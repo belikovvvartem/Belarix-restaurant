@@ -3,7 +3,7 @@
 <html lang="uk">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Panorama — Доставка їжі</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -20,7 +20,8 @@
 html{scroll-behavior:smooth;-webkit-tap-highlight-color:transparent}
 body{font-family:'Jost',sans-serif;background:var(--bg);color:var(--text);font-size:16px;line-height:1.6;overflow-x:hidden}
 a{color:var(--primary);text-decoration:none}
-button{font-family:'Jost',sans-serif;cursor:pointer}
+button{font-family:'Jost',sans-serif;cursor:pointer;touch-action:manipulation}
+input,select,textarea{font-size:16px!important} /* prevents iOS zoom on focus */
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-track{background:var(--bg2)}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
@@ -75,10 +76,10 @@ button{font-family:'Jost',sans-serif;cursor:pointer}
 .dish-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:transform var(--t),box-shadow var(--t);cursor:pointer}
 .dish-card:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
 .dish-img{height:0;padding-bottom:60%;background:var(--bg2);position:relative;overflow:hidden}
-.dish-img > *{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:60px}
+.dish-img > *{position:absolute;top:0;left:0;display:flex;align-items:center;justify-content:center;font-size:60px}
 .dish-img img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
-.badge-pop{position:absolute;top:10px;left:10px;background:var(--primary);color:#fff;font-size:10px;font-weight:700;padding:3px 9px;border-radius:40px}
-.badge-sale{position:absolute;top:10px;right:10px;background:var(--accent);color:var(--text);font-size:10px;font-weight:700;padding:3px 9px;border-radius:40px}
+.badge-pop{position:absolute;top:7px;left:7px;background:var(--primary);color:#fff;font-size:8px;font-weight:700;padding:2px 6px;border-radius:30px;z-index:2;pointer-events:none;letter-spacing:.3px;text-transform:uppercase}
+.badge-sale{position:absolute;top:7px;right:7px;background:var(--accent);color:var(--text);font-size:8px;font-weight:700;padding:2px 6px;border-radius:30px;z-index:2;pointer-events:none;letter-spacing:.3px;text-transform:uppercase}
 .dish-body{padding:13px 14px 14px}
 .dish-name{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;margin-bottom:4px;line-height:1.3}
 .dish-meta{display:flex;gap:10px;margin-bottom:12px;font-size:11px;color:var(--light)}
@@ -93,19 +94,47 @@ button{font-family:'Jost',sans-serif;cursor:pointer}
 .qty-n{font-weight:700;font-size:15px;min-width:18px;text-align:center}
 .empty-menu{text-align:center;padding:60px 20px;color:var(--muted)}
 .empty-menu p{font-size:15px;margin-top:8px}
-/* BANNER SLIDER - photo only */
-#bannerSlider{height:220px}
-.banner-slide{
-  min-width:100%;height:220px;position:relative;overflow:hidden;
-  box-sizing:border-box;background:#1C1208;
+/* BANNER SLIDER */
+#bannerSlider{
+  width:100%;background:var(--bg2);position:relative;
+  padding:20px 20px 0;
 }
-.banner-slide img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:1}
+#bannerSliderInner{
+  max-width:1180px;margin:0 auto;
+  position:relative;overflow:hidden;
+  border-radius:16px;
+}
+.banner-track{display:flex;transition:transform .5s cubic-bezier(.4,0,.2,1)}
+.banner-slide{
+  min-width:100%;position:relative;overflow:hidden;
+  box-sizing:border-box;background:var(--bg2);border-radius:16px;flex-shrink:0;
+  line-height:0;
+}
+.banner-slide img{width:100%;height:auto;display:block;object-fit:cover;max-height:520px}
 .banner-slide-content{display:none}
-.banner-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.4);cursor:pointer;transition:background .3s}
+#bannerDots{
+  position:absolute;bottom:14px;left:50%;transform:translateX(-50%);
+  display:flex;gap:6px;z-index:2;
+}
+.banner-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.5);cursor:pointer;transition:all .3s;border:none}
 .banner-dot.on{background:#fff;width:22px;border-radius:4px}
+.banner-arrow{
+  position:absolute;top:50%;transform:translateY(-50%);
+  width:36px;height:36px;border-radius:50%;border:none;
+  background:rgba(0,0,0,.28);color:#fff;font-size:20px;cursor:pointer;
+  z-index:2;backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;
+  transition:background .2s;line-height:1;
+}
+.banner-arrow:hover{background:rgba(0,0,0,.48)}
+.banner-arrow-l{left:12px}
+.banner-arrow-r{right:12px}
 @media(max-width:600px){
-  #bannerSlider{height:150px}
-  .banner-slide{height:150px}
+  #bannerSlider{padding:10px 10px 10px}
+  #bannerSliderInner{border-radius:12px}
+  .banner-arrow{display:none}
+  #bannerDots{bottom:8px}
+  .banner-dot{width:6px;height:6px}
+  .banner-dot.on{width:16px}
 }
 
 /* CONTACTS */
@@ -263,8 +292,42 @@ button{font-family:'Jost',sans-serif;cursor:pointer}
 .success-modal .btn-ghost{width:100%}
 
 /* FLOAT CALL */
-.float-call{position:fixed;bottom:24px;right:24px;z-index:800;width:52px;height:52px;background:var(--primary);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 18px rgba(201,75,31,.4);transition:transform var(--t)}
-.float-call:hover{transform:scale(1.1);color:#fff}
+.float-call{
+  position:fixed;bottom:24px;right:24px;z-index:800;
+  width:56px;height:56px;
+  background:var(--primary);color:#fff;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 20px rgba(201,75,31,.5);
+  transition:transform .2s ease,box-shadow .2s ease;
+  animation:float-pulse 2.8s ease-in-out infinite;
+}
+.float-call::before{
+  content:'';position:absolute;inset:-6px;border-radius:50%;
+  border:2px solid rgba(201,75,31,.4);
+  animation:float-ring 2.8s ease-in-out infinite;
+}
+.float-call::after{
+  content:'';position:absolute;inset:-12px;border-radius:50%;
+  border:1.5px solid rgba(201,75,31,.18);
+  animation:float-ring 2.8s ease-in-out infinite .3s;
+}
+.float-call:hover{transform:scale(1.12);box-shadow:0 6px 28px rgba(201,75,31,.65);color:#fff}
+.float-call svg{position:relative;z-index:1;animation:float-wiggle 2.8s ease-in-out infinite}
+@keyframes float-pulse{
+  0%,100%{box-shadow:0 4px 20px rgba(201,75,31,.45)}
+  50%{box-shadow:0 6px 32px rgba(201,75,31,.7)}
+}
+@keyframes float-ring{
+  0%{transform:scale(1);opacity:.7}
+  60%{transform:scale(1.18);opacity:0}
+  100%{transform:scale(1.18);opacity:0}
+}
+@keyframes float-wiggle{
+  0%,80%,100%{transform:rotate(0deg)}
+  85%{transform:rotate(-15deg)}
+  90%{transform:rotate(12deg)}
+  95%{transform:rotate(-8deg)}
+}
 
 /* SKELETON */
 @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
@@ -295,7 +358,7 @@ button{font-family:'Jost',sans-serif;cursor:pointer}
   .dishes-grid{grid-template-columns:1fr}
   .dish-card{display:flex;flex-direction:row;border-radius:10px;min-height:100px}
   .dish-img{flex-shrink:0;width:110px;min-width:110px;height:auto;min-height:100px;padding-bottom:0;border-radius:10px 0 0 10px;font-size:36px}
-  .dish-img>*{position:relative;width:110px;height:100%;display:flex;align-items:center;justify-content:center}
+  .dish-img>*{position:relative;display:flex;align-items:center;justify-content:center}
   .dish-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
   .dish-body{flex:1;padding:10px 12px 10px;display:flex;flex-direction:column;justify-content:space-between;min-width:0}
   .dish-name{font-size:14px;margin-bottom:2px}
@@ -369,19 +432,13 @@ button{font-family:'Jost',sans-serif;cursor:pointer}
     <span class="banner-i">Доставка <strong>45–60 хв</strong></span>
   </div>
   <!-- BANNER SLIDER -->
-  <div id="bannerSlider" style="display:none;position:relative;overflow:hidden;background:var(--text)">
-    <div id="bannerTrack" style="display:flex;transition:transform .5s cubic-bezier(.4,0,.2,1)"></div>
-    <div id="bannerDots" style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:6px"></div>
-    <button onclick="slideBanner(-1)" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);width:32px;height:32px;border-radius:50%;border:none;background:rgba(255,255,255,.25);color:#fff;font-size:18px;cursor:pointer;backdrop-filter:blur(4px)">‹</button>
-    <button onclick="slideBanner(1)"  style="position:absolute;right:12px;top:50%;transform:translateY(-50%);width:32px;height:32px;border-radius:50%;border:none;background:rgba(255,255,255,.25);color:#fff;font-size:18px;cursor:pointer;backdrop-filter:blur(4px)">›</button>
-  </div>
-
-  <!-- BANNER SLIDER -->
   <div id="bannerSlider" style="display:none">
-    <div class="banner-track" id="bannerTrack"></div>
-    <div class="banner-dots" id="bannerDots"></div>
-    <button class="banner-arrow banner-arrow-l" onclick="slideBanner(-1)">‹</button>
-    <button class="banner-arrow banner-arrow-r" onclick="slideBanner(1)">›</button>
+    <div id="bannerSliderInner">
+      <div class="banner-track" id="bannerTrack"></div>
+      <div id="bannerDots"></div>
+      <button class="banner-arrow banner-arrow-l" onclick="slideBanner(-1)">‹</button>
+      <button class="banner-arrow banner-arrow-r" onclick="slideBanner(1)">›</button>
+    </div>
   </div>
 
   <div class="filters-wrap" id="menuAnchor">
@@ -573,7 +630,7 @@ button{font-family:'Jost',sans-serif;cursor:pointer}
     <div style="font-size:48px;margin-bottom:12px">🕐</div>
     <h2 style="margin-bottom:10px">Ресторан зачинено</h2>
     <p style="font-size:14px;color:var(--muted);margin-bottom:6px">В даний момент ми не приймаємо замовлення.</p>
-    <p style="font-size:14px;color:var(--muted);margin-bottom:18px">Ваше замовлення буде опрацьовано з відкриттям о <strong id="closedOpenTime">10:00</strong></p>
+    <p style="font-size:14px;color:var(--muted);margin-bottom:18px">Ваше замовлення буде опрацьовано <strong id="closedOpenTime">завтра о 10:00</strong></p>
     <div style="display:flex;gap:10px;flex-direction:column">
       <button class="btn-pri" onclick="proceedAnyway()" style="background:var(--primary)">Підтвердити замовлення</button>
       <button class="btn-ghost" onclick="closeModal('closedModal')">Скасувати</button>
@@ -656,17 +713,27 @@ function initBannerSlider(banners){
   slider.style.display="block";
   bannerSlides=active;
   bannerIdx=0;
-  // Fix 2: photo-only slides, no text
   track.innerHTML=active.map(function(b){
     var img=b.photo?'<img src="'+b.photo+'" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">':'';
-    var bg=b.photo?'#1C1208':(b.color||"#C94B1F");
+    var bg=b.photo?'var(--bg2)':(b.color||"#C94B1F");
     return '<div class="banner-slide" style="background:'+bg+'">'+img+'</div>';
   }).join("");
   dots.innerHTML=active.map(function(_,i){
     return '<div class="banner-dot'+(i===0?" on":"")+'" onclick="goToBanner('+i+')" ></div>';
   }).join("");
   if(bannerTimer) clearInterval(bannerTimer);
-  if(active.length>1) bannerTimer=setInterval(function(){slideBanner(1);},4500);
+  var isMob = window.innerWidth <= 600;
+  if(active.length>1) bannerTimer=setInterval(function(){slideBanner(1);}, isMob ? 2800 : 4500);
+  // Touch swipe for mobile
+  var inner = document.getElementById("bannerSliderInner");
+  if(inner){
+    var tx=0;
+    inner.addEventListener("touchstart",function(e){tx=e.touches[0].clientX;},{passive:true});
+    inner.addEventListener("touchend",function(e){
+      var dx=e.changedTouches[0].clientX-tx;
+      if(Math.abs(dx)>40) slideBanner(dx<0?1:-1);
+    },{passive:true});
+  }
 }
 
 window.slideBanner=function(dir){
@@ -708,6 +775,8 @@ function listenFirebase() {
     if(snap.exists()){
       var raw=snap.val();
       Object.keys(raw).forEach(function(k){if(raw[k]&&typeof raw[k]==="object"){raw[k].id=k;banners.push(raw[k]);}});
+      // Sort by order field (drag reorder) then by createdAt
+      banners.sort(function(a,b){return (a.order??a.createdAt??0)-(b.order??b.createdAt??0);});
     }
     initBannerSlider(banners);
   }, function(e){console.warn("Banners:",e.message);});
@@ -770,11 +839,22 @@ function isOpenNow() {
   var hours = isWeekend ? WORK_HOURS.weekends : WORK_HOURS.weekdays;
   return h >= hours.open && h < hours.close;
 }
-function getNextOpen() {
-  var n = new Date(), d = n.getDay();
+function getNextOpenLabel() {
+  var n = new Date();
+  var d = n.getDay();
+  var h = n.getHours() + n.getMinutes() / 60;
+  // Determine today's hours
   var isWeekend = (d === 0 || d === 6);
   var hours = isWeekend ? WORK_HOURS.weekends : WORK_HOURS.weekdays;
-  return fmtHour(hours.open);
+  // If we haven't opened yet today, it's today
+  if (h < hours.open) {
+    return "сьогодні о " + fmtHour(hours.open);
+  }
+  // Otherwise it's tomorrow — check tomorrow's schedule
+  var tomorrowDay = (d + 1) % 7;
+  var tomorrowWeekend = (tomorrowDay === 0 || tomorrowDay === 6);
+  var tomorrowHours = tomorrowWeekend ? WORK_HOURS.weekends : WORK_HOURS.weekdays;
+  return "завтра о " + fmtHour(tomorrowHours.open);
 }
 function checkHours() {
   var n = new Date(), d = n.getDay(), h = n.getHours() + n.getMinutes() / 60;
@@ -1035,8 +1115,7 @@ window.openCheckout = function() {
   document.body.style.overflow = "";
 
   if (!isOpenNow()) {
-    // Show closed modal
-    document.getElementById("closedOpenTime").textContent = getNextOpen();
+    document.getElementById("closedOpenTime").textContent = getNextOpenLabel();
     setTimeout(function() { openModal("closedModal"); }, 250);
     return;
   }
@@ -1103,8 +1182,19 @@ function buildPreview() {
   });
 
   var dlvLabel = dlv === 0 ? "(доставка безкоштовна)" : "+" + dlv + " грн доставка";
+
+  // Fix 3: closed notice at confirmation
+  var closedNotice = "";
+  if (!isOpenNow()) {
+    closedNotice = '<div style="background:rgba(201,75,31,.08);border:1.5px solid var(--primary);border-radius:var(--radius-s);padding:10px 13px;margin-bottom:12px;font-size:12px;color:var(--primary);font-weight:600;display:flex;align-items:center;gap:8px">'
+      + '<span style="font-size:18px">🕐</span>'
+      + '<span>Ресторан зараз зачинено. Замовлення буде опрацьовано ' + getNextOpenLabel() + '</span>'
+      + '</div>';
+  }
+
   document.getElementById("previewBox").innerHTML =
-    '<h3>Ваше замовлення</h3>'
+    closedNotice
+    + '<h3>Ваше замовлення</h3>'
     + items
     + '<div class="prev-total"><span>Разом ' + dlvLabel + '</span><span>' + tot + ' грн</span></div>'
     + '<div class="prev-info"><span>' + nm + '</span><span>' + ph + '</span><span>' + addr + '</span>'
