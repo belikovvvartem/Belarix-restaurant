@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html lang="uk" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panorama — Адмін</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ========== THEMES ========== */
+:root,[data-theme="dark"]{
+  --bg:#0A0C10;--bg2:#111318;--surf:#181C24;--surf2:#1E232E;
+  --brd:#252B38;--brd2:#2E3547;
+  --txt:#E8EAF0;--sub:#8892A4;--dim:#4A5568;
+  --p:#F97316;--pd:#EA6B0C;--pl:rgba(249,115,22,.14);
+  --green:#22C55E;--red:#EF4444;--blue:#3B82F6;--yellow:#EAB308;
+  --r:10px;--rs:6px;--t:.18s ease;
+}
+[data-theme="light"]{
+  --bg:#F1F5F9;--bg2:#FFFFFF;--surf:#FFFFFF;--surf2:#F8FAFC;
+  --brd:#E2E8F0;--brd2:#CBD5E1;
+  --txt:#0F172A;--sub:#64748B;--dim:#94A3B8;
+  --p:#EA6B0C;--pd:#C4570A;--pl:rgba(234,107,12,.10);
+  --green:#16A34A;--red:#DC2626;--blue:#2563EB;--yellow:#D97706;
+}
+
+/* ========== BASE ========== */
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);font-size:14px;overflow:hidden}
+button{font-family:'Inter',sans-serif;cursor:pointer;border:none;outline:none}
+input,select,textarea{font-family:'Inter',sans-serif;outline:none}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--brd2);border-radius:2px}
+
+/* ========== LOADING ========== */
+#loadingScreen{
+  position:fixed;inset:0;background:var(--bg);z-index:9999;
+  display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;
+  transition:opacity .3s;
+}
+.ld-mark{width:48px;height:48px;background:var(--p);border-radius:14px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:22px}
+.ld-name{font-size:18px;font-weight:700;color:var(--txt)}
+.ld-bar{width:100px;height:3px;background:var(--brd2);border-radius:3px;overflow:hidden}
+.ld-fill{height:100%;background:var(--p);border-radius:3px;animation:ldslide 1.2s ease-in-out infinite}
+@keyframes ldslide{0%{width:0;margin-left:0}50%{width:60%;margin-left:20%}100%{width:0;margin-left:100%}}
+
+/* ========== LOGIN ========== */
+#loginScreen{
+  position:fixed;inset:0;background:var(--bg);z-index:1000;
+  display:none;align-items:center;justify-content:center;padding:20px;
+}
+.lbox{
+  background:var(--surf);border:1px solid var(--brd2);border-radius:18px;
+  padding:36px 32px;width:100%;max-width:380px;
+  position:relative;overflow:hidden;
+}
+.lbox::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--p),var(--yellow))}
+.llogo{display:flex;align-items:center;gap:10px;margin-bottom:26px}
+.lmark{width:38px;height:38px;background:var(--p);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:17px}
+.lname{font-size:17px;font-weight:700}
+.lrole{font-size:11px;color:var(--sub);margin-top:1px}
+.lbox h2{font-size:20px;font-weight:700;margin-bottom:4px}
+.lbox p{font-size:13px;color:var(--sub);margin-bottom:22px}
+.lerr{color:var(--red);font-size:12px;font-weight:600;min-height:16px;margin-bottom:10px}
+.lf{margin-bottom:12px}
+.lf label{display:block;font-size:11px;font-weight:600;color:var(--sub);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px}
+.lf input{width:100%;padding:11px 13px;background:var(--bg2);border:1.5px solid var(--brd2);border-radius:var(--rs);color:var(--txt);font-size:14px;transition:border-color var(--t)}
+.lf input:focus{border-color:var(--p)}
+.lbtn{width:100%;padding:12px;background:var(--p);color:#fff;border:none;border-radius:var(--rs);font-size:14px;font-weight:600;transition:background var(--t);margin-top:4px}
+.lbtn:hover:not(:disabled){background:var(--pd)}
+.lbtn:disabled{opacity:.6;cursor:not-allowed}
+.lhint{font-size:11px;color:var(--dim);text-align:center;margin-top:14px;line-height:1.7}
+
+/* ========== APP SHELL ========== */
+#app{display:none;height:100vh;grid-template-columns:220px 1fr}
+
+/* ========== SIDEBAR ========== */
+.side{background:var(--bg2);border-right:1px solid var(--brd);display:flex;flex-direction:column;overflow:hidden}
+.side-head{padding:16px;border-bottom:1px solid var(--brd);display:flex;align-items:center;gap:10px;flex-shrink:0}
+.side-mark{width:34px;height:34px;background:var(--p);border-radius:9px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:15px;flex-shrink:0}
+.side-name{font-size:14px;font-weight:700}
+.side-role{font-size:10px;color:var(--sub);text-transform:uppercase;letter-spacing:.5px}
+.side-nav{flex:1;padding:8px 6px;overflow-y:auto;display:flex;flex-direction:column;gap:1px}
+.nav-label{font-size:10px;font-weight:600;color:var(--dim);text-transform:uppercase;letter-spacing:.8px;padding:10px 8px 4px;flex-shrink:0}
+.nb{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:var(--rs);background:transparent;color:var(--sub);font-size:13px;font-weight:500;width:100%;text-align:left;transition:background var(--t),color var(--t);position:relative;flex-shrink:0}
+.nb:hover{background:var(--surf);color:var(--txt)}
+.nb.on{background:var(--pl);color:var(--p);font-weight:600}
+.nb-icon{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+.nb-lbl{flex:1}
+.nb-badge{margin-left:auto;background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:40px;opacity:0;transform:scale(0);transition:var(--t)}
+.nb-badge.on{opacity:1;transform:scale(1)}
+.side-foot{padding:10px 8px;border-top:1px solid var(--brd);display:flex;flex-direction:column;gap:6px;flex-shrink:0}
+.theme-row{display:flex;gap:5px}
+.theme-btn{flex:1;padding:7px;background:var(--surf2);border:1px solid var(--brd);border-radius:var(--rs);color:var(--sub);font-size:13px;transition:var(--t)}
+.theme-btn.on,.theme-btn:hover{background:var(--p);border-color:var(--p);color:#fff}
+.logout-btn{width:100%;padding:8px;background:transparent;color:var(--sub);border:1px solid var(--brd2);border-radius:var(--rs);font-size:12px;font-weight:600;transition:var(--t)}
+.logout-btn:hover{background:rgba(239,68,68,.1);border-color:var(--red);color:var(--red)}
+
+/* ========== MAIN ========== */
+.main{display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.topbar{height:56px;padding:0 20px;border-bottom:1px solid var(--brd);display:flex;align-items:center;justify-content:space-between;background:var(--bg2);flex-shrink:0;gap:12px}
+.topbar-left{display:flex;align-items:center;gap:12px}
+.topbar-title{font-size:16px;font-weight:700}
+.topbar-sub{font-size:12px;color:var(--sub)}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.tb-sel{padding:7px 10px;background:var(--surf);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--txt);font-size:12px;font-weight:500;cursor:pointer}
+.tb-btn{padding:7px 12px;background:var(--surf);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--sub);font-size:12px;font-weight:600;transition:var(--t);display:flex;align-items:center;gap:5px}
+.tb-btn:hover{border-color:var(--p);color:var(--p)}
+.upd-txt{font-size:11px;color:var(--dim)}
+
+/* ========== PANEL ========== */
+.panel{flex:1;overflow-y:auto;padding:20px;display:none;flex-direction:column}
+.panel.active{display:flex}
+
+/* ========== ORDER TABS ========== */
+.order-tabs{display:flex;gap:0;border-bottom:1px solid var(--brd);margin-bottom:16px;flex-shrink:0}
+.otab{padding:9px 18px;background:transparent;color:var(--sub);font-size:13px;font-weight:500;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color var(--t),border-color var(--t);display:flex;align-items:center;gap:6px}
+.otab:hover{color:var(--txt)}
+.otab.on{color:var(--p);border-bottom-color:var(--p);font-weight:600}
+.otab-badge{background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:40px;opacity:0}
+.otab-badge.on{opacity:1}
+
+/* ========== ORDERS GRID ========== */
+.orders-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;align-content:start}
+.ocard{background:var(--surf);border:1px solid var(--brd);border-radius:var(--r);overflow:hidden;transition:border-color var(--t)}
+.ocard:hover{border-color:var(--brd2)}
+.ocard.is-new{border-color:rgba(249,115,22,.4);animation:pcrd 2s ease-in-out 4}
+@keyframes pcrd{0%,100%{box-shadow:none}50%{box-shadow:0 0 0 4px rgba(249,115,22,.1)}}
+.ocard-bar{height:3px}
+.bar-new{background:linear-gradient(90deg,var(--p),var(--yellow))}
+.bar-accepted{background:linear-gradient(90deg,var(--blue),#60A5FA)}
+.bar-in_progress{background:linear-gradient(90deg,var(--yellow),#FDE68A)}
+.bar-shipped{background:linear-gradient(90deg,#A855F7,#C084FC)}
+.bar-completed{background:linear-gradient(90deg,var(--green),#86EFAC)}
+.ocard-head{padding:11px 13px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--brd)}
+.o-num{font-size:13px;font-weight:700;color:var(--p)}
+.o-time{font-size:10px;color:var(--sub);margin-top:2px}
+.o-badge{padding:3px 9px;border-radius:40px;font-size:11px;font-weight:600}
+.b-new{background:rgba(249,115,22,.15);color:#FB923C}
+.b-accepted{background:rgba(59,130,246,.15);color:#60A5FA}
+.b-in_progress{background:rgba(234,179,8,.15);color:#FACC15}
+.b-shipped{background:rgba(168,85,247,.15);color:#C084FC}
+.b-completed{background:rgba(34,197,94,.15);color:#4ADE80}
+.ocard-body{padding:11px 13px}
+.o-cust{margin-bottom:9px;padding-bottom:9px;border-bottom:1px solid var(--brd)}
+.o-name{font-weight:600;font-size:13px;margin-bottom:2px}
+.o-phone a{font-size:12px;color:var(--blue)}
+.o-addr{font-size:11px;color:var(--sub);margin-top:2px}
+.o-items{margin-bottom:9px;display:flex;flex-direction:column;gap:2px}
+.o-item{display:flex;justify-content:space-between;font-size:11px}
+.o-item-n{color:var(--sub)}
+.o-item-p{font-weight:600}
+.o-totals{display:flex;justify-content:space-between;align-items:center;padding-top:7px;border-top:1px solid var(--brd);margin-bottom:9px}
+.o-total{font-size:17px;font-weight:700;color:var(--p)}
+.o-dlv{font-size:10px;margin-top:2px}
+.o-eta{font-size:11px;color:var(--sub);background:var(--bg2);padding:3px 8px;border-radius:5px}
+.o-comment{background:var(--bg2);border-radius:6px;padding:7px 10px;font-size:11px;color:var(--sub);margin-bottom:9px;font-style:italic;border-left:2px solid var(--brd2)}
+.o-actions{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+.oa{flex:1;min-width:80px;padding:8px 10px;border-radius:var(--rs);font-size:12px;font-weight:600;text-align:center;cursor:pointer;transition:var(--t);border:none;line-height:1.2}
+.oa-del{flex:0;min-width:36px;padding:8px;font-size:14px}
+.oa-accept{background:rgba(59,130,246,.15);color:#60A5FA}
+.oa-accept:hover{background:rgba(59,130,246,.25)}
+.oa-cook{background:rgba(234,179,8,.15);color:#FACC15}
+.oa-cook:hover{background:rgba(234,179,8,.25)}
+.oa-ship{background:rgba(168,85,247,.15);color:#C084FC}
+.oa-ship:hover{background:rgba(168,85,247,.25)}
+.oa-done{background:rgba(34,197,94,.15);color:#4ADE80}
+.oa-done:hover{background:rgba(34,197,94,.25)}
+.oa-back{background:var(--surf2);color:var(--sub)}
+.oa-back:hover{color:var(--p)}
+.oa-del{background:rgba(239,68,68,.1);color:var(--red)}
+.oa-del:hover{background:rgba(239,68,68,.2)}
+
+/* ========== STATE BOX ========== */
+.state-box{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;gap:10px;color:var(--sub);text-align:center;min-height:260px}
+.state-icon{font-size:40px;opacity:.4;margin-bottom:4px}
+.state-box strong{font-size:15px;color:var(--txt)}
+.state-box p{font-size:13px;line-height:1.7}
+.spinner{width:28px;height:28px;border:2.5px solid var(--brd2);border-top-color:var(--p);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ========== STATS ========== */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:18px;flex-shrink:0}
+.stat-card{background:var(--surf);border:1px solid var(--brd);border-radius:var(--r);padding:16px 18px}
+.stat-label{font-size:11px;font-weight:600;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.stat-val{font-size:26px;font-weight:700;color:var(--txt)}
+.stat-val.accent{color:var(--p)}
+.stat-sub{font-size:12px;color:var(--sub);margin-top:3px}
+.chart-card{background:var(--surf);border:1px solid var(--brd);border-radius:var(--r);padding:16px 18px;margin-bottom:12px;flex-shrink:0}
+.chart-title{font-size:14px;font-weight:600;margin-bottom:12px}
+.bar-chart{display:flex;flex-direction:column;gap:7px}
+.bar-row{display:flex;align-items:center;gap:10px;font-size:12px}
+.bar-label{width:130px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0}
+.bar-track{flex:1;height:18px;background:var(--bg2);border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;background:var(--p);border-radius:4px;transition:width .5s ease}
+.bar-val{width:55px;text-align:right;font-weight:600;flex-shrink:0}
+
+/* ========== FORM ========== */
+.panel-tabs{display:flex;gap:5px;margin-bottom:16px;flex-shrink:0}
+.ptab{padding:7px 16px;border-radius:var(--rs);background:transparent;color:var(--sub);font-size:12px;font-weight:600;border:1px solid var(--brd2);transition:var(--t)}
+.ptab.on{background:var(--p);border-color:var(--p);color:#fff}
+.form-card{background:var(--surf);border:1px solid var(--brd);border-radius:var(--r);padding:18px;margin-bottom:14px;flex-shrink:0}
+.form-card h3{font-size:14px;font-weight:700;margin-bottom:14px;color:var(--txt)}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.fg{margin-bottom:10px}
+.fg label{display:block;font-size:11px;font-weight:600;color:var(--sub);margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px}
+.fg input,.fg select,.fg textarea{width:100%;padding:9px 11px;background:var(--bg2);border:1.5px solid var(--brd2);border-radius:var(--rs);color:var(--txt);font-size:13px;transition:border-color var(--t)}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--p)}
+.fg textarea{resize:vertical;min-height:64px}
+.photo-label{display:inline-flex;align-items:center;gap:7px;padding:8px 14px;background:var(--bg2);border:1.5px dashed var(--brd2);border-radius:var(--rs);cursor:pointer;font-size:12px;color:var(--sub);transition:border-color var(--t)}
+.photo-label:hover{border-color:var(--p);color:var(--p)}
+.photo-preview{width:52px;height:52px;object-fit:cover;border-radius:var(--rs);border:1px solid var(--brd2);display:none}
+.btn-pri{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;background:var(--p);color:#fff;border:none;border-radius:var(--rs);font-size:13px;font-weight:600;transition:background var(--t);cursor:pointer}
+.btn-pri:hover:not(:disabled){background:var(--pd)}
+.btn-pri:disabled{opacity:.5;cursor:not-allowed}
+
+/* ========== DISH LIST ========== */
+.dish-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.dish-card{background:var(--surf);border:1px solid var(--brd);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:8px;transition:border-color var(--t)}
+.dish-card:hover{border-color:var(--brd2)}
+.dc-head{display:flex;gap:10px;align-items:flex-start}
+.dc-photo{width:56px;height:56px;border-radius:var(--rs);background:var(--surf2);overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:22px}
+.dc-photo img{width:100%;height:100%;object-fit:cover}
+.dc-name{font-weight:600;font-size:13px}
+.dc-price{font-size:12px;color:var(--p);font-weight:700;margin-top:2px}
+.dc-tag{font-size:10px;color:var(--sub);background:var(--surf2);padding:2px 7px;border-radius:4px;display:inline-block;margin-top:3px}
+.dc-desc{font-size:11px;color:var(--sub);line-height:1.5}
+.dc-btns{display:flex;gap:6px}
+.dc-btns button{flex:1;padding:6px;font-size:11px;font-weight:600;border-radius:var(--rs);cursor:pointer;transition:var(--t)}
+.dc-edit{background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.2);color:#60A5FA}
+.dc-edit:hover{background:rgba(59,130,246,.22)}
+.dc-del{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:var(--red)}
+.dc-del:hover{background:rgba(239,68,68,.2)}
+
+/* ========== BANNERS ========== */
+.banner-card{background:var(--surf);border:1px solid var(--brd);border-radius:var(--r);overflow:hidden;margin-bottom:10px}
+.banner-preview{height:90px;display:flex;align-items:center;padding:20px;position:relative;overflow:hidden}
+.banner-preview img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.35}
+.banner-preview-content{color:#fff;z-index:1;position:relative}
+.banner-preview-title{font-size:16px;font-weight:700}
+.banner-preview-sub{font-size:12px;opacity:.85;margin-top:3px}
+.banner-actions{display:flex;gap:8px;padding:10px 12px}
+.banner-actions button{flex:1;padding:7px;font-size:11px;font-weight:600;border-radius:var(--rs);cursor:pointer;transition:var(--t)}
+.b-toggle{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.2);color:var(--green)}
+.b-toggle:hover{background:rgba(34,197,94,.22)}
+.b-toggle.inactive{background:rgba(234,179,8,.12);border-color:rgba(234,179,8,.2);color:var(--yellow)}
+.b-del{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:var(--red)}
+.b-del:hover{background:rgba(239,68,68,.2)}
+
+/* ========== HISTORY ========== */
+.hist-filters{display:flex;gap:8px;margin-bottom:14px;flex-shrink:0;flex-wrap:wrap}
+.hist-group{background:var(--surf);border:1px solid var(--brd);border-radius:var(--rs);margin-bottom:8px;overflow:hidden;flex-shrink:0}
+.hist-group-head{display:flex;align-items:center;gap:10px;padding:11px 13px;cursor:pointer;transition:background var(--t)}
+.hist-group-head:hover{background:var(--surf2)}
+.hist-ico{width:26px;height:26px;border-radius:6px;background:var(--surf2);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.hist-msg{font-size:12px;line-height:1.5;flex:1}
+.hist-time{font-size:10px;color:var(--dim);margin-top:2px}
+.hist-chevron{color:var(--sub);font-size:16px;font-weight:300;transition:transform var(--t);flex-shrink:0}
+.hist-body{border-top:1px solid var(--brd);padding:0 13px;max-height:0;overflow:hidden;transition:max-height .3s ease,padding .3s ease}
+.hist-body.open{max-height:400px;padding:8px 13px}
+.hist-event{display:flex;gap:8px;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--brd)}
+.hist-event:last-child{border-bottom:none}
+.hist-ev-dot{width:6px;height:6px;border-radius:50%;background:var(--p);flex-shrink:0;margin-top:5px}
+.hist-ev-msg{font-size:12px;color:var(--txt)}
+.hist-ev-time{font-size:10px;color:var(--dim);margin-top:2px}
+.hist-flat{background:var(--surf);border:1px solid var(--brd);border-radius:var(--rs);padding:11px 13px;margin-bottom:8px;display:flex;gap:10px;align-items:flex-start;flex-shrink:0}
+.htag{display:inline-block;font-size:9px;font-weight:700;padding:1px 6px;border-radius:3px;text-transform:uppercase;letter-spacing:.4px;margin-right:5px}
+.ht-order{background:rgba(249,115,22,.15);color:#FB923C}
+.ht-menu{background:rgba(59,130,246,.15);color:#60A5FA}
+.ht-settings{background:rgba(34,197,94,.15);color:#4ADE80}
+.ht-banner{background:rgba(168,85,247,.15);color:#C084FC}
+
+/* ========== SETTINGS ========== */
+.settings-cols{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:900px}
+.city-row{display:flex;align-items:center;gap:7px;padding:8px 10px;background:var(--surf2);border-radius:var(--rs);border:1px solid var(--brd);margin-bottom:6px}
+.city-name{flex:2;font-size:13px;font-weight:500}
+.city-price-input{width:75px;padding:5px 8px;background:var(--bg2);border:1.5px solid var(--brd2);border-radius:var(--rs);color:var(--txt);font-size:12px;text-align:center;font-family:'Inter',sans-serif;transition:border-color var(--t)}
+.city-price-input:focus{border-color:var(--p)}
+.city-save{padding:5px 10px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.2);border-radius:var(--rs);color:var(--green);font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:var(--t)}
+.city-save:hover{background:rgba(34,197,94,.22)}
+.city-del{padding:5px 8px;background:transparent;border:1px solid rgba(239,68,68,.2);border-radius:var(--rs);color:var(--red);font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:var(--t)}
+.city-del:hover{background:rgba(239,68,68,.1)}
+
+/* ========== MODAL ========== */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(4px);z-index:2000;display:none;align-items:center;justify-content:center;padding:16px}
+.modal-bg.on{display:flex}
+.modal-box{background:var(--surf);border:1px solid var(--brd2);border-radius:14px;padding:24px;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;position:relative}
+.modal-box::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:14px 14px 0 0;background:linear-gradient(90deg,var(--p),var(--yellow))}
+.modal-x{position:absolute;top:12px;right:12px;width:28px;height:28px;border-radius:6px;background:var(--surf2);color:var(--sub);font-size:13px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:var(--t)}
+.modal-x:hover{background:rgba(239,68,68,.15);color:var(--red)}
+.modal-box h3{font-size:16px;font-weight:700;margin-bottom:18px}
+
+/* ========== RESPONSIVE ========== */
+@media(max-width:768px){
+  /* Switch to full-height layout with fixed bottom nav */
+  html,body{overflow:auto;height:auto}
+  #app{
+    display:flex;flex-direction:column;
+    height:auto;min-height:100svh;
+    grid-template-columns:none;
+  }
+  .main{
+    order:1;flex:1;overflow:visible;
+    padding-bottom:68px;
+  }
+  .topbar{position:sticky;top:0;z-index:90;padding:0 14px;height:52px}
+  .topbar-title{font-size:15px}
+
+  /* Panel — no flex, just block scroll */
+  .panel{display:none;flex-direction:column;padding:14px}
+  .panel.active{display:block}
+
+  /* Sidebar → bottom nav */
+  .side{
+    order:2;
+    position:fixed;bottom:0;left:0;right:0;z-index:150;
+    flex-direction:row;height:62px;
+    border-right:none;border-top:1px solid var(--brd);
+    background:var(--bg2);
+  }
+  .side-head,.side-foot{display:none}
+  .side-nav{
+    flex-direction:row;flex:1;padding:0;gap:0;
+    overflow-x:auto;overflow-y:hidden;align-items:stretch;
+    -webkit-overflow-scrolling:touch;scrollbar-width:none;
+  }
+  .side-nav::-webkit-scrollbar{display:none}
+  .nav-label{display:none}
+  .nb{
+    flex:1;flex-direction:column;align-items:center;justify-content:center;
+    gap:3px;min-width:52px;padding:6px 4px;
+    font-size:9px;font-weight:600;border-radius:0;
+    color:var(--sub);-webkit-tap-highlight-color:transparent;
+  }
+  .nb:hover{background:transparent}
+  .nb.on{background:transparent;color:var(--p)}
+  .nb-icon{font-size:20px;line-height:1;width:auto;display:block}
+  .nb-lbl{display:block}
+  .nb-badge{position:absolute;top:4px;right:10px;font-size:8px;padding:1px 4px}
+
+  /* Grids */
+  .orders-grid{grid-template-columns:1fr}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .fgrid{grid-template-columns:1fr}
+  .settings-cols{grid-template-columns:1fr}
+  .dish-grid{grid-template-columns:1fr}
+  .form-card{padding:14px}
+
+  /* Actions */
+  .o-actions{flex-wrap:wrap}
+  .oa{min-width:calc(50% - 3px);flex:none;flex-grow:1}
+
+  /* Modal */
+  .modal-bg{padding:0;align-items:flex-end}
+  .modal-box{border-radius:16px 16px 0 0;max-height:90svh;max-width:100%;padding:20px 16px}
+  .modal-box::before{border-radius:16px 16px 0 0}
+
+  /* Login */
+  #loginScreen{padding:16px;align-items:center}
+  .lbox{border-radius:16px;padding:28px 20px}
+
+  /* Topbar */
+  .topbar-right .upd-txt,.topbar-right #sortSel{display:none}
+}
+@media(max-width:400px){
+  .nb{min-width:46px;font-size:8px}
+  .nb-icon{font-size:18px}
+  .stats-grid{grid-template-columns:1fr}
+  .stat-val{font-size:22px}
+}
+@supports(height:100svh){
+  #app{min-height:100svh}
+  .side{bottom:env(safe-area-inset-bottom,0)}
+  .main{padding-bottom:calc(68px + env(safe-area-inset-bottom,0))}
+}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loadingScreen">
+  <div class="ld-mark">P</div>
+  <div class="ld-name">Panorama</div>
+  <div class="ld-bar"><div class="ld-fill"></div></div>
+</div>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="lbox">
+    <div class="llogo">
+      <div class="lmark">P</div>
+      <div><div class="lname">Panorama</div><div class="lrole">Admin Panel</div></div>
+    </div>
+    <h2>Вхід</h2>
+    <p>Введіть дані Firebase акаунту</p>
+    <div class="lerr" id="lerr"></div>
+    <div class="lf"><label>Email</label><input id="lu" type="email" placeholder="admin@panorama.ua" autocomplete="email"></div>
+    <div class="lf"><label>Пароль</label><input id="lp" type="password" placeholder="••••••••" autocomplete="current-password"></div>
+    <button class="lbtn" onclick="doLogin()">Увійти</button>
+    <p class="lhint">Firebase Console → Authentication → Users</p>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <!-- SIDEBAR -->
+  <aside class="side">
+    <div class="side-head">
+      <div class="side-mark">P</div>
+      <div><div class="side-name">Panorama</div><div class="side-role">Admin</div></div>
+    </div>
+    <nav class="side-nav">
+      <div class="nav-label">Замовлення</div>
+      <button class="nb on" id="nb-orders" onclick="setSection('orders')">
+        <span class="nb-icon">⊞</span><span class="nb-lbl">Замовлення</span>
+        <span class="nb-badge" id="new-badge">0</span>
+      </button>
+      <button class="nb" id="nb-stats" onclick="setSection('stats')">
+        <span class="nb-icon">◈</span><span class="nb-lbl">Статистика</span>
+      </button>
+      <div class="nav-label">Контент</div>
+      <button class="nb" id="nb-menu" onclick="setSection('menu')">
+        <span class="nb-icon">☰</span><span class="nb-lbl">Меню</span>
+      </button>
+      <button class="nb" id="nb-banners" onclick="setSection('banners')">
+        <span class="nb-icon">◧</span><span class="nb-lbl">Банери</span>
+      </button>
+      <div class="nav-label">Система</div>
+      <button class="nb" id="nb-history" onclick="setSection('history')">
+        <span class="nb-icon">◷</span><span class="nb-lbl">Історія</span>
+      </button>
+      <button class="nb" id="nb-settings" onclick="setSection('settings')">
+        <span class="nb-icon">⊙</span><span class="nb-lbl">Налашт.</span>
+      </button>
+    </nav>
+    <div class="side-foot">
+      <div class="theme-row">
+        <button class="theme-btn on" id="btnDark"  onclick="setTheme('dark')"  title="Темна">● Темна</button>
+        <button class="theme-btn"    id="btnLight" onclick="setTheme('light')" title="Світла">○ Світла</button>
+      </div>
+      <button class="logout-btn" onclick="doLogout()">← Вийти</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <div><div class="topbar-title" id="topTitle">Замовлення</div><div class="topbar-sub" id="topSub">Управління замовленнями</div></div>
+      </div>
+      <div class="topbar-right">
+        <span class="upd-txt" id="updTxt"></span>
+        <select class="tb-sel" id="sortSel" onchange="renderOrders()">
+          <option value="newest">Нові спочатку</option>
+          <option value="oldest">Старі спочатку</option>
+          <option value="high">Сума ↓</option>
+          <option value="low">Сума ↑</option>
+        </select>
+        <button class="tb-btn" id="refreshBtn" onclick="manualRefresh()">↻ Оновити</button>
+      </div>
+    </div>
+
+    <!-- ORDERS -->
+    <div id="sec-orders" class="panel active">
+      <div class="order-tabs">
+        <button class="otab on" id="otab-active" onclick="setOrderTab('active')">
+          Активні <span class="otab-badge on" id="otab-active-badge">0</span>
+        </button>
+        <button class="otab" id="otab-completed" onclick="setOrderTab('completed')">
+          Завершені <span class="otab-badge" id="otab-completed-badge">0</span>
+        </button>
+      </div>
+      <div class="orders-grid" id="ordersGrid">
+        <div class="state-box"><div class="spinner"></div><strong>Завантаження...</strong></div>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div id="sec-stats" class="panel">
+      <div class="stats-grid" id="statsCards"></div>
+      <div class="chart-card"><div class="chart-title">Топ страв</div><div class="bar-chart" id="topDishes"></div></div>
+      <div class="chart-card"><div class="chart-title">По категоріях</div><div class="bar-chart" id="catChart"></div></div>
+    </div>
+
+    <!-- MENU -->
+    <div id="sec-menu" class="panel">
+      <div class="panel-tabs">
+        <button class="ptab on" id="pt-add"  onclick="setMenuTab('add')">+ Додати</button>
+        <button class="ptab"    id="pt-list" onclick="setMenuTab('list')">Всі страви</button>
+      </div>
+      <div id="mt-add">
+        <div class="form-card">
+          <h3>Нова страва</h3>
+          <div class="fgrid">
+            <div class="fg"><label>Назва *</label><input id="mName" placeholder="Назва страви"></div>
+            <div class="fg"><label>Категорія *</label><select id="mCat"></select></div>
+            <div class="fg"><label>Ціна (грн) *</label><input id="mPrice" type="number" min="1" placeholder="150"></div>
+            <div class="fg"><label>Час (хв)</label><input id="mPrep" type="number" min="1" placeholder="15"></div>
+            <div class="fg"><label>Стара ціна</label><input id="mOldPrice" type="number" min="1" placeholder="200"></div>
+          </div>
+          <div class="fg"><label>Опис</label><textarea id="mDesc" placeholder="Опис страви..." rows="2"></textarea></div>
+          <div class="fg">
+            <label>Фото</label>
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:4px">
+              <label class="photo-label">Вибрати файл<input type="file" id="mPhoto" accept="image/*" style="display:none" onchange="previewPhoto('mPhoto','mPhotoPreview')"></label>
+              <img id="mPhotoPreview" class="photo-preview">
+              <span id="mPhotoStatus" style="font-size:11px;color:var(--sub)"></span>
+            </div>
+          </div>
+          <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--sub);cursor:pointer;margin-bottom:12px">
+            <input type="checkbox" id="mPop"> Хіт продажів
+          </label>
+          <div id="mErr" style="font-size:12px;min-height:14px;margin-bottom:8px"></div>
+          <button class="btn-pri" onclick="addDish()">Додати страву</button>
+        </div>
+      </div>
+      <div id="mt-list" style="display:none">
+        <div class="dish-grid" id="dishGrid"></div>
+      </div>
+    </div>
+
+    <!-- BANNERS -->
+    <div id="sec-banners" class="panel">
+      <div class="panel-tabs">
+        <button class="ptab on" id="pbt-add"  onclick="setBannerTab('add')">+ Додати</button>
+        <button class="ptab"    id="pbt-list" onclick="setBannerTab('list')">Всі банери</button>
+      </div>
+      <div id="bt-add">
+        <div class="form-card">
+          <h3>Новий банер</h3>
+          <div class="fg"><label>Заголовок *</label><input id="bTitle" placeholder="Весняні знижки -20%" oninput="updateBannerPreview()"></div>
+          <div class="fg"><label>Підзаголовок</label><input id="bSub" placeholder="Тільки до кінця тижня" oninput="updateBannerPreview()"></div>
+          <div class="fg">
+            <label>Колір фону</label>
+            <div style="display:flex;gap:8px;align-items:center;margin-top:4px">
+              <input type="color" id="bColor" value="#C94B1F" style="width:42px;height:34px;padding:2px;background:var(--bg2);border:1.5px solid var(--brd2);border-radius:var(--rs);cursor:pointer" oninput="updateBannerPreview()">
+              <span style="font-size:11px;color:var(--sub)">Оберіть колір фону</span>
+            </div>
+          </div>
+          <div class="fg">
+            <label>Фото (необов'язково)</label>
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:4px">
+              <label class="photo-label">Вибрати файл<input type="file" id="bPhoto" accept="image/*" style="display:none" onchange="previewPhoto('bPhoto','bPhotoPreview')"></label>
+              <img id="bPhotoPreview" class="photo-preview">
+            </div>
+          </div>
+          <div id="bErr" style="font-size:12px;min-height:14px;margin-bottom:8px"></div>
+          <button class="btn-pri" onclick="addBanner()">Додати банер</button>
+        </div>
+        <div class="form-card">
+          <h3>Попередній перегляд</h3>
+          <div id="bPreview" style="border-radius:var(--rs);height:120px;overflow:hidden;background:#1C1208;position:relative">
+            <img id="bPreviewImg" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none">
+            <div id="bPreviewEmpty" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.3);font-size:13px">Завантажте фото для перегляду</div>
+          </div>
+        </div>
+      </div>
+      <div id="bt-list" style="display:none">
+        <div id="bannerList"></div>
+      </div>
+    </div>
+
+    <!-- HISTORY -->
+    <div id="sec-history" class="panel">
+      <div class="hist-filters">
+        <select class="tb-sel" id="histType" onchange="renderHistory()">
+          <option value="all">Всі події</option>
+          <option value="order">Замовлення</option>
+          <option value="menu">Меню</option>
+          <option value="banner">Банери</option>
+          <option value="settings">Налаштування</option>
+        </select>
+        <input class="tb-sel" id="histSearch" placeholder="Пошук..." style="flex:1;min-width:120px;padding:7px 10px" oninput="renderHistory()">
+      </div>
+      <div id="histList"></div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div id="sec-settings" class="panel">
+      <div class="settings-cols">
+        <div>
+          <div class="form-card">
+            <h3>Міста доставки</h3>
+            <div id="citiesList"></div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
+              <input class="tb-sel" id="newCityName" placeholder="Місто/село" style="flex:2;padding:8px 10px;min-width:100px">
+              <input id="newCityPrice" placeholder="Ціна" type="number" style="width:80px;padding:8px 10px;background:var(--bg2);border:1.5px solid var(--brd2);border-radius:var(--rs);color:var(--txt);font-size:13px;font-family:'Inter',sans-serif">
+              <button class="btn-pri" onclick="addCity()" style="padding:8px 14px">Додати</button>
+            </div>
+          </div>
+          <div class="form-card">
+            <h3>Загальні</h3>
+            <div class="fg"><label>Мінімальне замовлення (грн)</label><input id="sMin" type="number" placeholder="200"></div>
+            <div class="fg"><label>Безкоштовна доставка від (грн)</label><input id="sFree" type="number" placeholder="500"></div>
+            <div style="display:flex;align-items:center;gap:10px;margin-top:4px">
+              <button class="btn-pri" onclick="saveSettings()">Зберегти</button>
+              <span id="settMsg" style="font-size:12px;color:var(--green)"></span>
+            </div>
+          </div>
+          <div class="form-card">
+            <h3>⏰ Графік роботи</h3>
+            <p style="font-size:12px;color:var(--sub);margin-bottom:12px">Сайт автоматично показує статус та обмежує замовлення поза робочим часом</p>
+            <div style="margin-bottom:12px">
+              <div style="font-size:11px;font-weight:600;color:var(--sub);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px">Пн — Пт (будні)</div>
+              <div style="display:flex;gap:10px;align-items:center">
+                <div class="fg" style="margin:0;flex:1"><label>Відкриття</label><input id="sWdOpen" type="number" min="0" max="23" placeholder="10"></div>
+                <span style="color:var(--sub);padding-top:16px">—</span>
+                <div class="fg" style="margin:0;flex:1"><label>Закриття</label><input id="sWdClose" type="number" min="0" max="23" placeholder="22"></div>
+              </div>
+            </div>
+            <div style="margin-bottom:14px">
+              <div style="font-size:11px;font-weight:600;color:var(--sub);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px">Сб — Нд (вихідні)</div>
+              <div style="display:flex;gap:10px;align-items:center">
+                <div class="fg" style="margin:0;flex:1"><label>Відкриття</label><input id="sWeOpen" type="number" min="0" max="23" placeholder="11"></div>
+                <span style="color:var(--sub);padding-top:16px">—</span>
+                <div class="fg" style="margin:0;flex:1"><label>Закриття</label><input id="sWeClose" type="number" min="0" max="23" placeholder="23"></div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <button class="btn-pri" onclick="saveWorkHours()">Зберегти графік</button>
+              <span id="hoursMsg" style="font-size:12px;color:var(--green)"></span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="form-card">
+            <h3>Категорії меню</h3>
+            <div id="catsList"></div>
+            <div style="display:flex;gap:8px;margin-top:4px">
+              <input class="tb-sel" id="newCatName" placeholder="Нова категорія" style="flex:1;padding:8px 10px">
+              <button class="btn-pri" onclick="addCategory()" style="padding:8px 14px">Додати</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- EDIT DISH MODAL -->
+<div class="modal-bg" id="editModal" onclick="if(event.target===this)closeEditModal()">
+  <div class="modal-box">
+    <button class="modal-x" onclick="closeEditModal()">✕</button>
+    <h3>Редагувати страву</h3>
+    <div class="fgrid">
+      <div class="fg"><label>Назва *</label><input id="eName"></div>
+      <div class="fg"><label>Категорія *</label><select id="eCat"></select></div>
+      <div class="fg"><label>Ціна (грн) *</label><input id="ePrice" type="number" min="1"></div>
+      <div class="fg"><label>Час (хв)</label><input id="ePrep" type="number" min="1"></div>
+      <div class="fg"><label>Стара ціна</label><input id="eOldPrice" type="number" min="1"></div>
+    </div>
+    <div class="fg"><label>Опис</label><textarea id="eDesc" rows="2"></textarea></div>
+    <div class="fg">
+      <label>Фото</label>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:4px">
+        <label class="photo-label">Замінити<input type="file" id="ePhoto" accept="image/*" style="display:none" onchange="previewPhoto('ePhoto','ePhotoPreview')"></label>
+        <img id="ePhotoPreview" class="photo-preview">
+        <img id="ePhotoExisting" class="photo-preview">
+        <span id="ePhotoStatus" style="font-size:11px;color:var(--sub)"></span>
+      </div>
+    </div>
+    <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--sub);cursor:pointer;margin-bottom:14px">
+      <input type="checkbox" id="ePop"> Хіт продажів
+    </label>
+    <div style="display:flex;gap:8px">
+      <button class="btn-pri" onclick="saveDishEdit()" style="flex:2">Зберегти</button>
+      <button onclick="closeEditModal()" style="flex:1;padding:9px;background:var(--surf2);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--sub);font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif">Скасувати</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp }    from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getDatabase, ref, onValue, set, push, update, remove, get }
+  from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+const fbApp = initializeApp({
+  apiKey:"AIzaSyCDHo7-eCu4umw_5A4p1Xx6Mtd7YXtvTno",
+  authDomain:"rate-me-bot.firebaseapp.com",
+  databaseURL:"https://rate-me-bot-default-rtdb.firebaseio.com",
+  projectId:"rate-me-bot",
+  storageBucket:"rate-me-bot.firebasestorage.app",
+  messagingSenderId:"828148222624",
+  appId:"1:828148222624:web:1becef58851cbf670bd7c5"
+});
+const db=getDatabase(fbApp), auth=getAuth(fbApp);
+
+/* ——— R2 UPLOAD ——— */
+const R2_PUBLIC="https://pub-56a3b31b31254981bb29f91b352d374d.r2.dev";
+const R2_ACC="71d915a9f077d416a177b596ba394b1b";
+const R2_KEY="63e0159560af504f25c11dc79295faf1";
+const R2_SEC="029a9ea4717a554c6da9e7fda48334054c64b8f13ba38eb7d60724081ed2213e";
+
+async function uploadToR2(file,folder="dishes"){
+  const ext=(file.name.split(".").pop()||"jpg").toLowerCase();
+  const key=`${folder}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+  const host=`${R2_ACC}.r2.cloudflarestorage.com`;
+  const endpoint=`https://${host}/panorama/${key}`;
+  const now=new Date();
+  const ds=now.toISOString().slice(0,10).replace(/-/g,"");
+  const amz=now.toISOString().replace(/[:\-]|\.\d{3}/g,"").slice(0,15)+"Z";
+  const ct=file.type||"image/jpeg";
+  const buf=await file.arrayBuffer();
+  const ph=Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256",buf))).map(b=>b.toString(16).padStart(2,"0")).join("");
+  const sh="content-type;host;x-amz-content-sha256;x-amz-date";
+  const ch=`content-type:${ct}\nhost:${host}\nx-amz-content-sha256:${ph}\nx-amz-date:${amz}\n`;
+  const cr=`PUT\n/panorama/${key}\n\n${ch}\n${sh}\n${ph}`;
+  const scope=`${ds}/auto/s3/aws4_request`;
+  const crh=Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256",new TextEncoder().encode(cr)))).map(b=>b.toString(16).padStart(2,"0")).join("");
+  const sts=`AWS4-HMAC-SHA256\n${amz}\n${scope}\n${crh}`;
+  async function hmac(k,d){
+    const ck=await crypto.subtle.importKey("raw",k instanceof ArrayBuffer?k:new TextEncoder().encode(k),{name:"HMAC",hash:"SHA-256"},false,["sign"]);
+    return crypto.subtle.sign("HMAC",ck,new TextEncoder().encode(d));
+  }
+  const kd=await hmac("AWS4"+R2_SEC,ds),kr=await hmac(kd,"auto"),ks=await hmac(kr,"s3"),kx=await hmac(ks,"aws4_request");
+  const sig=Array.from(new Uint8Array(await hmac(kx,sts))).map(b=>b.toString(16).padStart(2,"0")).join("");
+  const authH=`AWS4-HMAC-SHA256 Credential=${R2_KEY}/${scope},SignedHeaders=${sh},Signature=${sig}`;
+  const res=await fetch(endpoint,{method:"PUT",headers:{"Content-Type":ct,"x-amz-content-sha256":ph,"x-amz-date":amz,"Authorization":authH},body:file});
+  if(!res.ok){const t=await res.text().catch(()=>"");throw new Error(`R2 ${res.status}: ${t.slice(0,100)}`);}
+  return `${R2_PUBLIC}/${key}`;
+}
+
+window.previewPhoto=(inputId,previewId)=>{
+  const f=document.getElementById(inputId)?.files?.[0];
+  const p=document.getElementById(previewId);
+  if(!f||!p) return;
+  p.src=URL.createObjectURL(f); p.style.display="block";
+};
+
+/* ——— THEME ——— */
+function setTheme(t){
+  document.documentElement.setAttribute("data-theme",t);
+  localStorage.setItem("adm_theme",t);
+  document.getElementById("btnDark").classList.toggle("on",t==="dark");
+  document.getElementById("btnLight").classList.toggle("on",t==="light");
+}
+window.setTheme=setTheme;
+const savedTheme=localStorage.getItem("adm_theme")||"dark";
+setTheme(savedTheme);
+
+/* ——— STATE ——— */
+let appStarted=false, unsubOrders=null;
+let curSection="orders", curOrderTab="active";
+let allOrders={}, allDishes=[], allBanners=[], editingDishId=null;
+let siteSettings={cities:[],minOrder:200,freeDelivery:500,categories:["Перші страви","Другі страви","Салати","Напої","Випічка"]};
+let historyLog=JSON.parse(localStorage.getItem("adm_hist")||"[]");
+let seen=new Set(JSON.parse(sessionStorage.getItem("adm_seen")||"[]"));
+
+/* ——— AUTH ——— */
+onAuthStateChanged(auth,user=>{
+  const ls=document.getElementById("loadingScreen");
+  if(ls){ls.style.opacity="0";setTimeout(()=>ls.style.display="none",300);}
+  if(user){
+    document.getElementById("loginScreen").style.display="none";
+    document.getElementById("app").style.display="grid";
+    startApp();
+  } else {
+    appStarted=false;
+    if(unsubOrders){unsubOrders();unsubOrders=null;}
+    document.getElementById("loginScreen").style.display="flex";
+    document.getElementById("app").style.display="none";
+  }
+});
+
+window.doLogin=async()=>{
+  const email=document.getElementById("lu").value.trim();
+  const pwd=document.getElementById("lp").value;
+  const errEl=document.getElementById("lerr");
+  const btn=document.querySelector(".lbtn");
+  if(!email||!pwd){errEl.textContent="Введіть email та пароль";return;}
+  btn.disabled=true;btn.textContent="Вхід...";errEl.textContent="";
+  try{await signInWithEmailAndPassword(auth,email,pwd);}
+  catch(e){
+    btn.disabled=false;btn.textContent="Увійти";
+    const msgs={"auth/invalid-credential":"Невірний email або пароль","auth/user-not-found":"Користувача не знайдено","auth/wrong-password":"Невірний пароль","auth/too-many-requests":"Забагато спроб"};
+    errEl.textContent=msgs[e.code]||e.message;
+    setTimeout(()=>errEl.textContent="",5000);
+  }
+};
+document.getElementById("lp").addEventListener("keydown",e=>{if(e.key==="Enter")doLogin();});
+window.doLogout=async()=>{
+  appStarted=false;if(unsubOrders){unsubOrders();unsubOrders=null;}
+  try{await signOut(auth);}catch(e){}
+};
+
+/* ——— START ——— */
+function startApp(){
+  if(appStarted)return;appStarted=true;
+  listenSettings();listenMenu();listenBanners();listenOrders();
+}
+
+/* ——— STATUS LABELS ——— */
+const SL={new:"Нове",accepted:"Прийнято",in_progress:"Готується",shipped:"В дорозі",completed:"Виконано"};
+const SN={
+  new:{status:"accepted",label:"Прийняти",cls:"oa-accept"},
+  accepted:{status:"in_progress",label:"На кухню",cls:"oa-cook"},
+  in_progress:{status:"shipped",label:"Відправити",cls:"oa-ship"},
+  shipped:{status:"completed",label:"Доставлено",cls:"oa-done"},
+};
+
+/* ——— ORDERS ——— */
+function listenOrders(){
+  unsubOrders=onValue(ref(db,"orders"),snap=>{
+    const newOnes=[];
+    allOrders={new:[],accepted:[],in_progress:[],shipped:[],completed:[]};
+    if(snap.exists()){
+      const raw=snap.val();
+      Object.keys(raw).forEach(key=>{
+        const od=raw[key];
+        if(!od||typeof od!=="object")return;
+        od.id=key;
+        (allOrders[od.status]?allOrders[od.status]:allOrders.new).push(od);
+        if(od.status==="new"&&!seen.has(od.id))newOnes.push(od);
+      });
+    }
+    Object.keys(allOrders).forEach(s=>allOrders[s].sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)));
+    if(newOnes.length){
+      playBeep();
+      newOnes.forEach(o=>{seen.add(o.id);logHistory("order","Нове замовлення від "+(o.customer?.name||"—")+" на "+(o.total||0)+" грн",o.orderNum||o.id.slice(0,8));});
+      sessionStorage.setItem("adm_seen",JSON.stringify([...seen]));
+    }
+    updateBadges();
+    if(curSection==="orders")renderOrders();
+    if(curSection==="stats")renderStats();
+    setUpd();
+  },err=>{ document.getElementById("ordersGrid").innerHTML=`<div class="state-box"><div class="state-icon">🔒</div><strong>Помилка доступу</strong><p>${err.message}</p></div>`; });
+}
+
+function updateBadges(){
+  const active=(allOrders.new||[]).length;
+  const nb=document.getElementById("new-badge");
+  nb.textContent=active;nb.classList.toggle("on",active>0);
+  const allActive=["new","accepted","in_progress","shipped"].reduce((s,k)=>s+(allOrders[k]||[]).length,0);
+  const comp=(allOrders.completed||[]).length;
+  const ab=document.getElementById("otab-active-badge");
+  ab.textContent=allActive;ab.classList.toggle("on",allActive>0);
+  const cb=document.getElementById("otab-completed-badge");
+  cb.textContent=comp;cb.classList.toggle("on",comp>0);
+}
+
+window.setOrderTab=tab=>{
+  curOrderTab=tab;
+  ["active","completed"].forEach(t=>document.getElementById("otab-"+t).classList.toggle("on",t===tab));
+  renderOrders();
+};
+
+function renderOrders(){
+  const sortMode=document.getElementById("sortSel").value;
+  let list=curOrderTab==="active"
+    ? [...allOrders.new,...allOrders.accepted,...allOrders.in_progress,...allOrders.shipped]
+    : [...allOrders.completed];
+  if(sortMode==="oldest")list.sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
+  else if(sortMode==="high")list.sort((a,b)=>(b.total||0)-(a.total||0));
+  else if(sortMode==="low")list.sort((a,b)=>(a.total||0)-(b.total||0));
+  else list.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  const el=document.getElementById("ordersGrid");
+  if(!list.length){el.innerHTML=`<div class="state-box"><div class="state-icon">○</div><strong>Замовлень немає</strong></div>`;return;}
+  el.innerHTML=list.map(o=>{
+    const nxt=SN[o.status];
+    const time=fmtTime(o.createdAt);
+    const street=o.customer?.street||o.customer?.address||"Самовивіз";
+    const addr=o.customer?.city?(o.customer.city+(street&&street!==o.customer.city?", "+street:"")):street;
+    return `<div class="ocard${o.status==="new"?" is-new":""}">
+      <div class="ocard-bar bar-${o.status}"></div>
+      <div class="ocard-head">
+        <div><div class="o-num">${o.orderNum||o.id.slice(0,8)}</div><div class="o-time">${time}</div></div>
+        <span class="o-badge b-${o.status}">${SL[o.status]||o.status}</span>
+      </div>
+      <div class="ocard-body">
+        <div class="o-cust">
+          <div class="o-name">${o.customer?.name||"—"}</div>
+          <div class="o-phone"><a href="tel:${o.customer?.phone}">${o.customer?.phone||"—"}</a></div>
+          <div class="o-addr">${addr}</div>
+        </div>
+        <div class="o-items">${(o.items||[]).map(i=>`<div class="o-item"><span class="o-item-n">${i.name} ×${i.qty}</span><span class="o-item-p">${i.price*i.qty} грн</span></div>`).join("")}</div>
+        <div class="o-totals">
+          <div><div class="o-total">${o.total} грн</div><div class="o-dlv" style="color:${o.delivery===0?"var(--green)":"var(--dim)"}">${o.delivery===0?"Доставка безкоштовна":"+"+o.delivery+" грн доставка"}</div></div>
+          <div class="o-eta">~${o.eta} хв</div>
+        </div>
+        ${o.customer?.comment?`<div class="o-comment">${o.customer.comment}</div>`:""}
+        <div class="o-actions">
+          ${nxt?`<button class="oa ${nxt.cls}" onclick="updStatus('${o.id}','${nxt.status}')">${nxt.label} →</button>`:""}
+          ${o.status==="completed"?`<button class="oa oa-back" onclick="updStatus('${o.id}','shipped')" style="font-size:10px">↩ Скасувати</button>`:""}
+          ${o.status!=="new"&&o.status!=="completed"?`<button class="oa oa-back" onclick="updStatus('${o.id}','new')" style="font-size:10px">↩ Назад</button>`:""}
+          <button class="oa oa-del" onclick="delOrder('${o.id}')" title="Видалити">🗑</button>
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+window.updStatus=async(id,st)=>{
+  const prev=Object.values(allOrders).flat().find(o=>o.id===id);
+  try{
+    await update(ref(db,`orders/${id}`),{status:st,updatedAt:Date.now()});
+    if(prev)logHistory("order","Статус: "+(SL[prev.status]||prev.status)+" → "+(SL[st]||st),prev.orderNum||id.slice(0,8));
+  }catch(e){console.error(e);}
+};
+window.delOrder=async id=>{
+  if(!confirm("Видалити замовлення?"))return;
+  const prev=Object.values(allOrders).flat().find(o=>o.id===id);
+  try{await remove(ref(db,`orders/${id}`));if(prev)logHistory("order","Видалено",prev.orderNum||id.slice(0,8));}
+  catch(e){console.error(e);}
+};
+
+/* ——— STATS ——— */
+function renderStats(){
+  const all=Object.values(allOrders).flat();
+  const now=new Date();now.setHours(0,0,0,0);
+  const todayN=all.filter(o=>o.createdAt>=now.getTime()).length;
+  const todayRev=all.filter(o=>o.status==="completed"&&o.createdAt>=now.getTime()).reduce((s,o)=>s+(o.total||0),0);
+  const totalRev=allOrders.completed.reduce((s,o)=>s+(o.total||0),0);
+  const avgOrder=allOrders.completed.length?Math.round(totalRev/allOrders.completed.length):0;
+  document.getElementById("statsCards").innerHTML=`
+    <div class="stat-card"><div class="stat-label">Сьогодні</div><div class="stat-val accent">${todayN}</div><div class="stat-sub">Всього: ${all.length}</div></div>
+    <div class="stat-card"><div class="stat-label">Виручка сьогодні</div><div class="stat-val">${todayRev}<span style="font-size:14px;color:var(--sub)"> грн</span></div><div class="stat-sub">Загалом: ${totalRev} грн</div></div>
+    <div class="stat-card"><div class="stat-label">Виконано</div><div class="stat-val">${allOrders.completed.length}</div><div class="stat-sub">Активних: ${all.length-allOrders.completed.length}</div></div>
+    <div class="stat-card"><div class="stat-label">Середній чек</div><div class="stat-val">${avgOrder}<span style="font-size:14px;color:var(--sub)"> грн</span></div></div>`;
+  const dc={},cc={};
+  all.forEach(o=>(o.items||[]).forEach(i=>{
+    const k=i.name;if(!dc[k])dc[k]={qty:0,rev:0};dc[k].qty+=i.qty;dc[k].rev+=i.price*i.qty;
+    const c=i.cat||"Інше";if(!cc[c])cc[c]=0;cc[c]+=i.qty;
+  }));
+  const td=Object.entries(dc).sort((a,b)=>b[1].qty-a[1].qty).slice(0,8);
+  const maxD=td[0]?.[1].qty||1;
+  document.getElementById("topDishes").innerHTML=td.length?td.map(([n,d])=>`<div class="bar-row"><span class="bar-label">${n}</span><div class="bar-track"><div class="bar-fill" style="width:${Math.round(d.qty/maxD*100)}%"></div></div><span class="bar-val">${d.qty} шт</span></div>`).join(""):"<p style='color:var(--sub);font-size:13px'>Немає даних</p>";
+  const tc=Object.entries(cc).sort((a,b)=>b[1]-a[1]);
+  const maxC=tc[0]?.[1]||1;
+  document.getElementById("catChart").innerHTML=tc.length?tc.map(([c,n])=>`<div class="bar-row"><span class="bar-label">${c}</span><div class="bar-track"><div class="bar-fill" style="width:${Math.round(n/maxC*100)}%;background:var(--blue)"></div></div><span class="bar-val">${n} шт</span></div>`).join(""):"<p style='color:var(--sub);font-size:13px'>Немає даних</p>";
+}
+
+/* ——— SETTINGS ——— */
+function listenSettings(){
+  onValue(ref(db,"settings"),snap=>{if(snap.exists())siteSettings=snap.val();renderSettings();},e=>console.warn("Settings:",e.message));
+}
+window.saveSettings=async()=>{
+  siteSettings.minOrder=parseInt(document.getElementById("sMin").value)||200;
+  siteSettings.freeDelivery=parseInt(document.getElementById("sFree").value)||500;
+  try{await set(ref(db,"settings"),siteSettings);logHistory("settings","Мін. "+siteSettings.minOrder+" грн, безкоштовна від "+siteSettings.freeDelivery+" грн");const m=document.getElementById("settMsg");m.textContent="Збережено";setTimeout(()=>m.textContent="",2500);}
+  catch(e){alert("Помилка: "+e.message);}
+};
+window.addCity=async()=>{
+  const name=document.getElementById("newCityName").value.trim();
+  const price=parseInt(document.getElementById("newCityPrice").value)||50;
+  if(!name)return;
+  if(!Array.isArray(siteSettings.cities))siteSettings.cities=[];
+  if(siteSettings.cities.find(c=>c.name.toLowerCase()===name.toLowerCase())){alert("Вже є!");return;}
+  siteSettings.cities.push({name,price});
+  document.getElementById("newCityName").value="";document.getElementById("newCityPrice").value="";
+  await set(ref(db,"settings"),siteSettings);logHistory("settings","Місто: "+name+" ("+price+" грн)");renderSettings();
+};
+window.removeCity=async idx=>{
+  const c=siteSettings.cities[idx];if(!confirm("Видалити "+c.name+"?"))return;
+  siteSettings.cities.splice(idx,1);await set(ref(db,"settings"),siteSettings);renderSettings();
+};
+window.updateCityPrice=(idx,val)=>siteSettings.cities[idx].price=parseInt(val)||0;
+window.saveCityPrice=async idx=>{
+  await set(ref(db,"settings"),siteSettings);
+  const el=document.getElementById("cpSave"+idx);if(el){el.textContent="✓";setTimeout(()=>el.textContent="Зберегти",2000);}
+};
+window.addCategory=async()=>{
+  const name=document.getElementById("newCatName").value.trim();if(!name)return;
+  if(!Array.isArray(siteSettings.categories))siteSettings.categories=[];
+  if(siteSettings.categories.includes(name)){alert("Вже є!");return;}
+  siteSettings.categories.push(name);document.getElementById("newCatName").value="";
+  await set(ref(db,"settings"),siteSettings);renderSettings();rebuildCatSelects();
+};
+window.removeCategory=async idx=>{
+  if(!confirm("Видалити категорію?"))return;
+  siteSettings.categories.splice(idx,1);await set(ref(db,"settings"),siteSettings);renderSettings();rebuildCatSelects();
+};
+function rebuildCatSelects(){
+  const cats=Array.isArray(siteSettings.categories)?siteSettings.categories:["Перші страви","Другі страви","Салати","Напої","Випічка"];
+  const opts=cats.map(c=>`<option>${c}</option>`).join("");
+  ["mCat","eCat"].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=opts;});
+}
+function renderSettings(){
+  document.getElementById("sMin").value=siteSettings.minOrder||200;
+  document.getElementById("sFree").value=siteSettings.freeDelivery||500;
+  // Work hours
+  const wh=siteSettings.workHours||{weekdays:{open:10,close:22},weekends:{open:11,close:23}};
+  const wdO=document.getElementById("sWdOpen");  if(wdO)wdO.value=wh.weekdays?.open??10;
+  const wdC=document.getElementById("sWdClose"); if(wdC)wdC.value=wh.weekdays?.close??22;
+  const weO=document.getElementById("sWeOpen");  if(weO)weO.value=wh.weekends?.open??11;
+  const weC=document.getElementById("sWeClose"); if(weC)weC.value=wh.weekends?.close??23;
+  const cats=Array.isArray(siteSettings.categories)?siteSettings.categories:[];
+  document.getElementById("catsList").innerHTML=cats.length?cats.map((c,i)=>`<div class="city-row"><span class="city-name">${c}</span><button class="city-del" onclick="removeCategory(${i})">✕</button></div>`).join(""):`<p style="color:var(--dim);font-size:12px;margin-bottom:8px">Немає категорій</p>`;
+  rebuildCatSelects();
+  const cities=Array.isArray(siteSettings.cities)?siteSettings.cities:[];
+  document.getElementById("citiesList").innerHTML=cities.length?cities.map((c,i)=>`<div class="city-row"><span class="city-name">${c.name}</span><input type="number" class="city-price-input" value="${c.price}" oninput="updateCityPrice(${i},this.value)"><span style="font-size:11px;color:var(--sub)">грн</span><button id="cpSave${i}" class="city-save" onclick="saveCityPrice(${i})">Зберегти</button><button class="city-del" onclick="removeCity(${i})">✕</button></div>`).join(""):`<p style="color:var(--dim);font-size:12px;margin-bottom:8px">Немає міст</p>`;
+}
+window.saveWorkHours=async()=>{
+  const wdOpen=parseInt(document.getElementById("sWdOpen").value);
+  const wdClose=parseInt(document.getElementById("sWdClose").value);
+  const weOpen=parseInt(document.getElementById("sWeOpen").value);
+  const weClose=parseInt(document.getElementById("sWeClose").value);
+  if(isNaN(wdOpen)||isNaN(wdClose)||isNaN(weOpen)||isNaN(weClose)||wdOpen>=wdClose||weOpen>=weClose){
+    alert("Перевірте значення годин (відкриття повинно бути меншим за закриття)");return;
+  }
+  if(!siteSettings.workHours)siteSettings.workHours={};
+  siteSettings.workHours.weekdays={open:wdOpen,close:wdClose};
+  siteSettings.workHours.weekends={open:weOpen,close:weClose};
+  try{
+    await set(ref(db,"settings"),siteSettings);
+    logHistory("settings","Графік: Пн-Пт "+wdOpen+":00–"+wdClose+":00, Сб-Нд "+weOpen+":00–"+weClose+":00");
+    const m=document.getElementById("hoursMsg");
+    m.textContent="✓ Збережено";setTimeout(()=>m.textContent="",2500);
+  }catch(e){alert("Помилка: "+e.message);}
+};
+
+/* ——— MENU ——— */
+function listenMenu(){
+  onValue(ref(db,"menu"),snap=>{
+    allDishes=[];
+    if(snap.exists()){const raw=snap.val();Object.keys(raw).forEach(k=>{const d=raw[k];if(d&&typeof d==="object"){d.id=k;allDishes.push(d);}});}
+    rebuildCatSelects();
+    if(curSection==="menu")renderDishList();
+    if(curSection==="stats")renderStats();
+  },e=>console.error("Menu:",e.message));
+}
+window.addDish=async()=>{
+  const name=document.getElementById("mName").value.trim();
+  const price=parseInt(document.getElementById("mPrice").value)||0;
+  const errEl=document.getElementById("mErr");
+  if(!name||!price){errEl.style.color="var(--red)";errEl.textContent="Заповніть назву та ціну!";setTimeout(()=>errEl.textContent="",3000);return;}
+  const btn=document.querySelector("#mt-add .btn-pri");
+  if(btn){btn.disabled=true;btn.textContent="Зберігаємо...";}
+  let photoUrl=null;
+  const pf=document.getElementById("mPhoto")?.files?.[0];
+  if(pf){try{errEl.style.color="var(--sub)";errEl.textContent="Завантаження фото...";photoUrl=await uploadToR2(pf);errEl.textContent="";}catch(e){errEl.style.color="var(--yellow)";errEl.textContent="Фото не завантажено: "+e.message;}}
+  const dish={name,price,cat:document.getElementById("mCat").value,prep:parseInt(document.getElementById("mPrep").value)||15,desc:document.getElementById("mDesc").value.trim(),pop:document.getElementById("mPop").checked,oldPrice:parseInt(document.getElementById("mOldPrice").value)||null,photo:photoUrl,createdAt:Date.now()};
+  try{
+    await push(ref(db,"menu"),dish);
+    logHistory("menu","Додано: "+name+" — "+price+" грн");
+    ["mName","mPrice","mPrep","mDesc","mOldPrice"].forEach(id=>document.getElementById(id).value="");
+    document.getElementById("mPop").checked=false;document.getElementById("mPhoto").value="";
+    const pr=document.getElementById("mPhotoPreview");if(pr){pr.src="";pr.style.display="none";}
+    document.getElementById("mPhotoStatus").textContent="";
+    errEl.style.color="var(--green)";errEl.textContent="Страву додано!";
+    setTimeout(()=>errEl.textContent="",3000);
+  }catch(e){errEl.style.color="var(--red)";errEl.textContent="Помилка: "+e.message;}
+  if(btn){btn.disabled=false;btn.textContent="Додати страву";}
+};
+window.openEditDish=id=>{
+  const d=allDishes.find(x=>x.id===id);if(!d)return;
+  editingDishId=id;
+  document.getElementById("eName").value=d.name||"";
+  document.getElementById("ePrice").value=d.price||"";
+  document.getElementById("ePrep").value=d.prep||"";
+  document.getElementById("eDesc").value=d.desc||"";
+  document.getElementById("eOldPrice").value=d.oldPrice||"";
+  document.getElementById("ePop").checked=!!d.pop;
+  rebuildCatSelects();
+  const eCat=document.getElementById("eCat");
+  if(eCat)[...eCat.options].forEach(o=>o.selected=o.value===d.cat);
+  const ep=document.getElementById("ePhotoPreview");if(ep){ep.src="";ep.style.display="none";}
+  const ee=document.getElementById("ePhotoExisting");if(ee){if(d.photo){ee.src=d.photo;ee.style.display="block";}else ee.style.display="none";}
+  document.getElementById("ePhotoStatus").textContent="";
+  document.getElementById("ePhoto").value="";
+  document.getElementById("editModal").classList.add("on");
+};
+window.closeEditModal=()=>document.getElementById("editModal").classList.remove("on");
+window.saveDishEdit=async()=>{
+  const id=editingDishId;if(!id)return;
+  const name=document.getElementById("eName").value.trim();
+  const price=parseInt(document.getElementById("ePrice").value)||0;
+  if(!name||!price)return;
+  const saveBtn=document.querySelector("#editModal .btn-pri");
+  if(saveBtn){saveBtn.disabled=true;saveBtn.textContent="Зберігаємо...";}
+  let photoUrl=allDishes.find(x=>x.id===id)?.photo||null;
+  const pf=document.getElementById("ePhoto")?.files?.[0];
+  if(pf){try{document.getElementById("ePhotoStatus").textContent="Завантаження...";photoUrl=await uploadToR2(pf);document.getElementById("ePhotoStatus").textContent="Оновлено";}catch(e){console.warn(e);}}
+  const data={name,price,cat:document.getElementById("eCat").value,prep:parseInt(document.getElementById("ePrep").value)||15,desc:document.getElementById("eDesc").value.trim(),pop:document.getElementById("ePop").checked,oldPrice:parseInt(document.getElementById("eOldPrice").value)||null,photo:photoUrl};
+  try{await update(ref(db,`menu/${id}`),data);logHistory("menu","Відредаговано: "+name);closeEditModal();}
+  catch(e){alert("Помилка: "+e.message);}
+  if(saveBtn){saveBtn.disabled=false;saveBtn.textContent="Зберегти";}
+};
+window.deleteDish=async id=>{
+  const d=allDishes.find(x=>x.id===id);
+  if(!confirm("Видалити "+d?.name+"?"))return;
+  try{await remove(ref(db,`menu/${id}`));logHistory("menu","Видалено: "+(d?.name||id));}
+  catch(e){alert("Помилка: "+e.message);}
+};
+function renderDishList(){
+  const el=document.getElementById("dishGrid");if(!el)return;
+  if(!allDishes.length){el.innerHTML=`<div class="state-box"><div class="state-icon">○</div><strong>Меню порожнє</strong><p>Додайте страви у вкладці "Додати"</p></div>`;return;}
+  el.innerHTML=allDishes.map(d=>`
+    <div class="dish-card">
+      <div class="dc-head">
+        <div class="dc-photo">${d.photo?`<img src="${d.photo}" alt="${d.name}">`:""}</div>
+        <div style="flex:1;min-width:0">
+          <div class="dc-name">${d.name}</div>
+          <div class="dc-price">${d.price} грн${d.oldPrice?` <s style="font-size:10px;font-weight:400;color:var(--dim)">${d.oldPrice}</s>`:""}</div>
+          <span class="dc-tag">${d.cat}</span>
+        </div>
+      </div>
+      ${d.desc?`<div class="dc-desc">${d.desc}</div>`:""}
+      <div class="dc-btns">
+        <button class="dc-edit" onclick="openEditDish('${d.id}')">Редагувати</button>
+        <button class="dc-del" onclick="deleteDish('${d.id}')">Видалити</button>
+      </div>
+    </div>`).join("");
+}
+
+/* ——— BANNERS ——— */
+function listenBanners(){
+  onValue(ref(db,"banners"),snap=>{
+    allBanners=[];
+    if(snap.exists()){const raw=snap.val();Object.keys(raw).forEach(k=>{const b=raw[k];if(b&&typeof b==="object"){b.id=k;allBanners.push(b);}});}
+    if(curSection==="banners")renderBannerList();
+  },e=>console.warn("Banners:",e.message));
+}
+window.setBannerTab=tab=>{
+  document.getElementById("pbt-add").classList.toggle("on",tab==="add");
+  document.getElementById("pbt-list").classList.toggle("on",tab==="list");
+  document.getElementById("bt-add").style.display=tab==="add"?"block":"none";
+  document.getElementById("bt-list").style.display=tab==="list"?"block":"none";
+  if(tab==="list")renderBannerList();
+};
+window.updateBannerPreview=()=>{
+  const f=document.getElementById("bPhoto")?.files?.[0];
+  const img=document.getElementById("bPreviewImg");
+  const empty=document.getElementById("bPreviewEmpty");
+  if(f&&img){
+    img.src=URL.createObjectURL(f);
+    img.style.display="block";
+    if(empty)empty.style.display="none";
+  }
+};
+window.addBanner=async()=>{
+  const title=document.getElementById("bTitle").value.trim();
+  const sub=document.getElementById("bSub").value.trim();
+  const color=document.getElementById("bColor").value||"#C94B1F";
+  const errEl=document.getElementById("bErr");
+  if(!title){errEl.style.color="var(--red)";errEl.textContent="Введіть заголовок!";setTimeout(()=>errEl.textContent="",3000);return;}
+  const btn=document.querySelector("#bt-add .btn-pri");
+  if(btn){btn.disabled=true;btn.textContent="Зберігаємо...";}
+  let photoUrl=null;
+  const pf=document.getElementById("bPhoto")?.files?.[0];
+  if(pf){try{errEl.style.color="var(--sub)";errEl.textContent="Завантаження фото...";photoUrl=await uploadToR2(pf,"banners");errEl.textContent="";}catch(e){errEl.style.color="var(--yellow)";errEl.textContent="Фото не завантажено";}}
+  const banner={title,sub,color,photo:photoUrl,active:true,createdAt:Date.now()};
+  try{
+    await push(ref(db,"banners"),banner);
+    logHistory("banner","Додано банер: "+title);
+    document.getElementById("bTitle").value="";document.getElementById("bSub").value="";document.getElementById("bPhoto").value="";
+    const bp=document.getElementById("bPhotoPreview");if(bp){bp.src="";bp.style.display="none";}
+    errEl.style.color="var(--green)";errEl.textContent="Банер додано!";
+    setTimeout(()=>errEl.textContent="",3000);
+  }catch(e){errEl.style.color="var(--red)";errEl.textContent="Помилка: "+e.message;}
+  if(btn){btn.disabled=false;btn.textContent="Додати банер";}
+};
+function renderBannerList(){
+  const el=document.getElementById("bannerList");if(!el)return;
+  if(!allBanners.length){el.innerHTML=`<div class="state-box"><div class="state-icon">◧</div><strong>Банерів немає</strong></div>`;return;}
+  el.innerHTML=allBanners.map(b=>`
+    <div class="banner-card">
+      <div class="banner-preview" style="background:${b.color||"#C94B1F"}">
+        ${b.photo?`<img src="${b.photo}" alt="">`:""}
+        <div class="banner-preview-content">
+          <div class="banner-preview-title">${b.title}</div>
+          ${b.sub?`<div class="banner-preview-sub">${b.sub}</div>`:""}
+        </div>
+        ${!b.active?`<div style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,.5);color:#fff;font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px">Прихований</div>`:""}
+      </div>
+      <div class="banner-actions">
+        <button class="b-toggle ${!b.active?"inactive":""}" onclick="toggleBanner('${b.id}',${!b.active})">${b.active?"Приховати":"Показати"}</button>
+        <button class="b-del" onclick="deleteBanner('${b.id}')">Видалити</button>
+      </div>
+    </div>`).join("");
+}
+window.toggleBanner=async(id,active)=>{try{await update(ref(db,"banners/"+id),{active});}catch(e){alert("Помилка");}};
+window.deleteBanner=async id=>{if(!confirm("Видалити банер?"))return;try{await remove(ref(db,"banners/"+id));}catch(e){alert("Помилка");}};
+
+/* ——— HISTORY ——— */
+function logHistory(type,msg,orderNum){
+  historyLog.unshift({type,msg,time:new Date().toISOString(),orderNum:orderNum||null});
+  if(historyLog.length>500)historyLog.pop();
+  localStorage.setItem("adm_hist",JSON.stringify(historyLog));
+  if(curSection==="history")renderHistory();
+}
+window.renderHistory=()=>{
+  const type=document.getElementById("histType").value;
+  const search=document.getElementById("histSearch").value.toLowerCase();
+  let items=historyLog;
+  if(type!=="all")items=items.filter(h=>h.type===type);
+  if(search)items=items.filter(h=>h.msg.toLowerCase().includes(search)||(h.orderNum&&h.orderNum.toLowerCase().includes(search)));
+  const el=document.getElementById("histList");
+  if(!items.length){el.innerHTML=`<div class="state-box"><div class="state-icon">○</div><strong>Нічого не знайдено</strong></div>`;return;}
+  // Group order events
+  const groups=[];
+  const orderMap={};
+  items.forEach(h=>{
+    if(h.type==="order"&&h.orderNum){
+      if(!orderMap[h.orderNum]){orderMap[h.orderNum]={orderNum:h.orderNum,events:[],firstTime:h.time};groups.push({kind:"order",ref:orderMap[h.orderNum]});}
+      orderMap[h.orderNum].events.push(h);
+    } else groups.push({kind:"flat",h});
+  });
+  el.innerHTML=groups.map((g,gi)=>{
+    if(g.kind==="flat"){
+      const h=g.h;
+      const t=new Date(h.time).toLocaleString("uk-UA",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});
+      const tc=h.type==="menu"?"ht-menu":h.type==="banner"?"ht-banner":"ht-settings";
+      const tl=h.type==="menu"?"Меню":h.type==="banner"?"Банер":"Налаштування";
+      return `<div class="hist-flat"><div class="hist-ico">•</div><div><div class="hist-msg"><span class="htag ${tc}">${tl}</span>${h.msg}</div><div class="hist-time">${t}</div></div></div>`;
+    }
+    const grp=g.ref;
+    const t=new Date(grp.firstTime).toLocaleString("uk-UA",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});
+    const events=grp.events.map(e=>{
+      const et=new Date(e.time).toLocaleString("uk-UA",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});
+      return `<div class="hist-event"><div class="hist-ev-dot"></div><div><div class="hist-ev-msg">${e.msg}</div><div class="hist-ev-time">${et}</div></div></div>`;
+    }).join("");
+    return `<div class="hist-group" id="hg${gi}">
+      <div class="hist-group-head" onclick="toggleHist('hg${gi}')">
+        <div class="hist-ico">⊞</div>
+        <div style="flex:1"><div class="hist-msg"><span class="htag ht-order">Замовлення</span><strong>${grp.orderNum}</strong> — ${grp.events.length} подій</div><div class="hist-time">${t}</div></div>
+        <div class="hist-chevron">›</div>
+      </div>
+      <div class="hist-body">${events}</div>
+    </div>`;
+  }).join("");
+};
+window.toggleHist=id=>{
+  const el=document.getElementById(id);if(!el)return;
+  const body=el.querySelector(".hist-body");
+  const chev=el.querySelector(".hist-chevron");
+  const open=!body.classList.contains("open");
+  body.classList.toggle("open",open);
+  if(chev)chev.style.transform=open?"rotate(90deg)":"";
+};
+
+/* ——— SECTION ROUTING ——— */
+const SECTIONS=["orders","stats","menu","banners","history","settings"];
+window.setSection=sec=>{
+  curSection=sec;
+  SECTIONS.forEach(s=>{
+    const el=document.getElementById("sec-"+s);
+    el.classList.toggle("active",s===sec);
+    document.getElementById("nb-"+s).classList.toggle("on",s===sec);
+  });
+  const titles={orders:"Замовлення",stats:"Статистика",menu:"Меню",banners:"Банери",history:"Історія",settings:"Налаштування"};
+  const subs={orders:"Управління замовленнями",stats:"Аналітика продажів",menu:"Страви та категорії",banners:"Слайдер на сайті",history:"Журнал подій",settings:"Налаштування сайту"};
+  document.getElementById("topTitle").textContent=titles[sec];
+  document.getElementById("topSub").textContent=subs[sec];
+  document.getElementById("sortSel").style.display=sec==="orders"?"block":"none";
+  document.getElementById("refreshBtn").style.display=sec==="orders"?"flex":"none";
+  if(sec==="orders")renderOrders();
+  if(sec==="stats")renderStats();
+  if(sec==="menu"){renderDishList();rebuildCatSelects();}
+  if(sec==="banners"){setBannerTab("add");renderBannerList();}
+  if(sec==="history")renderHistory();
+  if(sec==="settings")renderSettings();
+};
+window.setMenuTab=tab=>{
+  ["add","list"].forEach(t=>{document.getElementById("pt-"+t).classList.toggle("on",t===tab);document.getElementById("mt-"+t).style.display=t===tab?"block":"none";});
+  if(tab==="list")renderDishList();
+};
+
+/* ——— MISC ——— */
+window.manualRefresh=()=>{const btn=document.getElementById("refreshBtn");btn.textContent="↻ ...";setTimeout(()=>btn.textContent="↻ Оновити",700);setUpd();};
+function setUpd(){const t=new Date().toLocaleTimeString("uk-UA",{hour:"2-digit",minute:"2-digit"});const el=document.getElementById("updTxt");if(el)el.textContent="Оновлено "+t;}
+function fmtTime(ts){if(!ts)return"—";const d=Math.floor((Date.now()-ts)/60000);if(d<1)return"Щойно";if(d<60)return d+" хв тому";if(d<1440)return Math.floor(d/60)+" год тому";return new Date(ts).toLocaleDateString("uk-UA",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});}
+function playBeep(){try{const c=new(window.AudioContext||window.webkitAudioContext)();[440,554,659].forEach((f,i)=>{const o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=f;o.type="sine";const t=c.currentTime+i*.15;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.2,t+.02);g.gain.exponentialRampToValueAtTime(.001,t+.28);o.start(t);o.stop(t+.3);});}catch(e){}}
+</script>
+</body>
+</html>
