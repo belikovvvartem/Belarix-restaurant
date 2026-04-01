@@ -80,8 +80,8 @@ input,select,textarea{font-size:16px!important} /* prevents iOS zoom on focus */
 /* emoji placeholder - fill the box */
 .dish-img > span:not(.badge-pop):not(.badge-sale){position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:60px}
 .dish-img img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
-.badge-pop{position:absolute;top:10px;left:10px;background:var(--primary);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:40px;z-index:2;pointer-events:none;letter-spacing:.3px;text-transform:uppercase}
-.badge-sale{position:absolute;top:10px;right:10px;background:var(--accent);color:var(--text);font-size:11px;font-weight:700;padding:4px 10px;border-radius:40px;z-index:2;pointer-events:none;letter-spacing:.3px;text-transform:uppercase}
+.badge-pop{position:absolute;top:10px;left:10px;background:var(--primary);color:#fff;font-size:12px;font-weight:700;padding:5px 12px;border-radius:40px;z-index:2;pointer-events:none;letter-spacing:.4px;text-transform:uppercase;box-shadow:0 2px 8px rgba(201,75,31,.4)}
+.badge-sale{position:absolute;top:10px;right:10px;background:var(--accent);color:var(--text);font-size:12px;font-weight:700;padding:5px 12px;border-radius:40px;z-index:2;pointer-events:none;letter-spacing:.4px;text-transform:uppercase;box-shadow:0 2px 8px rgba(240,180,41,.4)}
 .dish-body{padding:16px 18px 18px}
 .dish-name{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:5px;line-height:1.3}
 .dish-meta{display:flex;gap:10px;margin-bottom:10px;font-size:13px;color:var(--light)}
@@ -391,7 +391,8 @@ input,select,textarea{font-size:16px!important} /* prevents iOS zoom on focus */
   .badge-pop{left:6px}
   .badge-sale{right:6px}
   .banner-sep{display:none}
-  .banner-i{font-size:12px;padding:9px 16px}
+  .banner-i{font-size:11px;padding:8px 14px;white-space:nowrap}
+  .banner-sep{display:none}
   .track-search-box{flex-direction:column}
   .track-page-inner{padding:28px 16px}
   .track-page-title{font-size:24px}
@@ -495,7 +496,7 @@ input,select,textarea{font-size:16px!important} /* prevents iOS zoom on focus */
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
           </div>
           <h3>Адреса</h3>
-          <p>вул. Шевченка, 42<br>м. Ужгород<br><br><a href="tel:+380501234567">+38 (050) 123-45-67</a><br><a href="/cdn-cgi/l/email-protection#0e676068614e7e6f60617c6f636f207b6f"><span class="__cf_email__" data-cfemail="4f262129200f3f2e21203d2e222e613a2e">[email&#160;protected]</span></a></p>
+          <p>вул. Шевченка, 42<br>м. Ужгород<br><br><a href="tel:+380501234567">+38 (050) 123-45-67</a><br><a href="mailto:info@panorama.ua">info@panorama.ua</a></p>
         </div>
         <div class="con-card">
           <div class="con-card-icon">
@@ -667,7 +668,7 @@ input,select,textarea{font-size:16px!important} /* prevents iOS zoom on focus */
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13.1 19.79 19.79 0 0 1 1.62 4.43 2 2 0 0 1 3.6 2.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.16 6.16l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 17.27z"/></svg>
 </a>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script type="module">
+<script type="module">
 import { initializeApp }    from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getDatabase, ref, push, get, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
@@ -690,7 +691,7 @@ let FREE    = 500;
 let DLV_COST = 50;
 let CITIES  = [{name:"Ужгород", price:50}];
 // Work hours from Firebase: {weekdays:{open:10,close:22}, weekends:{open:11,close:23}}
-let WORK_HOURS = {weekdays:{open:10,close:22}, weekends:{open:11,close:23}};
+let WORK_HOURS = {weekdays:{open:10,openMin:0,close:22,closeMin:0}, weekends:{open:11,openMin:0,close:23,closeMin:0}, saturday:null, sunday:null};
 
 const STATUSES = [
   {k:"new",        l:"Новий"},
@@ -872,42 +873,51 @@ function populateCitySelect() {
 
 /* ——— HOURS ——— */
 function pad(n){return String(n).padStart(2,"0");}
-function fmtHour(h){return pad(h)+":00";}
+function fmtHour(h,m){return pad(h)+":"+(m?pad(m):"00");}
+function toMinutes(h,m){return h*60+(m||0);}
+
+function getDayHours(d) {
+  if (d === 6 && WORK_HOURS.saturday && WORK_HOURS.saturday.close) return WORK_HOURS.saturday;
+  if (d === 0 && WORK_HOURS.sunday  && WORK_HOURS.sunday.close)  return WORK_HOURS.sunday;
+  if (d === 0 || d === 6) return WORK_HOURS.weekends;
+  return WORK_HOURS.weekdays;
+}
 function isOpenNow() {
-  var n = new Date(), d = n.getDay(), h = n.getHours() + n.getMinutes() / 60;
-  var isWeekend = (d === 0 || d === 6);
-  var hours = isWeekend ? WORK_HOURS.weekends : WORK_HOURS.weekdays;
-  return h >= hours.open && h < hours.close;
+  var n = new Date(), d = n.getDay();
+  var nowMin = n.getHours()*60 + n.getMinutes();
+  var hours = getDayHours(d);
+  var openMin  = toMinutes(hours.open,  hours.openMin);
+  var closeMin = toMinutes(hours.close, hours.closeMin);
+  return nowMin >= openMin && nowMin < closeMin;
 }
 function getNextOpenLabel() {
-  var n = new Date();
-  var d = n.getDay();
-  var h = n.getHours() + n.getMinutes() / 60;
-  // Determine today's hours
+  var n = new Date(), d = n.getDay();
+  var nowMin = n.getHours()*60 + n.getMinutes();
   var isWeekend = (d === 0 || d === 6);
   var hours = isWeekend ? WORK_HOURS.weekends : WORK_HOURS.weekdays;
-  // If we haven't opened yet today, it's today
-  if (h < hours.open) {
-    return "сьогодні о " + fmtHour(hours.open);
+  var openMin = toMinutes(hours.open, hours.openMin);
+  if (nowMin < openMin) {
+    return "сьогодні о " + fmtHour(hours.open, hours.openMin);
   }
-  // Otherwise it's tomorrow — check tomorrow's schedule
   var tomorrowDay = (d + 1) % 7;
   var tomorrowWeekend = (tomorrowDay === 0 || tomorrowDay === 6);
   var tomorrowHours = tomorrowWeekend ? WORK_HOURS.weekends : WORK_HOURS.weekdays;
-  return "завтра о " + fmtHour(tomorrowHours.open);
+  return "завтра о " + fmtHour(tomorrowHours.open, tomorrowHours.openMin);
 }
 function checkHours() {
-  var n = new Date(), d = n.getDay(), h = n.getHours() + n.getMinutes() / 60;
+  var n = new Date(), d = n.getDay();
+  var nowMin = n.getHours()*60 + n.getMinutes();
   var isWeekend = (d === 0 || d === 6);
   var hours = isWeekend ? WORK_HOURS.weekends : WORK_HOURS.weekdays;
-  var open = h >= hours.open && h < hours.close;
+  var openMin  = toMinutes(hours.open,  hours.openMin);
+  var closeMin = toMinutes(hours.close, hours.closeMin);
+  var open = nowMin >= openMin && nowMin < closeMin;
   document.getElementById("hoursLabel").textContent = open
-    ? ("Відкрито до " + fmtHour(hours.close))
-    : ("Зачинено (відкр. о " + fmtHour(hours.open) + ")");
+    ? ("Відкрито до " + fmtHour(hours.close, hours.closeMin))
+    : ("Зачинено (відкр. о " + fmtHour(hours.open, hours.openMin) + ")");
   document.getElementById("hoursDot").className = "hours-dot" + (open ? "" : " off");
-  // Update contacts page hours
-  var wd = fmtHour(WORK_HOURS.weekdays.open) + " – " + fmtHour(WORK_HOURS.weekdays.close);
-  var we = fmtHour(WORK_HOURS.weekends.open) + " – " + fmtHour(WORK_HOURS.weekends.close);
+  var wd = fmtHour(WORK_HOURS.weekdays.open, WORK_HOURS.weekdays.openMin) + " – " + fmtHour(WORK_HOURS.weekdays.close, WORK_HOURS.weekdays.closeMin);
+  var we = fmtHour(WORK_HOURS.weekends.open, WORK_HOURS.weekends.openMin) + " – " + fmtHour(WORK_HOURS.weekends.close, WORK_HOURS.weekends.closeMin);
   var e1 = document.getElementById("cHrsWeekday"); if(e1) e1.textContent = wd;
   var e2 = document.getElementById("cHrsWeekend"); if(e2) e2.textContent = we;
   var e3 = document.getElementById("cHrsSunday");  if(e3) e3.textContent = we;
@@ -944,14 +954,17 @@ function buildMenu() {
     return;
   }
 
-  // Group by category
+  // Group by category, ordered by CATS (admin-defined order)
   var groups = {};
-  var order  = [];
   list.forEach(function(item) {
     var cat = item.cat || "Інше";
-    if (!groups[cat]) { groups[cat] = []; order.push(cat); }
+    if (!groups[cat]) groups[cat] = [];
     groups[cat].push(item);
   });
+  // Sort by CATS order
+  var order = [];
+  CATS.forEach(function(cat) { if (groups[cat]) order.push(cat); });
+  Object.keys(groups).forEach(function(cat) { if (order.indexOf(cat)<0) order.push(cat); });
 
   var html = "";
   order.forEach(function(cat) {
@@ -996,7 +1009,7 @@ function makeDishCard(item) {
       + '<span class="qty-n">' + qty + '</span>'
       + '<button class="qty-btn" onclick="chQty(\'' + id + '\',1)">+</button>'
       + '</div>'
-    : '<button class="add-btn" onclick="event.stopPropagation();addItem(\'' + id + '\')">+</button>';
+    : '<button class="add-btn" onclick="event.stopPropagation();openDishModal(\'' + id + '\')" title="Відкрити">+</button>';
 
   return '<div class="dish-card" onclick="openDishModal(\'' + id + '\')">'
     + '<div class="dish-img">' + imgHtml
@@ -1053,14 +1066,54 @@ window.closeDishModal = function() {
 window.addItemModal = function(id) { addItem(id); refreshDishModalCtrl(id); };
 window.chQtyModal   = function(id, d) { chQty(id, d); refreshDishModalCtrl(id); };
 function refreshDishModalCtrl(id) {
-  var inCart = cart.find(function(c) { return c.id === id; });
+  var item   = MENU.find(function(i) { return i.id === id; });
+  var inCart = cart.find(function(c) { return c.id === id && c.sizeIdx === undefined; });
   var qty    = inCart ? inCart.qty : 0;
-  document.getElementById("dmCtrl").innerHTML = qty > 0
-    ? '<div class="qty-ctrl"><button class="qty-btn" onclick="chQtyModal(\'' + id + '\',-1)">−</button><span class="qty-n">' + qty + '</span><button class="qty-btn" onclick="chQtyModal(\'' + id + '\',1)">+</button></div>'
-    : '<button class="add-btn" onclick="addItemModal(\'' + id + '\')">+</button>';
+  if (item && item.sizes && item.sizes.length) {
+    // Show size selector
+    var selHtml = '<div style="display:flex;flex-direction:column;gap:8px;width:100%">';
+    item.sizes.forEach(function(s, si) {
+      var sInCart = cart.find(function(ci){ return ci.id === id && ci.sizeIdx === si; });
+      var sQty = sInCart ? sInCart.qty : 0;
+      selHtml += '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg2);border-radius:var(--radius-s);border:1px solid var(--border)">';
+      selHtml += '<div><div style="font-size:14px;font-weight:600">' + s.label + '</div><div style="font-size:13px;color:var(--primary);font-weight:700;margin-top:2px">' + s.price + ' грн</div></div>';
+      if (sQty > 0) {
+        selHtml += '<div class="qty-ctrl"><button class="qty-btn" onclick="chQtySize(\'' + id + '\',' + si + ',-1)">−</button><span class="qty-n">' + sQty + '</span><button class="qty-btn" onclick="chQtySize(\'' + id + '\',' + si + ',1)">+</button></div>';
+      } else {
+        selHtml += '<button class="add-btn" onclick="addItemSize(\'' + id + '\',' + si + ')">+</button>';
+      }
+      selHtml += '</div>';
+    });
+    selHtml += '</div>';
+    document.getElementById("dmCtrl").innerHTML = selHtml;
+    document.getElementById("dmPrice").style.display = "none";
+  } else {
+    document.getElementById("dmPrice").style.display = "";
+    document.getElementById("dmCtrl").innerHTML = qty > 0
+      ? '<div class="qty-ctrl"><button class="qty-btn" onclick="chQtyModal(\'' + id + '\',-1)">−</button><span class="qty-n">' + qty + '</span><button class="qty-btn" onclick="chQtyModal(\'' + id + '\',1)">+</button></div>'
+      : '<button class="add-btn" onclick="addItemModal(\'' + id + '\')">+</button>';
+  }
 }
 
 /* ——— CART ——— */
+window.addItemSize = function(id, sizeIdx) {
+  var item = MENU.find(function(i) { return i.id === id; });
+  if (!item || !item.sizes || !item.sizes[sizeIdx]) return;
+  var s = item.sizes[sizeIdx];
+  var ex = cart.find(function(c) { return c.id === id && c.sizeIdx === sizeIdx; });
+  if (ex) { ex.qty++; } else {
+    cart.push({id:id, name:item.name + ' ' + s.label, price:s.price, qty:1, sizeIdx:sizeIdx,
+      photo:item.photo||null, emoji:item.emoji||'', prep:item.prep||15, cat:item.cat||''});
+  }
+  saveCart(); refreshDishModalCtrl(id); updateCart(); bumpCartBtn();
+};
+window.chQtySize = function(id, sizeIdx, d) {
+  var i = cart.findIndex(function(c) { return c.id === id && c.sizeIdx === sizeIdx; });
+  if (i < 0) return;
+  cart[i].qty += d;
+  if (cart[i].qty <= 0) cart.splice(i, 1);
+  saveCart(); refreshDishModalCtrl(id); updateCart();
+};
 window.addItem = function(id) {
   var item = MENU.find(function(i) { return i.id === id; });
   if (!item) return;
