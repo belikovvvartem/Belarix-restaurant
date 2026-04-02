@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Panorama v3 — FIXED -->
+<!-- Panorama v3 -->
 <html lang="uk">
 <head>
 <meta charset="UTF-8">
@@ -21,7 +21,7 @@ html{scroll-behavior:smooth;-webkit-tap-highlight-color:transparent}
 body{font-family:'Jost',sans-serif;background:var(--bg);color:var(--text);font-size:17px;line-height:1.6;overflow-x:hidden}
 a{color:var(--primary);text-decoration:none}
 button{font-family:'Jost',sans-serif;cursor:pointer;touch-action:manipulation}
-input,select,textarea{font-size:16px!important}
+input,select,textarea{font-size:16px!important} /* prevents iOS zoom on focus */
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-track{background:var(--bg2)}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
@@ -53,7 +53,7 @@ input,select,textarea{font-size:16px!important}
 .mob-menu .mob-call{color:var(--primary);font-weight:700;border:none;margin-top:6px}
 .mob-menu.open{display:flex}
 
-/* BANNER INFO STRIP */
+/* BANNER INFO STRIP — centered */
 .banner{background:var(--text);display:flex;align-items:center;justify-content:center;gap:0;padding:0;overflow-x:auto;scrollbar-width:none;flex-wrap:nowrap}
 .banner::-webkit-scrollbar{display:none}
 .banner-i{font-size:13px;color:rgba(255,255,255,.75);flex-shrink:0;padding:11px 24px;border-right:1px solid rgba(255,255,255,.12)}
@@ -75,7 +75,9 @@ input,select,textarea{font-size:16px!important}
 .dishes-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:22px}
 .dish-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:transform var(--t),box-shadow var(--t);cursor:pointer}
 .dish-card:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+/* Fix 2: dish image always 1:1 */
 .dish-img{padding-bottom:100%;background:var(--bg2);position:relative;overflow:hidden;height:0}
+/* emoji placeholder - fill the box */
 .dish-img > span:not(.badge-pop):not(.badge-sale){position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:60px}
 .dish-img img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
 .badge-pop{position:absolute;top:10px;left:10px;background:var(--primary);color:#fff;font-size:12px;font-weight:700;padding:5px 12px;border-radius:40px;z-index:2;pointer-events:none;letter-spacing:.4px;text-transform:uppercase;box-shadow:0 2px 8px rgba(201,75,31,.4)}
@@ -98,23 +100,46 @@ input,select,textarea{font-size:16px!important}
 .qty-n{font-weight:700;font-size:16px;min-width:22px;text-align:center}
 .empty-menu{text-align:center;padding:60px 20px;color:var(--muted)}
 .empty-menu p{font-size:15px;margin-top:8px}
-
 /* BANNER SLIDER */
-#bannerSlider{width:100%;background:var(--bg);position:relative;padding:20px 20px 0}
-#bannerSliderInner{
-  max-width:1180px;margin:0 auto;position:relative;overflow:hidden;border-radius:16px;
-  aspect-ratio:21/8;background:var(--bg2);
-  background-image:linear-gradient(90deg,var(--bg2) 0%,var(--border) 50%,var(--bg2) 100%);
-  background-size:200% 100%;animation:shimmer 1.6s infinite;
+#bannerSlider{
+  width:100%;background:var(--bg);position:relative;
+  padding:20px 20px 0;
 }
-#bannerSliderInner.loaded{animation:none;background-image:none}
+#bannerSliderInner{
+  max-width:1180px;margin:0 auto;
+  position:relative;overflow:hidden;
+  border-radius:16px;
+  aspect-ratio:21/8;
+  background:var(--bg2);
+  /* Skeleton shimmer while loading */
+  background-image:linear-gradient(90deg,var(--bg2) 0%,var(--border) 50%,var(--bg2) 100%);
+  background-size:200% 100%;
+  animation:shimmer 1.6s infinite;
+}
+#bannerSliderInner.loaded{
+  animation:none;
+  background-image:none;
+}
 .banner-track{display:flex;height:100%;transition:transform .5s cubic-bezier(.4,0,.2,1)}
-.banner-slide{min-width:100%;height:100%;position:relative;overflow:hidden;box-sizing:border-box;background:var(--bg2);border-radius:16px;flex-shrink:0}
+.banner-slide{
+  min-width:100%;height:100%;position:relative;overflow:hidden;
+  box-sizing:border-box;background:var(--bg2);border-radius:16px;flex-shrink:0;
+}
 .banner-slide img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
-#bannerDots{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:2}
+.banner-slide-content{display:none}
+#bannerDots{
+  position:absolute;bottom:14px;left:50%;transform:translateX(-50%);
+  display:flex;gap:6px;z-index:2;
+}
 .banner-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.5);cursor:pointer;transition:all .3s;border:none}
 .banner-dot.on{background:#fff;width:22px;border-radius:4px}
-.banner-arrow{position:absolute;top:50%;transform:translateY(-50%);width:36px;height:36px;border-radius:50%;border:none;background:rgba(0,0,0,.28);color:#fff;font-size:20px;cursor:pointer;z-index:2;backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;transition:background .2s;line-height:1}
+.banner-arrow{
+  position:absolute;top:50%;transform:translateY(-50%);
+  width:36px;height:36px;border-radius:50%;border:none;
+  background:rgba(0,0,0,.28);color:#fff;font-size:20px;cursor:pointer;
+  z-index:2;backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;
+  transition:background .2s;line-height:1;
+}
 .banner-arrow:hover{background:rgba(0,0,0,.48)}
 .banner-arrow-l{left:12px}
 .banner-arrow-r{right:12px}
@@ -199,26 +224,41 @@ input,select,textarea{font-size:16px!important}
 .dish-modal-name{font-family:'Playfair Display',serif;font-size:24px;font-weight:700;margin-bottom:6px;line-height:1.2}
 .dish-modal-desc{font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:14px;flex-shrink:0}
 .dish-modal-meta{display:flex;gap:14px;margin-bottom:14px;font-size:13px;color:var(--light);flex-shrink:0}
-.dm-sizes{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;flex-shrink:0}
-.dm-size-row{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-radius:12px;border:2px solid var(--border);background:var(--bg2);transition:border-color var(--t),background var(--t)}
+.dm-sizes{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;flex-shrink:0}
+.dm-size-row{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:transparent;transition:border-color var(--t),background var(--t)}
 .dm-size-row.has-qty{border-color:var(--primary);background:var(--primary-l)}
-.dm-size-left{display:flex;flex-direction:column;gap:2px}
-.dm-size-label{font-size:15px;font-weight:600}
+.dm-size-left{display:flex;align-items:center;gap:10px}
+.dm-size-label{font-size:14px;font-weight:500;color:var(--text)}
 .dm-size-price{font-size:14px;font-weight:700;color:var(--primary)}
 .dish-modal-footer{margin-top:auto;padding-top:14px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-shrink:0}
 .dish-modal-price{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:var(--primary)}
-.dm-cart-btn{padding:13px 28px;background:var(--primary);color:#fff;border:none;border-radius:40px;font-size:15px;font-weight:700;cursor:pointer;transition:background var(--t),transform var(--t);font-family:'Jost',sans-serif;flex-shrink:0}
+.dm-cart-btn{padding:11px 22px;background:var(--primary);color:#fff;border:none;border-radius:40px;font-size:14px;font-weight:700;cursor:pointer;transition:background var(--t),transform var(--t);font-family:'Jost',sans-serif;flex-shrink:0}
 .dm-cart-btn:hover{background:var(--primary-d);transform:translateY(-1px)}
 .dm-cart-btn.in-cart{background:var(--green)}
 .dish-modal-x{position:absolute;top:14px;right:14px;z-index:10;width:34px;height:34px;border-radius:50%;border:none;background:rgba(0,0,0,.35);color:#fff;font-size:15px;display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(4px)}
 .dish-modal-x:hover{background:rgba(0,0,0,.55)}
 @media(max-width:640px){
-  .dish-modal{flex-direction:column;max-height:95svh;border-radius:18px 18px 0 0;overflow-y:auto}
-  .dish-modal-photo{flex:none;border-radius:18px 18px 0 0}
-  .dish-modal-photo::before{padding-bottom:65%}
-  .dish-modal-body{padding:18px 18px 20px}
-  .dish-modal-name{font-size:20px}
+  /* Modal with top gap + rounded top corners, no bottom radius */
   .dish-modal-bg{padding:0;align-items:flex-end}
+  .dish-modal{
+    flex-direction:column;
+    width:100%;max-width:100%;
+    height:calc(100svh - 48px);
+    max-height:calc(100svh - 48px);
+    border-radius:20px 20px 0 0;
+    overflow-y:auto;
+    transform:translateY(100%);
+    transition:transform .35s cubic-bezier(.4,0,.2,1);
+  }
+  .dish-modal-bg.on .dish-modal{transform:translateY(0)}
+  /* Smaller photo on mobile - not 1:1 but 16:9 */
+  .dish-modal-photo{flex:none;border-radius:20px 20px 0 0}
+  .dish-modal-photo::before{padding-bottom:62%}
+  .dish-modal-body{padding:16px 16px 28px;flex:1}
+  .dish-modal-name{font-size:19px}
+  .dish-modal-x{top:10px;right:10px;background:rgba(0,0,0,.5)}
+  /* Smaller cart button on mobile */
+  .dm-cart-btn{padding:10px 20px;font-size:13px}
 }
 
 /* CART SIDEBAR */
@@ -255,7 +295,7 @@ input,select,textarea{font-size:16px!important}
 /* MODAL */
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1100;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity var(--t)}
 .modal-bg.on{opacity:1;pointer-events:all}
-.modal{background:var(--surface);border-radius:18px;padding:32px;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;position:relative;box-shadow:var(--shadow-l);transform:translateY(16px);transition:transform var(--t)}
+.modal{background:var(--surface);border-radius:18px;padding:32px;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;position:relative;box-shadow:var(--shadow-l);transform:translateY(12px) scale(.98);transition:transform .28s cubic-bezier(.4,0,.2,1),opacity .28s}
 .modal-bg.on .modal{transform:translateY(0)}
 .modal h2{font-family:'Playfair Display',serif;font-size:22px;margin-bottom:22px}
 .modal-x{position:absolute;top:14px;right:14px;width:32px;height:32px;border-radius:50%;border:none;background:var(--bg2);font-size:14px;display:flex;align-items:center;justify-content:center;color:var(--text)}
@@ -310,13 +350,33 @@ input,select,textarea{font-size:16px!important}
   transition:transform .2s ease,box-shadow .2s ease;
   animation:float-pulse 2.8s ease-in-out infinite;
 }
-.float-call::before{content:'';position:absolute;inset:-6px;border-radius:50%;border:2px solid rgba(201,75,31,.4);animation:float-ring 2.8s ease-in-out infinite}
-.float-call::after{content:'';position:absolute;inset:-12px;border-radius:50%;border:1.5px solid rgba(201,75,31,.18);animation:float-ring 2.8s ease-in-out infinite .3s}
+.float-call::before{
+  content:'';position:absolute;inset:-6px;border-radius:50%;
+  border:2px solid rgba(201,75,31,.4);
+  animation:float-ring 2.8s ease-in-out infinite;
+}
+.float-call::after{
+  content:'';position:absolute;inset:-12px;border-radius:50%;
+  border:1.5px solid rgba(201,75,31,.18);
+  animation:float-ring 2.8s ease-in-out infinite .3s;
+}
 .float-call:hover{transform:scale(1.12);box-shadow:0 6px 28px rgba(201,75,31,.65);color:#fff}
 .float-call svg{position:relative;z-index:1;animation:float-wiggle 2.8s ease-in-out infinite}
-@keyframes float-pulse{0%,100%{box-shadow:0 4px 20px rgba(201,75,31,.45)}50%{box-shadow:0 6px 32px rgba(201,75,31,.7)}}
-@keyframes float-ring{0%{transform:scale(1);opacity:.7}60%{transform:scale(1.18);opacity:0}100%{transform:scale(1.18);opacity:0}}
-@keyframes float-wiggle{0%,80%,100%{transform:rotate(0deg)}85%{transform:rotate(-15deg)}90%{transform:rotate(12deg)}95%{transform:rotate(-8deg)}}
+@keyframes float-pulse{
+  0%,100%{box-shadow:0 4px 20px rgba(201,75,31,.45)}
+  50%{box-shadow:0 6px 32px rgba(201,75,31,.7)}
+}
+@keyframes float-ring{
+  0%{transform:scale(1);opacity:.7}
+  60%{transform:scale(1.18);opacity:0}
+  100%{transform:scale(1.18);opacity:0}
+}
+@keyframes float-wiggle{
+  0%,80%,100%{transform:rotate(0deg)}
+  85%{transform:rotate(-15deg)}
+  90%{transform:rotate(12deg)}
+  95%{transform:rotate(-8deg)}
+}
 
 /* SKELETON */
 @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
@@ -344,8 +404,13 @@ input,select,textarea{font-size:16px!important}
 @media(max-width:600px){
   .dishes-grid{grid-template-columns:1fr}
   .dish-card{display:flex;flex-direction:row;border-radius:12px;min-height:110px}
-  .dish-img{flex-shrink:0;width:120px;min-width:120px;height:110px!important;padding-bottom:0!important;border-radius:12px 0 0 12px}
+  .dish-img{
+    flex-shrink:0;width:120px;min-width:120px;
+    height:110px!important;padding-bottom:0!important;
+    border-radius:12px 0 0 12px;
+  }
   .dish-img > *{position:absolute;top:0;left:0;font-size:40px;width:100%;height:100%;display:flex;align-items:center;justify-content:center}
+  /* badges stay small - override the flex stretch */
   .dish-img .badge-pop,.dish-img .badge-sale{width:auto;height:auto;display:inline-block}
   .dish-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
   .dish-body{flex:1;padding:12px 14px;display:flex;flex-direction:column;justify-content:space-between;min-width:0}
@@ -358,13 +423,23 @@ input,select,textarea{font-size:16px!important}
   .badge-pop,.badge-sale{font-size:8px;padding:2px 6px;top:6px}
   .badge-pop{left:6px}
   .badge-sale{right:6px}
+  .banner-sep{display:none}
   .banner-i{font-size:11px;padding:8px 14px;white-space:nowrap}
+  .banner-sep{display:none}
   .banner{overflow-x:hidden;justify-content:center}
   .track-search-box{flex-direction:column}
   .track-page-inner{padding:28px 16px}
   .track-page-title{font-size:24px}
-  .modal{padding:20px;border-radius:16px 16px 0 0;max-height:92svh}
   .modal-bg{align-items:flex-end;padding:0}
+  .modal{
+    padding:20px 18px 28px;
+    border-radius:0;
+    width:100%;max-width:100%;
+    height:100svh;max-height:100svh;
+    overflow-y:auto;
+    transform:translateY(100%);
+    transition:transform .35s cubic-bezier(.4,0,.2,1);
+  }
   .cat-group-title{font-size:20px;margin-bottom:16px}
 }
 @media(max-width:380px){
@@ -418,8 +493,10 @@ input,select,textarea{font-size:16px!important}
 <div id="homePage">
   <div class="banner">
     <span class="banner-i">Безкоштовна доставка від <strong id="bannerFree">500 грн</strong></span>
+    <span class="banner-sep"></span>
     <span class="banner-i">Мінімальне замовлення <strong id="bannerMin">200 грн</strong></span>
   </div>
+  <!-- BANNER SLIDER -->
   <div id="bannerSlider">
     <div id="bannerSliderInner">
       <div class="banner-track" id="bannerTrack"></div>
@@ -428,6 +505,7 @@ input,select,textarea{font-size:16px!important}
       <button class="banner-arrow banner-arrow-r" onclick="slideBanner(1)">&#8250;</button>
     </div>
   </div>
+
   <div class="filters-wrap" id="menuAnchor">
     <div class="filters-inner" id="filterBar"></div>
   </div>
@@ -560,7 +638,7 @@ input,select,textarea{font-size:16px!important}
     <div class="step-body" id="sb1">
       <div class="fg"><label>Ім'я *</label><input id="fName" placeholder="Ваше ім'я" type="text"></div>
       <div class="fg"><label>Телефон *</label><input id="fPhone" placeholder="+380 (0XX) XXX-XX-XX" type="tel" maxlength="19"></div>
-      <button class="btn-pri" onclick="toStep(2)">Далі &rarr;</button>
+      <button class="btn-pri" onclick="toStep(2)">Далі →</button>
     </div>
     <div class="step-body hide" id="sb2">
       <div class="dlv-sel">
@@ -585,14 +663,14 @@ input,select,textarea{font-size:16px!important}
       </div>
       <div class="fg"><label>Коментар</label><textarea id="fNote" placeholder="Побажання, алергії, спосіб оплати..." rows="3"></textarea></div>
       <div class="row-btns">
-        <button class="btn-ghost" onclick="toStep(1)">&larr; Назад</button>
-        <button class="btn-pri" onclick="toStep(3)">Далі &rarr;</button>
+        <button class="btn-ghost" onclick="toStep(1)">← Назад</button>
+        <button class="btn-pri" onclick="toStep(3)">Далі →</button>
       </div>
     </div>
     <div class="step-body hide" id="sb3">
       <div class="preview-box" id="previewBox"></div>
       <div class="row-btns">
-        <button class="btn-ghost" onclick="toStep(2)">&larr; Назад</button>
+        <button class="btn-ghost" onclick="toStep(2)">← Назад</button>
         <button class="btn-pri" id="placeBtn" onclick="placeOrder()">Підтвердити замовлення</button>
       </div>
     </div>
@@ -620,7 +698,7 @@ input,select,textarea{font-size:16px!important}
     <p style="font-size:14px;color:var(--muted);margin-bottom:6px">В даний момент ми не приймаємо замовлення.</p>
     <p style="font-size:14px;color:var(--muted);margin-bottom:18px">Ваше замовлення буде опрацьовано <strong id="closedOpenTime">завтра о 10:00</strong></p>
     <div style="display:flex;gap:10px;flex-direction:column">
-      <button class="btn-pri" onclick="proceedAnyway()">Підтвердити замовлення</button>
+      <button class="btn-pri" onclick="proceedAnyway()" style="background:var(--primary)">Підтвердити замовлення</button>
       <button class="btn-ghost" onclick="closeModal('closedModal')">Скасувати</button>
     </div>
   </div>
@@ -653,19 +731,15 @@ let MIN     = 200;
 let FREE    = 500;
 let DLV_COST = 50;
 let CITIES  = [{name:"Ужгород", price:50}];
-let WORK_HOURS = {
-  weekdays: {open:10, openMin:0, close:22, closeMin:0},
-  weekends: {open:11, openMin:0, close:23, closeMin:0},
-  saturday: null,
-  sunday:   null
-};
+// Work hours from Firebase: {weekdays:{open:10,close:22}, weekends:{open:11,close:23}}
+let WORK_HOURS = {weekdays:{open:10,openMin:0,close:22,closeMin:0}, weekends:{open:11,openMin:0,close:23,closeMin:0}, saturday:null, sunday:null};
 
 const STATUSES = [
-  {k:"new",         l:"Новий"},
-  {k:"accepted",    l:"Прийнято"},
-  {k:"in_progress", l:"Готується"},
-  {k:"shipped",     l:"В дорозі"},
-  {k:"completed",   l:"Доставлено"},
+  {k:"new",        l:"Новий"},
+  {k:"accepted",   l:"Прийнято"},
+  {k:"in_progress",l:"Готується"},
+  {k:"shipped",    l:"В дорозі"},
+  {k:"completed",  l:"Доставлено"},
 ];
 
 /* ——— STATE ——— */
@@ -677,9 +751,9 @@ let trackUnsub = null;
 
 /* ——— PAGES ——— */
 window.showPage = function(page) {
-  document.getElementById("homePage").style.display      = page === "home"     ? "block" : "none";
-  document.getElementById("contactsPage").style.display  = page === "contacts" ? "block" : "none";
-  document.getElementById("trackPage").style.display     = page === "track"    ? "block" : "none";
+  document.getElementById("homePage").style.display     = page === "home"     ? "block" : "none";
+  document.getElementById("contactsPage").style.display = page === "contacts" ? "block" : "none";
+  document.getElementById("trackPage").style.display    = page === "track"    ? "block" : "none";
   document.getElementById("navHome").classList.toggle("active",     page === "home");
   document.getElementById("navContacts").classList.toggle("active", page === "contacts");
   document.getElementById("navTrack").classList.toggle("active",    page === "track");
@@ -691,76 +765,82 @@ window.showPage = function(page) {
 updateCart();
 checkHours();
 setInterval(checkHours, 60000);
+// Show banner area immediately (filled by Firebase listener)
+(function(){
+  var s=document.getElementById("bannerSlider");
+  if(s) s.style.display="block";
+})();
 listenFirebase();
 
 /* ——— BANNER SLIDER ——— */
-var bannerSlides = [], bannerIdx = 0, bannerTimer = null;
+var bannerSlides=[], bannerIdx=0, bannerTimer=null;
 
-function initBannerSlider(banners) {
-  var active = banners.filter(function(b) { return b.active !== false; });
-  var slider  = document.getElementById("bannerSlider");
-  var track   = document.getElementById("bannerTrack");
-  var dots    = document.getElementById("bannerDots");
-  if (!slider) return;
-  if (!active.length) {
-    var innerEl = document.getElementById("bannerSliderInner");
-    if (innerEl) innerEl.classList.add("loaded");
-    track.innerHTML = '<div class="banner-slide" style="background:var(--bg2)"></div>';
-    dots.innerHTML  = "";
+function initBannerSlider(banners){
+  var active=banners.filter(function(b){return b.active!==false;});
+  var slider=document.getElementById("bannerSlider");
+  var track=document.getElementById("bannerTrack");
+  var dots=document.getElementById("bannerDots");
+  // Always show slider - use placeholder if no banners yet
+  if(!slider) return;
+  if(!active.length){
+    slider.style.display="block";
+    var innerEl=document.getElementById("bannerSliderInner");
+    if(innerEl) innerEl.classList.add("loaded");
+    track.innerHTML='<div class="banner-slide" style="background:var(--bg2)"></div>';
+    dots.innerHTML="";
     return;
   }
-  var inner2 = document.getElementById("bannerSliderInner");
-  if (inner2) inner2.classList.add("loaded");
-  bannerSlides = active;
-  bannerIdx    = 0;
-  track.innerHTML = active.map(function(b) {
-    var img = b.photo ? '<img src="' + b.photo + '" alt="">' : '';
-    var bg  = b.photo ? 'var(--bg2)' : (b.color || "#C94B1F");
-    return '<div class="banner-slide" style="background:' + bg + '">' + img + '</div>';
+  slider.style.display="block";
+  var inner2=document.getElementById("bannerSliderInner");
+  if(inner2) inner2.classList.add("loaded");
+  bannerSlides=active;
+  bannerIdx=0;
+  track.innerHTML=active.map(function(b){
+    var img=b.photo?'<img src="'+b.photo+'" alt="">':'';
+    var bg=b.photo?'var(--bg2)':(b.color||"#C94B1F");
+    return '<div class="banner-slide" style="background:'+bg+'">'+img+'</div>';
   }).join("");
-  dots.innerHTML = active.map(function(_, i) {
-    return '<button class="banner-dot' + (i === 0 ? " on" : "") + '" onclick="goToBanner(' + i + ')"></button>';
+  dots.innerHTML=active.map(function(_,i){
+    return '<div class="banner-dot'+(i===0?" on":"")+'" onclick="goToBanner('+i+')" ></div>';
   }).join("");
-  if (bannerTimer) clearInterval(bannerTimer);
-  if (active.length > 1) {
-    var isMob = window.innerWidth <= 600;
-    bannerTimer = setInterval(function() { slideBanner(1); }, isMob ? 2800 : 4500);
-  }
-  // Touch swipe
+  if(bannerTimer) clearInterval(bannerTimer);
+  var isMob = window.innerWidth <= 600;
+  if(active.length>1) bannerTimer=setInterval(function(){slideBanner(1);}, isMob ? 2800 : 4500);
+  // Touch swipe for mobile
   var inner = document.getElementById("bannerSliderInner");
-  if (inner) {
-    var tx = 0;
-    inner.addEventListener("touchstart", function(e) { tx = e.touches[0].clientX; }, {passive: true});
-    inner.addEventListener("touchend",   function(e) {
-      var dx = e.changedTouches[0].clientX - tx;
-      if (Math.abs(dx) > 40) slideBanner(dx < 0 ? 1 : -1);
-    }, {passive: true});
+  if(inner){
+    var tx=0;
+    inner.addEventListener("touchstart",function(e){tx=e.touches[0].clientX;},{passive:true});
+    inner.addEventListener("touchend",function(e){
+      var dx=e.changedTouches[0].clientX-tx;
+      if(Math.abs(dx)>40) slideBanner(dx<0?1:-1);
+    },{passive:true});
   }
 }
 
-window.slideBanner = function(dir) {
-  if (!bannerSlides.length) return;
-  bannerIdx = (bannerIdx + dir + bannerSlides.length) % bannerSlides.length;
+window.slideBanner=function(dir){
+  bannerIdx=(bannerIdx+dir+bannerSlides.length)%bannerSlides.length;
   goToBanner(bannerIdx);
 };
-window.goToBanner = function(i) {
-  bannerIdx = i;
-  var track = document.getElementById("bannerTrack");
-  var dots  = document.getElementById("bannerDots");
-  if (track) track.style.transform = "translateX(-" + i + "00%)";
-  if (dots)  dots.querySelectorAll(".banner-dot").forEach(function(d, j) { d.classList.toggle("on", j === i); });
+window.goToBanner=function(i){
+  bannerIdx=i;
+  var track=document.getElementById("bannerTrack");
+  var dots=document.getElementById("bannerDots");
+  if(track) track.style.transform="translateX(-"+i+"00%)";
+  if(dots) dots.querySelectorAll(".banner-dot").forEach(function(d,j){d.classList.toggle("on",j===i);});
 };
 
 function listenFirebase() {
   onValue(ref(db, "settings"), function(snap) {
     if (snap.exists()) {
       var s = snap.val();
-      if (s.minOrder)                                              MIN     = s.minOrder;
-      if (s.freeDelivery)                                          FREE    = s.freeDelivery;
-      if (s.cities && Array.isArray(s.cities) && s.cities.length) CITIES  = s.cities;
+      if (s.minOrder)                                           MIN    = s.minOrder;
+      if (s.freeDelivery)                                       FREE   = s.freeDelivery;
+      if (s.cities && Array.isArray(s.cities) && s.cities.length) CITIES = s.cities;
       if (s.categories && Array.isArray(s.categories) && s.categories.length) {
         CATS = ["Всі"].concat(s.categories);
       }
+      // Fix 3: Work hours from Firebase
       if (s.workHours) {
         if (s.workHours.weekdays) WORK_HOURS.weekdays = s.workHours.weekdays;
         if (s.workHours.weekends) WORK_HOURS.weekends = s.workHours.weekends;
@@ -771,29 +851,36 @@ function listenFirebase() {
     checkHours();
   }, function(e) { console.warn("Settings:", e.message); });
 
+  // Banners
   onValue(ref(db, "banners"), function(snap) {
-    var banners = [];
-    if (snap.exists()) {
-      var raw = snap.val();
-      Object.keys(raw).forEach(function(k) {
-        if (raw[k] && typeof raw[k] === "object") { raw[k].id = k; banners.push(raw[k]); }
-      });
-      banners.sort(function(a, b) { return (a.order ?? a.createdAt ?? 0) - (b.order ?? b.createdAt ?? 0); });
+    var banners=[];
+    if(snap.exists()){
+      var raw=snap.val();
+      Object.keys(raw).forEach(function(k){if(raw[k]&&typeof raw[k]==="object"){raw[k].id=k;banners.push(raw[k]);}});
+      // Sort by order field (drag reorder) then by createdAt
+      banners.sort(function(a,b){return (a.order!=null?a.order:a.createdAt||0)-(b.order!=null?b.order:b.createdAt||0);});
     }
     initBannerSlider(banners);
-  }, function(e) { console.warn("Banners:", e.message); });
+  }, function(e){console.warn("Banners:",e.message);});
 
+  // Menu
   onValue(ref(db, "menu"), function(snap) {
     MENU = [];
     if (snap.exists()) {
       var raw = snap.val();
       Object.keys(raw).forEach(function(key) {
         var dish = raw[key];
-        if (dish && typeof dish === "object") { dish.id = key; MENU.push(dish); }
+        if (dish && typeof dish === "object") {
+          dish.id = key;
+          MENU.push(dish);
+        }
       });
     }
+    // Add any categories from menu not yet in CATS
     MENU.forEach(function(item) {
-      if (item.cat && !CATS.includes(item.cat)) CATS.push(item.cat);
+      if (item.cat && !CATS.includes(item.cat)) {
+        CATS.push(item.cat);
+      }
     });
     buildFilters();
     buildMenu();
@@ -811,6 +898,8 @@ function updateBannerText() {
     var el = document.getElementById(id);
     if (el) el.textContent = els[id];
   });
+  var mw = document.getElementById("minWarn");
+  if (mw) mw.textContent = "Мінімальне замовлення " + MIN + " грн";
 }
 
 function populateCitySelect() {
@@ -824,50 +913,55 @@ function populateCitySelect() {
 }
 
 /* ——— HOURS ——— */
-function pad(n) { return String(n).padStart(2, "0"); }
-function fmtHour(h, m) { return pad(h) + ":" + (m ? pad(m) : "00"); }
-function toMinutes(h, m) { return h * 60 + (m || 0); }
+function pad(n){return String(n).padStart(2,"0");}
+function fmtHour(h,m){return pad(h)+":"+(m?pad(m):"00");}
+function toMinutes(h,m){return h*60+(m||0);}
 
 function getDayHours(d) {
   if (d === 6 && WORK_HOURS.saturday && WORK_HOURS.saturday.close) return WORK_HOURS.saturday;
-  if (d === 0 && WORK_HOURS.sunday   && WORK_HOURS.sunday.close)   return WORK_HOURS.sunday;
+  if (d === 0 && WORK_HOURS.sunday  && WORK_HOURS.sunday.close)  return WORK_HOURS.sunday;
   if (d === 0 || d === 6) return WORK_HOURS.weekends;
   return WORK_HOURS.weekdays;
 }
 function isOpenNow() {
   var n = new Date(), d = n.getDay();
-  var nowMin  = n.getHours() * 60 + n.getMinutes();
-  var hours   = getDayHours(d);
-  var openMin = toMinutes(hours.open, hours.openMin);
-  var closeMin= toMinutes(hours.close, hours.closeMin);
+  var nowMin = n.getHours()*60 + n.getMinutes();
+  var hours = getDayHours(d);
+  var openMin  = toMinutes(hours.open,  hours.openMin);
+  var closeMin = toMinutes(hours.close, hours.closeMin);
   return nowMin >= openMin && nowMin < closeMin;
 }
 function getNextOpenLabel() {
   var n = new Date(), d = n.getDay();
-  var nowMin  = n.getHours() * 60 + n.getMinutes();
-  var hours   = getDayHours(d);
+  var nowMin = n.getHours()*60 + n.getMinutes();
+  var isWeekend = (d === 0 || d === 6);
+  var hours = isWeekend ? WORK_HOURS.weekends : WORK_HOURS.weekdays;
   var openMin = toMinutes(hours.open, hours.openMin);
-  if (nowMin < openMin) return "сьогодні о " + fmtHour(hours.open, hours.openMin);
-  var tomorrowDay     = (d + 1) % 7;
-  var tomorrowHours   = getDayHours(tomorrowDay);
+  if (nowMin < openMin) {
+    return "сьогодні о " + fmtHour(hours.open, hours.openMin);
+  }
+  var tomorrowDay = (d + 1) % 7;
+  var tomorrowWeekend = (tomorrowDay === 0 || tomorrowDay === 6);
+  var tomorrowHours = tomorrowWeekend ? WORK_HOURS.weekends : WORK_HOURS.weekdays;
   return "завтра о " + fmtHour(tomorrowHours.open, tomorrowHours.openMin);
 }
 function checkHours() {
   var n = new Date(), d = n.getDay();
-  var nowMin   = n.getHours() * 60 + n.getMinutes();
-  var hours    = getDayHours(d);
+  var nowMin = n.getHours()*60 + n.getMinutes();
+  var isWeekend = (d === 0 || d === 6);
+  var hours = isWeekend ? WORK_HOURS.weekends : WORK_HOURS.weekdays;
   var openMin  = toMinutes(hours.open,  hours.openMin);
   var closeMin = toMinutes(hours.close, hours.closeMin);
-  var open     = nowMin >= openMin && nowMin < closeMin;
+  var open = nowMin >= openMin && nowMin < closeMin;
   document.getElementById("hoursLabel").textContent = open
     ? ("Відкрито до " + fmtHour(hours.close, hours.closeMin))
     : ("Зачинено (відкр. о " + fmtHour(hours.open, hours.openMin) + ")");
   document.getElementById("hoursDot").className = "hours-dot" + (open ? "" : " off");
   var wd = fmtHour(WORK_HOURS.weekdays.open, WORK_HOURS.weekdays.openMin) + " – " + fmtHour(WORK_HOURS.weekdays.close, WORK_HOURS.weekdays.closeMin);
   var we = fmtHour(WORK_HOURS.weekends.open, WORK_HOURS.weekends.openMin) + " – " + fmtHour(WORK_HOURS.weekends.close, WORK_HOURS.weekends.closeMin);
-  var e1 = document.getElementById("cHrsWeekday"); if (e1) e1.textContent = wd;
-  var e2 = document.getElementById("cHrsWeekend"); if (e2) e2.textContent = we;
-  var e3 = document.getElementById("cHrsSunday");  if (e3) e3.textContent = we;
+  var e1 = document.getElementById("cHrsWeekday"); if(e1) e1.textContent = wd;
+  var e2 = document.getElementById("cHrsWeekend"); if(e2) e2.textContent = we;
+  var e3 = document.getElementById("cHrsSunday");  if(e3) e3.textContent = we;
 }
 
 /* ——— FILTERS ——— */
@@ -882,32 +976,36 @@ window.setCat = function(c) { activeCat = c; buildFilters(); buildMenu(); };
 
 /* ——— MENU ——— */
 function buildMenu() {
+  // Hide skeleton
   var sk = document.getElementById("menuSkeleton");
   if (sk) sk.style.display = "none";
 
   var list = activeCat === "Всі" ? MENU : MENU.filter(function(i) { return i.cat === activeCat; });
 
   if (!list.length && MENU.length === 0) {
+    // Still loading — keep skeleton visible
     if (sk) sk.style.display = "";
     return;
   }
   if (!list.length) {
-    var sec2 = document.getElementById("menuSection");
-    var real2 = sec2.querySelector(".dishes-real");
-    if (!real2) { real2 = document.createElement("div"); real2.className = "dishes-real"; sec2.appendChild(real2); }
-    real2.innerHTML = '<div class="empty-menu"><p>Страв у цій категорії немає</p></div>';
+    var sec = document.getElementById("menuSection");
+    if (!sec.querySelector(".dishes-real")) {
+      sec.innerHTML = '<div class="empty-menu"><p>Страв у цій категорії немає</p></div>';
+    }
     return;
   }
 
+  // Group by category, ordered by CATS (admin-defined order)
   var groups = {};
   list.forEach(function(item) {
     var cat = item.cat || "Інше";
     if (!groups[cat]) groups[cat] = [];
     groups[cat].push(item);
   });
+  // Sort by CATS order
   var order = [];
   CATS.forEach(function(cat) { if (groups[cat]) order.push(cat); });
-  Object.keys(groups).forEach(function(cat) { if (order.indexOf(cat) < 0) order.push(cat); });
+  Object.keys(groups).forEach(function(cat) { if (order.indexOf(cat)<0) order.push(cat); });
 
   var html = "";
   order.forEach(function(cat) {
@@ -917,17 +1015,18 @@ function buildMenu() {
     groups[cat].forEach(function(item) { html += makeDishCard(item); });
     html += '</div></div>';
   });
-
   var sec = document.getElementById("menuSection");
+  // Remove skeleton if present
   var sk2 = document.getElementById("menuSkeleton");
   if (sk2) sk2.remove();
+  // Use wrapper to avoid wiping skeleton prematurely
   var real = sec.querySelector(".dishes-real");
   if (!real) { real = document.createElement("div"); real.className = "dishes-real"; sec.appendChild(real); }
   real.innerHTML = html;
 }
 
 function makeDishCard(item) {
-  var inCart = cart.find(function(c) { return c.id === item.id && c.sizeIdx === undefined; });
+  var inCart = cart.find(function(c) { return c.id === item.id; });
   var qty    = inCart ? inCart.qty : 0;
   var id     = item.id;
 
@@ -945,18 +1044,17 @@ function makeDishCard(item) {
     priceHtml = '<span class="dish-price">' + item.price + ' грн</span>';
   }
 
-  // FIX: Use data attributes to avoid quote-escaping issues in onclick handlers
   var ctrlHtml = qty > 0
     ? '<div class="qty-ctrl" onclick="event.stopPropagation()">'
-      + '<button class="qty-btn" data-id="' + id + '" data-d="-1" onclick="event.stopPropagation();chQty(this.dataset.id,-1)">&#8722;</button>'
+      + '<button class="qty-btn" onclick="chQty(\'' + id + '\',-1)">−</button>'
       + '<span class="qty-n">' + qty + '</span>'
-      + '<button class="qty-btn" data-id="' + id + '" data-d="1" onclick="event.stopPropagation();chQty(this.dataset.id,1)">&#43;</button>'
+      + '<button class="qty-btn" onclick="chQty(\'' + id + '\',1)">+</button>'
       + '</div>'
-    : '<button class="select-btn" data-id="' + id + '" onclick="event.stopPropagation();openDishModal(this.dataset.id)">&#43;</button>';
+    : '<button class="select-btn" onclick="event.stopPropagation();openDishModal(\'' + id + '\')" title="Відкрити">+</button>';
 
-  return '<div class="dish-card" data-id="' + id + '" onclick="openDishModal(this.dataset.id)">'
+  return '<div class="dish-card" onclick="openDishModal(\'' + id + '\')">'
     + '<div class="dish-img">' + imgHtml
-    + (item.pop  ? '<span class="badge-pop">Хіт</span>'    : "")
+    + (item.pop  ? '<span class="badge-pop">Хіт</span>'   : "")
     + (item.sale ? '<span class="badge-sale">Акція</span>' : "")
     + '</div>'
     + '<div class="dish-body">'
@@ -974,15 +1072,18 @@ window.openDishModal = function(id) {
   var item = MENU.find(function(i) { return i.id === id; });
   if (!item) return;
 
+  // Photo
   var dmImg = document.getElementById("dmImg");
   dmImg.innerHTML = item.photo
     ? '<img src="' + item.photo + '" alt="' + item.name + '">'
     : '<span>' + (item.emoji || "🍽") + '</span>';
 
+  // Name, meta, desc
   document.getElementById("dmName").textContent = item.name;
   document.getElementById("dmMeta").innerHTML   = "<span>" + (item.prep || 15) + " хв</span><span>" + (item.cat || "") + "</span>";
   document.getElementById("dmDesc").textContent = item.desc || "";
 
+  // Badges
   var badges = "";
   if (item.pop)  badges += '<span class="badge-pop"  style="position:static;display:inline-block">Хіт</span>';
   if (item.sale) badges += '<span class="badge-sale" style="position:static;display:inline-block">Акція</span>';
@@ -998,63 +1099,29 @@ window.closeDishModal = function() {
   document.body.style.overflow = "";
 };
 
-window.addItemModal = function(id) { addItem(id); refreshDishModalCtrl(id); };
-window.chQtyModal   = function(id, d) { chQty(id, d); refreshDishModalCtrl(id); };
-
-// FIX: addItemSize and chQtySize were missing — added here
-window.addItemSize = function(id, si) {
-  var item = MENU.find(function(i) { return i.id === id; });
-  if (!item || !item.sizes || !item.sizes[si]) return;
-  var size = item.sizes[si];
-  var ex = cart.find(function(c) { return c.id === id && c.sizeIdx === si; });
-  if (ex) {
-    ex.qty++;
-  } else {
-    cart.push({
-      id:       id,
-      name:     item.name + " (" + size.label + ")",
-      price:    size.price,
-      emoji:    item.emoji || "",
-      photo:    item.photo || null,
-      prep:     item.prep || 15,
-      qty:      1,
-      sizeIdx:  si
-    });
-  }
-  saveCart(); buildMenu(); updateCart(); bumpCartBtn();
-  refreshDishModalCtrl(id);
-};
-
-window.chQtySize = function(id, si, d) {
-  var i = cart.findIndex(function(c) { return c.id === id && c.sizeIdx === si; });
-  if (i < 0) return;
-  cart[i].qty += d;
-  if (cart[i].qty <= 0) cart.splice(i, 1);
-  saveCart(); buildMenu(); updateCart();
-  refreshDishModalCtrl(id);
-};
+window.addItemModal  = function(id) { addItem(id);   refreshDishModalCtrl(id); };
+window.chQtyModal    = function(id, d) { chQty(id, d); refreshDishModalCtrl(id); };
 
 function refreshDishModalCtrl(id) {
-  var item = MENU.find(function(i) { return i.id === id; });
+  var item   = MENU.find(function(i) { return i.id === id; });
   if (!item) return;
-  var inCart  = cart.find(function(ci) { return ci.id === id && ci.sizeIdx === undefined; });
-  var qty     = inCart ? inCart.qty : 0;
+  var inCart = cart.find(function(ci) { return ci.id === id && ci.sizeIdx === undefined; });
+  var qty    = inCart ? inCart.qty : 0;
   var dmSizes = document.getElementById("dmSizes");
   var dmPrice = document.getElementById("dmPrice");
   var dmCtrl  = document.getElementById("dmCtrl");
 
   if (item.sizes && item.sizes.length) {
-    /* ---- HAS SIZES ---- */
+    // ---- HAS SIZES ----
     dmSizes.style.display = "flex";
     dmPrice.style.display = "none";
     dmCtrl.innerHTML = "";
 
     var rows = "";
     item.sizes.forEach(function(s, si) {
-      var sInCart = cart.find(function(ci) { return ci.id === id && ci.sizeIdx === si; });
+      var sInCart = cart.find(function(ci){ return ci.id === id && ci.sizeIdx === si; });
       var sQty    = sInCart ? sInCart.qty : 0;
       var hasQty  = sQty > 0;
-      // FIX: Use data attributes instead of string-concatenated onclick with quotes
       rows += '<div class="dm-size-row' + (hasQty ? " has-qty" : "") + '">'
         + '<div class="dm-size-left">'
         + '<div class="dm-size-label">' + s.label + '</div>'
@@ -1062,19 +1129,19 @@ function refreshDishModalCtrl(id) {
         + '</div>';
       if (hasQty) {
         rows += '<div class="qty-ctrl">'
-          + '<button class="qty-btn" data-id="' + id + '" data-si="' + si + '" onclick="chQtySize(this.dataset.id,+this.dataset.si,-1)">&#8722;</button>'
+          + '<button class="qty-btn" onclick="chQtySize(\'' + id + '\',' + si + ',-1)">−</button>'
           + '<span class="qty-n">' + sQty + '</span>'
-          + '<button class="qty-btn" data-id="' + id + '" data-si="' + si + '" onclick="chQtySize(this.dataset.id,+this.dataset.si,1)">&#43;</button>'
+          + '<button class="qty-btn" onclick="chQtySize(\'' + id + '\',' + si + ',1)">+</button>'
           + '</div>';
       } else {
-        rows += '<button class="dm-cart-btn" data-id="' + id + '" data-si="' + si + '" onclick="addItemSize(this.dataset.id,+this.dataset.si)">До кошика</button>';
+        rows += '<button class="dm-cart-btn" onclick="addItemSize(\'' + id + '\',' + si + ')">До кошика</button>';
       }
       rows += '</div>';
     });
     dmSizes.innerHTML = rows;
 
   } else {
-    /* ---- SIMPLE PRICE ---- */
+    // ---- SIMPLE PRICE ----
     dmSizes.style.display = "none";
     dmPrice.style.display = "";
 
@@ -1088,14 +1155,13 @@ function refreshDishModalCtrl(id) {
     }
 
     if (qty > 0) {
-      // FIX: Use data attributes for onclick
       dmCtrl.innerHTML = '<div class="qty-ctrl">'
-        + '<button class="qty-btn" data-id="' + id + '" onclick="chQtyModal(this.dataset.id,-1)">&#8722;</button>'
+        + '<button class="qty-btn" onclick="chQtyModal(\'' + id + '\',-1)">−</button>'
         + '<span class="qty-n">' + qty + '</span>'
-        + '<button class="qty-btn" data-id="' + id + '" onclick="chQtyModal(this.dataset.id,1)">&#43;</button>'
+        + '<button class="qty-btn" onclick="chQtyModal(\'' + id + '\',1)">+</button>'
         + '</div>';
     } else {
-      dmCtrl.innerHTML = '<button class="dm-cart-btn" data-id="' + id + '" onclick="addItemModal(this.dataset.id)">До кошика</button>';
+      dmCtrl.innerHTML = '<button class="dm-cart-btn" onclick="addItemModal(\'' + id + '\')">До кошика</button>';
     }
   }
 }
@@ -1103,19 +1169,37 @@ function refreshDishModalCtrl(id) {
 window.addItem = function(id) {
   var item = MENU.find(function(i) { return i.id === id; });
   if (!item) return;
-  var ex = cart.find(function(c) { return c.id === id && c.sizeIdx === undefined; });
+  var ex = cart.find(function(c) { return c.id === id; });
   if (ex) { ex.qty++; } else { cart.push(Object.assign({}, item, {qty: 1})); }
   saveCart(); buildMenu(); updateCart(); bumpCartBtn();
 };
 window.chQty = function(id, d) {
-  // d may come as string from data attribute, coerce to number
-  d = +d;
-  var i = cart.findIndex(function(c) { return c.id === id && c.sizeIdx === undefined; });
+  var i = cart.findIndex(function(c) { return c.id === id; });
   if (i < 0) return;
   cart[i].qty += d;
   if (cart[i].qty <= 0) cart.splice(i, 1);
   saveCart(); buildMenu(); updateCart();
 };
+
+// BUG FIX: Added missing addItemSize and chQtySize functions
+window.addItemSize = function(id, si) {
+  var item = MENU.find(function(i) { return i.id === id; });
+  if (!item || !item.sizes || !item.sizes[si]) return;
+  var s = item.sizes[si];
+  var ex = cart.find(function(c) { return c.id === id && c.sizeIdx === si; });
+  if (ex) { ex.qty++; } else {
+    cart.push(Object.assign({}, item, {qty: 1, sizeIdx: si, price: s.price, name: item.name + " (" + s.label + ")", sizeName: s.label}));
+  }
+  saveCart(); buildMenu(); updateCart(); bumpCartBtn(); refreshDishModalCtrl(id);
+};
+window.chQtySize = function(id, si, d) {
+  var i = cart.findIndex(function(c) { return c.id === id && c.sizeIdx === si; });
+  if (i < 0) return;
+  cart[i].qty += d;
+  if (cart[i].qty <= 0) cart.splice(i, 1);
+  saveCart(); buildMenu(); updateCart(); refreshDishModalCtrl(id);
+};
+
 function saveCart() { localStorage.setItem("pnr_cart", JSON.stringify(cart)); }
 function totalSub() { return cart.reduce(function(s, i) { return s + i.price * i.qty; }, 0); }
 function dlvCost(sub) {
@@ -1150,13 +1234,13 @@ function updateCart() {
   }
 
   var ok = sub >= MIN;
-  document.getElementById("minWarn").style.display  = (!ok && sub > 0) ? "block" : "none";
-  document.getElementById("chkBtn").disabled         = sub < MIN;
-  document.getElementById("cartFoot").style.display  = cart.length ? "flex" : "none";
+  document.getElementById("minWarn").style.display = (!ok && sub > 0) ? "block" : "none";
+  document.getElementById("chkBtn").disabled       = sub < MIN;
+  document.getElementById("cartFoot").style.display = cart.length ? "flex" : "none";
 
   var body = document.getElementById("cartBody");
   if (!cart.length) {
-    body.innerHTML = '<div class="cart-empty"><div class="ce-icon">&#9711;</div><p>Кошик порожній</p><small>Додайте страви з меню</small></div>';
+    body.innerHTML = '<div class="cart-empty"><div class="ce-icon">○</div><p>Кошик порожній</p><small>Додайте страви з меню</small></div>';
     return;
   }
   var html = "";
@@ -1164,37 +1248,16 @@ function updateCart() {
     var thumb = i.photo
       ? '<div class="ci-thumb"><img src="' + i.photo + '" alt="' + i.name + '"></div>'
       : '<div class="ci-thumb">' + (i.emoji || "🍽") + '</div>';
-    // FIX: Use data attributes
     html += '<div class="cart-item">' + thumb
       + '<div class="ci-info"><div class="ci-name">' + i.name + '</div><div class="ci-price">' + (i.price * i.qty) + ' грн</div></div>'
       + '<div class="ci-qty">'
-      + '<button data-id="' + i.id + '" data-si="' + (i.sizeIdx !== undefined ? i.sizeIdx : "") + '" onclick="cartChQty(this)">&#8722;</button>'
+      + '<button onclick="chQty(\'' + i.id + '\',-1)">−</button>'
       + '<span>' + i.qty + '</span>'
-      + '<button data-id="' + i.id + '" data-si="' + (i.sizeIdx !== undefined ? i.sizeIdx : "") + '" data-d="1" onclick="cartChQtyPlus(this)">&#43;</button>'
+      + '<button onclick="chQty(\'' + i.id + '\',1)">+</button>'
       + '</div></div>';
   });
   body.innerHTML = html;
 }
-
-// FIX: Cart qty helpers that handle both sized and simple items
-window.cartChQty = function(btn) {
-  var id = btn.dataset.id;
-  var si = btn.dataset.si;
-  if (si !== "") {
-    chQtySize(id, +si, -1);
-  } else {
-    chQty(id, -1);
-  }
-};
-window.cartChQtyPlus = function(btn) {
-  var id = btn.dataset.id;
-  var si = btn.dataset.si;
-  if (si !== "") {
-    chQtySize(id, +si, 1);
-  } else {
-    chQty(id, 1);
-  }
-};
 
 function bumpCartBtn() {
   var b = document.getElementById("cartBtn");
@@ -1215,7 +1278,7 @@ window.toggleBurger = function() { document.getElementById("mobMenu").classList.
 window.closeBurger  = function() { document.getElementById("mobMenu").classList.remove("open"); };
 
 /* ——— MODAL UTILS ——— */
-window.bgClose    = function(e, id) { if (e.target === document.getElementById(id)) closeModal(id); };
+window.bgClose   = function(e, id) { if (e.target === document.getElementById(id)) closeModal(id); };
 window.closeModal = function(id) { document.getElementById(id).classList.remove("on"); document.body.style.overflow = ""; };
 function openModal(id) { document.getElementById(id).classList.add("on"); document.body.style.overflow = "hidden"; }
 
@@ -1256,9 +1319,9 @@ window.toStep = function(n) {
     if (ph.length < 12) { flashField("fPhone"); return; }
   }
   if (n > 2 && dlvType === "delivery") {
-    if (!document.getElementById("fCity").value)          { flashField("fCity"); return; }
+    if (!document.getElementById("fCity").value) { flashField("fCity"); return; }
     if (!document.getElementById("fStreet").value.trim()) { flashField("fStreet"); return; }
-    if (!document.getElementById("fHouse").value.trim())  { flashField("fHouse"); return; }
+    if (!document.getElementById("fHouse").value.trim()) { flashField("fHouse"); return; }
   }
   step = n;
   [1, 2, 3].forEach(function(i) {
@@ -1283,10 +1346,10 @@ function buildPreview() {
   var ph   = document.getElementById("fPhone").value;
   var city = dlvType === "delivery" ? document.getElementById("fCity").value : "";
   var street = dlvType === "delivery" ? document.getElementById("fStreet").value.trim() : "";
-  var house  = dlvType === "delivery" ? document.getElementById("fHouse").value.trim()  : "";
-  var addr   = dlvType === "delivery" ? (city ? city + ", " : "") + street + (house ? ", " + house : "") : "Самовивіз";
-  var note   = document.getElementById("fNote").value;
-  var eta    = Math.max.apply(null, cart.map(function(i) { return i.prep || 15; })) + (dlvType === "delivery" ? 30 : 10);
+  var house  = dlvType === "delivery" ? document.getElementById("fHouse").value.trim() : "";
+  var addr = dlvType === "delivery" ? (city ? city + ", " : "") + street + (house ? ", " + house : "") : "Самовивіз";
+  var note = document.getElementById("fNote").value;
+  var eta  = Math.max.apply(null, cart.map(function(i) { return i.prep || 15; })) + (dlvType === "delivery" ? 30 : 10);
 
   var items = "";
   cart.forEach(function(i) {
@@ -1295,10 +1358,11 @@ function buildPreview() {
 
   var dlvLabel = dlv === 0 ? "(доставка безкоштовна)" : "+" + dlv + " грн доставка";
 
+  // Fix 3: closed notice at confirmation
   var closedNotice = "";
   if (!isOpenNow()) {
     closedNotice = '<div style="background:rgba(201,75,31,.08);border:1.5px solid var(--primary);border-radius:var(--radius-s);padding:10px 13px;margin-bottom:12px;font-size:12px;color:var(--primary);font-weight:600;display:flex;align-items:center;gap:8px">'
-      + '<span style="font-size:18px">&#128336;</span>'
+      + '<span style="font-size:18px">🕐</span>'
       + '<span>Ресторан зараз зачинено. Замовлення буде опрацьовано ' + getNextOpenLabel() + '</span>'
       + '</div>';
   }
@@ -1320,19 +1384,19 @@ window.placeOrder = async function() {
   var nm   = document.getElementById("fName").value.trim();
   var ph   = document.getElementById("fPhone").value.trim();
   var city = dlvType === "delivery" ? document.getElementById("fCity").value : "";
-  var streetVal  = document.getElementById("fStreet") ? document.getElementById("fStreet").value.trim() : "";
-  var houseVal   = document.getElementById("fHouse")  ? document.getElementById("fHouse").value.trim()  : "";
+  var streetVal = document.getElementById("fStreet") ? document.getElementById("fStreet").value.trim() : "";
+  var houseVal  = document.getElementById("fHouse")  ? document.getElementById("fHouse").value.trim()  : "";
   var streetAddr = streetVal + (houseVal ? ", " + houseVal : "");
-  var addr       = dlvType === "delivery" ? (city ? city + ", " : "") + streetAddr : "Самовивіз";
-  var note       = document.getElementById("fNote").value.trim();
-  var sub        = totalSub(), dlv = dlvCost(sub), tot = sub + dlv;
-  var eta        = Math.max.apply(null, cart.map(function(i) { return i.prep || 15; })) + (dlvType === "delivery" ? 30 : 10);
-  var orderNum   = "PA-" + Math.floor(1000 + Math.random() * 9000);
+  var addr = dlvType === "delivery" ? (city ? city + ", " : "") + streetAddr : "Самовивіз";
+  var note = document.getElementById("fNote").value.trim();
+  var sub  = totalSub(), dlv = dlvCost(sub), tot = sub + dlv;
+  var eta  = Math.max.apply(null, cart.map(function(i) { return i.prep || 15; })) + (dlvType === "delivery" ? 30 : 10);
+  var orderNum = "PA-" + Math.floor(1000 + Math.random() * 9000);
 
   try {
     await push(ref(db, "orders"), {
       orderNum:     orderNum,
-      items:        cart.map(function(i) { return {id:i.id, name:i.name, emoji:i.emoji||"", photo:i.photo||null, qty:i.qty, price:i.price, prep:i.prep||15}; }),
+      items:        cart.map(function(i) { return {id:i.id,name:i.name,emoji:i.emoji||"",photo:i.photo||null,qty:i.qty,price:i.price,prep:i.prep||15}; }),
       customer:     {name:nm, phone:ph, city:city, street:streetAddr, address:addr, comment:note},
       deliveryType: dlvType,
       subtotal:     sub,
@@ -1343,14 +1407,14 @@ window.placeOrder = async function() {
       createdAt:    Date.now(),
     });
     closeModal("checkoutModal");
-    saveTrackHistory({orderNum: orderNum, date: Date.now(), name: nm, status: "new"});
+    saveTrackHistory({orderNum:orderNum, date:Date.now(), name:nm});
     cart = []; saveCart(); buildMenu(); updateCart();
-    document.getElementById("succNum").textContent  = orderNum;
-    document.getElementById("succMsg").textContent  = "Ваше замовлення прийнято! Незабаром ми зв'яжемося з вами.";
-    document.getElementById("succEta").textContent  = "Орієнтовно: ~" + eta + " хвилин";
+    document.getElementById("succNum").textContent = orderNum;
+    document.getElementById("succMsg").textContent = "Ваше замовлення прийнято! Незабаром ми зв'яжемося з вами.";
+    document.getElementById("succEta").textContent = "Орієнтовно: ~" + eta + " хвилин";
     openModal("successModal");
     btn.disabled = false; btn.textContent = "Підтвердити замовлення";
-    ["fName","fPhone","fStreet","fHouse","fNote"].forEach(function(id) { var el = document.getElementById(id); if (el) el.value = ""; });
+    ["fName","fPhone","fStreet","fHouse","fNote"].forEach(function(id) { var el=document.getElementById(id); if(el) el.value=""; });
     var cs = document.getElementById("fCity"); if (cs) cs.value = "";
     initPhoneInput();
     dlvType = "delivery"; setDlv("delivery");
@@ -1384,19 +1448,18 @@ function renderTrackHistory() {
   var list    = document.getElementById("trackHistoryList");
   if (!hist.length) { section.style.display = "none"; return; }
   section.style.display = "block";
-  var statusLabels = {new:"Нове", accepted:"Прийнято", in_progress:"Готується", shipped:"В дорозі", completed:"Завершено"};
-  var statusColors = {new:"#C94B1F", accepted:"#3B82F6", in_progress:"#D97706", shipped:"#7C3AED", completed:"#2A9D5C"};
   var html = "";
-  hist.forEach(function(h) {
-    var d = new Date(h.date).toLocaleDateString("uk-UA", {day:"2-digit", month:"2-digit", hour:"2-digit", minute:"2-digit"});
-    var st = h.status || "new";
+  var statusLabels = {new:"Нове",accepted:"Прийнято",in_progress:"Готується",shipped:"В дорозі",completed:"Завершено"};
+  var statusColors = {new:"#C94B1F",accepted:"#3B82F6",in_progress:"#D97706",shipped:"#7C3AED",completed:"#2A9D5C"};
+  hist.forEach(function(h, idx) {
+    var d = new Date(h.date).toLocaleDateString("uk-UA", {day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});
+    var st = h.status || (idx===0 ? "new" : "completed");
     var stLabel = statusLabels[st] || st;
     var stColor = statusColors[st] || "#7A6A55";
-    var badge = '<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:' + stColor + '22;color:' + stColor + '">' + stLabel + '</span>';
-    html += '<div class="track-history-item" data-num="' + h.orderNum + '" onclick="loadFromHistory(this.dataset.num)">'
-      + '<div><div class="thi-num">' + h.orderNum + '</div>'
-      + '<div class="thi-date" style="display:flex;align-items:center;gap:6px;margin-top:4px">' + badge + '<span>' + h.name + ' · ' + d + '</span></div></div>'
-      + '<span class="thi-arrow">&#8250;</span></div>';
+    var badge = '<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:'+stColor+'22;color:'+stColor+'">'+stLabel+'</span>';
+    html += '<div class="track-history-item" onclick="loadFromHistory(\'' + h.orderNum + '\')">'
+      + '<div><div class="thi-num">' + h.orderNum + '</div><div class="thi-date" style="display:flex;align-items:center;gap:6px;margin-top:4px">' + badge + '<span>' + h.name + ' · ' + d + '</span></div></div>'
+      + '<span class="thi-arrow">›</span></div>';
   });
   list.innerHTML = html;
 }
@@ -1422,7 +1485,7 @@ window.autoFillPrefix = function(el) {
 
 function renderTrackCard(o, container) {
   var si = STATUSES.findIndex(function(s) { return s.k === o.status; });
-  if (si < 0) si = 0;
+  var st = STATUSES[si] || STATUSES[0];
   var street = o.customer ? (o.customer.street || "") : "";
   var city   = o.customer ? (o.customer.city   || "") : "";
   var addr;
@@ -1438,7 +1501,7 @@ function renderTrackCard(o, container) {
   STATUSES.forEach(function(s, i) {
     var cls = i < si ? "done" : (i === si ? "cur" : "");
     timeline += '<div class="tl-step ' + cls + '">'
-      + '<div class="tl-dot">' + (i < si ? "&#10003;" : (i + 1)) + '</div>'
+      + '<div class="tl-dot">' + (i < si ? "✓" : (i + 1)) + '</div>'
       + '<span class="tl-label">' + s.l + '</span></div>';
   });
 
@@ -1452,7 +1515,7 @@ function renderTrackCard(o, container) {
     + '<div class="track-card-top">'
     + '<div><div class="tr-num">' + o.orderNum + '</div>'
     + '<div class="tr-time">' + (o.customer ? o.customer.name : "") + ' · ' + (o.customer ? o.customer.phone : "") + '</div></div>'
-    + '<span class="status-badge sb-' + o.status + '">' + STATUSES[si].l + '</span></div>'
+    + '<span class="status-badge sb-' + o.status + '">' + st.l + '</span></div>'
     + '<div class="timeline">' + timeline + '</div>'
     + '<div class="track-info">' + addr + ' · ~' + o.eta + ' хв · ' + o.total + ' грн</div>'
     + '<div class="track-items">' + items + '</div>'
@@ -1481,25 +1544,28 @@ window.trackOrder = async function() {
     }
     if (!oKey) {
       res.innerHTML = '<div class="track-card" style="text-align:center;padding:32px">'
-        + '<div style="font-size:40px;margin-bottom:10px;opacity:.4">&#9711;</div>'
+        + '<div style="font-size:40px;margin-bottom:10px;opacity:.4">○</div>'
         + '<strong>Замовлення не знайдено</strong>'
         + '<p style="color:var(--muted);font-size:13px;margin-top:6px">Перевірте номер</p></div>';
       return;
     }
+    // Real-time listener for instant status updates
     trackUnsub = onValue(ref(db, "orders/" + oKey), function(s2) {
       if (!s2.exists()) return;
       var od = s2.val();
       renderTrackCard(od, res);
+      // Update status in history
       var hist2 = JSON.parse(localStorage.getItem("pnr_track_hist") || "[]");
-      var hi = hist2.find(function(h) { return h.orderNum === val; });
-      if (hi && hi.status !== od.status) {
+      var hi = hist2.find(function(h){return h.orderNum===val;});
+      if(hi && hi.status !== od.status){
         hi.status = od.status;
         localStorage.setItem("pnr_track_hist", JSON.stringify(hist2));
         renderTrackHistory();
       }
     });
+    var hist = JSON.parse(localStorage.getItem("pnr_track_hist") || "[]");
     var o2 = snap.val()[oKey];
-    saveTrackHistory({orderNum: val, date: Date.now(), name: o2 && o2.customer ? o2.customer.name : "—", status: o2 ? o2.status : "new"});
+    saveTrackHistory({orderNum:val, date:Date.now(), name: o2 && o2.customer ? o2.customer.name : "—", status: o2 ? o2.status : "new"});
     renderTrackHistory();
   } catch(e) {
     res.innerHTML = '<div class="track-card" style="text-align:center"><strong>Помилка</strong><p style="color:var(--muted);font-size:13px;margin-top:6px">' + e.message + '</p></div>';
@@ -1517,11 +1583,6 @@ function setupPhoneInput() {
   var el = document.getElementById("fPhone");
   if (!el) return;
   initPhoneInput();
-  // Remove old listeners by cloning the node
-  var newEl = el.cloneNode(true);
-  el.parentNode.replaceChild(newEl, el);
-  el = newEl;
-
   el.addEventListener("focus", function() {
     if (!el.value.startsWith(PHONE_PREFIX)) el.value = PHONE_PREFIX;
     setTimeout(function() { el.setSelectionRange(el.value.length, el.value.length); }, 0);
