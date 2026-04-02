@@ -94,6 +94,7 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none}
 .theme-row{display:flex;gap:5px}
 .theme-btn{flex:1;padding:7px;background:var(--surf2);border:1px solid var(--brd);border-radius:var(--rs);color:var(--sub);font-size:13px;transition:var(--t)}
 .theme-btn.on,.theme-btn:hover{background:var(--p);border-color:var(--p);color:#fff}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
 .logout-btn{width:100%;padding:8px;background:transparent;color:var(--sub);border:1px solid var(--brd2);border-radius:var(--rs);font-size:12px;font-weight:600;transition:var(--t)}
 /* Hours big inputs */
 .hours-big-input{
@@ -615,7 +616,7 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none}
           <div class="fgrid">
             <div class="fg"><label>Назва *</label><input id="mName" placeholder="Назва страви"></div>
             <div class="fg"><label>Категорія *</label><select id="mCat"></select></div>
-            <div class="fg"><label>Ціна (грн) *</label><input id="mPrice" type="number" min="1" placeholder="150"></div>
+            <div class="fg" id="mPriceRow"><label>Ціна (грн) *</label><input id="mPrice" type="number" min="1" placeholder="150"></div>
             <div class="fg"><label>Час (хв)</label><input id="mPrep" type="number" min="1" placeholder="15"></div>
           </div>
           <div class="fg"><label>Опис</label><textarea id="mDesc" placeholder="Опис страви..." rows="2"></textarea></div>
@@ -1221,7 +1222,16 @@ function renderOrders(){
           <div class="o-phone"><a href="tel:${o.customer?.phone}">${o.customer?.phone||"—"}</a></div>
           <div class="o-addr">${addr}</div>
         </div>
-        <div class="o-items">${(o.items||[]).map(i=>`<div class="o-item"><span class="o-item-n">${i.name} ×${i.qty}</span><span class="o-item-p">${i.price*i.qty} грн</span></div>`).join("")}</div>
+        <div class="o-items">${(o.items||[]).map(i=>{
+          const hasPhoto=!!i.photo;
+          const dataAttr=hasPhoto?` data-photo="${i.photo}" data-name="${(i.name||'').replace(/"/g,'&quot;')}"  onclick="showItemPhoto(this)"`:'' ;
+          const cursor=hasPhoto?'pointer':'default';
+          const icon=hasPhoto?'📷 ':'';
+          return `<div class="o-item"${dataAttr} style="cursor:${cursor};border-radius:6px;padding:2px 4px;transition:background .15s">
+            <span class="o-item-n">${icon}${i.name} ×${i.qty}</span>
+            <span class="o-item-p">${i.price*i.qty} грн</span>
+          </div>`;
+        }).join("")}</div>
         <div class="o-totals">
           <div><div class="o-total">${o.total} грн</div><div class="o-dlv" style="color:${o.delivery===0?"var(--green)":"var(--dim)"}">${o.delivery===0?"Доставка безкоштовна":"+"+o.delivery+" грн доставка"}</div></div>
           <div class="o-eta">~${o.eta} хв</div>
@@ -1430,7 +1440,9 @@ window.addDish=async()=>{
   if(pf){try{errEl.style.color="var(--sub)";errEl.textContent="Завантаження фото...";photoUrl=await uploadToR2(pf);errEl.textContent="";}catch(e){errEl.style.color="var(--yellow)";errEl.textContent="Фото не завантажено: "+e.message;}}
   const hasSizes=document.getElementById("mHasSizes").checked;
   const sizes=hasSizes?getSizesFromList("mSizesList"):null;
-  const dish={name,price,cat:document.getElementById("mCat").value,prep:parseInt(document.getElementById("mPrep").value)||15,desc:document.getElementById("mDesc").value.trim(),pop:document.getElementById("mPop").checked,oldPrice:null,sizes:sizes&&sizes.length?sizes:null,photo:photoUrl,createdAt:Date.now()};
+  const finalPrice=hasSizes&&sizes&&sizes.length?sizes[0].price:price;
+  if(!finalPrice){errEl.style.color="var(--red)";errEl.textContent="Заповніть ціну або додайте розмір!";setTimeout(()=>errEl.textContent="",3000);if(btn){btn.disabled=false;btn.textContent="Додати страву";}return;}
+  const dish={name,price:finalPrice,cat:document.getElementById("mCat").value,prep:parseInt(document.getElementById("mPrep").value)||15,desc:document.getElementById("mDesc").value.trim(),pop:document.getElementById("mPop").checked,oldPrice:null,sizes:sizes&&sizes.length?sizes:null,photo:photoUrl,createdAt:Date.now()};
   try{
     await push(ref(db,"menu"),dish);
     logHistory("menu","Додано: "+name+" — "+price+" грн");
@@ -1797,6 +1809,9 @@ window.toggleAddSizes=function(){
   const on=document.getElementById("mHasSizes").checked;
   document.getElementById("mSizesBlock").style.display=on?"block":"none";
   if(on && !document.getElementById("mSizesList").children.length) addSizeRow("mSizesList");
+  // Hide/show main price field
+  const priceRow=document.getElementById("mPriceRow");
+  if(priceRow) priceRow.style.display=on?"none":"";
 };
 
 window.toggleEditSizes=function(){
@@ -1832,6 +1847,25 @@ function renderSizesInList(listId,sizes){
   });
 }
 
+
+/* ——— ITEM PHOTO POPUP ——— */
+window.showItemPhoto=function(el){
+  const photo=el.getAttribute("data-photo");
+  const name=el.getAttribute("data-name");
+  if(!photo) return;
+  const existing=document.getElementById("itemPhotoPopup");
+  if(existing) existing.remove();
+  const overlay=document.createElement("div");
+  overlay.id="itemPhotoPopup";
+  overlay.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:3000;display:flex;align-items:center;justify-content:center;cursor:pointer;animation:fadeIn .2s ease";
+  overlay.innerHTML=`
+    <div style="position:relative;max-width:min(440px,90vw)">
+      <img src="${photo}" alt="${name}" style="width:100%;border-radius:16px;display:block;max-height:80vh;object-fit:contain;box-shadow:0 24px 80px rgba(0,0,0,.7)">
+      <div style="text-align:center;color:rgba(255,255,255,.9);font-size:15px;font-weight:600;margin-top:12px">${name}</div>
+    </div>`;
+  overlay.addEventListener("click",function(){overlay.remove();});
+  document.body.appendChild(overlay);
+};
 window.manualRefresh=()=>{const btn=document.getElementById("refreshBtn");btn.textContent="↻ ...";setTimeout(()=>btn.textContent="↻ Оновити",700);setUpd();};
 function setUpd(){const t=new Date().toLocaleTimeString("uk-UA",{hour:"2-digit",minute:"2-digit"});const el=document.getElementById("updTxt");if(el)el.textContent="Оновлено "+t;}
 function fmtTime(ts){if(!ts)return"—";const d=Math.floor((Date.now()-ts)/60000);if(d<1)return"Щойно";if(d<60)return d+" хв тому";if(d<1440)return Math.floor(d/60)+" год тому";return new Date(ts).toLocaleDateString("uk-UA",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});}
