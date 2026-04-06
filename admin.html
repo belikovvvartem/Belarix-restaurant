@@ -190,9 +190,11 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none}
 .o-dlv{font-size:10px;margin-top:2px}
 .o-eta{font-size:11px;color:var(--sub);background:var(--bg2);padding:3px 8px;border-radius:5px}
 .o-comment{background:var(--bg2);border-radius:6px;padding:7px 10px;font-size:11px;color:var(--sub);margin-bottom:9px;font-style:italic;border-left:2px solid var(--brd2)}
-.o-actions{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
-.oa{flex:1;min-width:80px;padding:8px 10px;border-radius:var(--rs);font-size:12px;font-weight:600;text-align:center;cursor:pointer;transition:var(--t);border:none;line-height:1.2}
-.oa-del{flex:0;min-width:36px;padding:8px;font-size:14px}
+.o-actions{display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin-top:2px}
+.oa{flex:1;min-width:36px;padding:7px 8px;border-radius:var(--rs);font-size:11px;font-weight:700;text-align:center;cursor:pointer;transition:var(--t);border:none;line-height:1.2;white-space:nowrap}
+/* Main action btn gets more space */
+.oa-accept,.oa-cook,.oa-ship,.oa-done{flex:2;min-width:80px}
+.oa-del{flex:0 0 32px;min-width:32px;padding:7px;font-size:13px}
 .oa-accept{background:rgba(59,130,246,.15);color:#60A5FA}
 .oa-accept:hover{background:rgba(59,130,246,.25)}
 .oa-cook{background:rgba(234,179,8,.15);color:#FACC15}
@@ -898,18 +900,25 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none}
     </div>
     <div id="addDishList" style="display:flex;flex-direction:column;gap:8px;max-height:420px;overflow-y:auto"></div>
     <div id="addDishSelected" style="display:none;margin-top:14px;padding:12px 14px;background:var(--surf2);border-radius:var(--rs);border:1.5px solid var(--p)">
-      <div style="font-size:11px;font-weight:600;color:var(--sub);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px">Обрана страва</div>
-      <div style="display:flex;align-items:center;gap:10px">
+      <div style="font-size:11px;font-weight:600;color:var(--sub);text-transform:uppercase;letter-spacing:.4px;margin-bottom:10px">Обрана страва</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
         <div id="adPickedImg" style="width:44px;height:44px;border-radius:var(--rs);background:var(--surf);overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px"></div>
         <div style="flex:1;min-width:0">
           <div id="adPickedName" style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
           <div id="adPickedPrice" style="font-size:12px;color:var(--p);font-weight:700;margin-top:1px"></div>
         </div>
-        <div style="display:flex;align-items:center;gap:6px">
-          <button onclick="adQty(-1)" style="width:28px;height:28px;border-radius:50%;border:1.5px solid var(--brd2);background:var(--bg2);color:var(--txt);font-size:16px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;display:flex;align-items:center;justify-content:center">−</button>
-          <span id="adQtyNum" style="font-weight:700;font-size:14px;min-width:20px;text-align:center">1</span>
-          <button onclick="adQty(1)" style="width:28px;height:28px;border-radius:50%;border:1.5px solid var(--brd2);background:var(--bg2);color:var(--txt);font-size:16px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;display:flex;align-items:center;justify-content:center">+</button>
-        </div>
+      </div>
+      <!-- Size selector (shown only when dish has sizes) -->
+      <div id="adSizeBlock" style="display:none;margin-bottom:10px">
+        <div style="font-size:11px;font-weight:600;color:var(--sub);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Розмір</div>
+        <select id="adSizeSel" style="width:100%;padding:9px 10px;background:var(--bg2);border:1.5px solid var(--brd2);border-radius:var(--rs);color:var(--txt);font-size:13px;font-family:'Inter',sans-serif" onchange="adUpdatePrice()"></select>
+      </div>
+      <!-- Qty -->
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:12px;color:var(--sub);flex:1">Кількість:</span>
+        <button onclick="adQty(-1)" style="width:28px;height:28px;border-radius:50%;border:1.5px solid var(--brd2);background:var(--bg2);color:var(--txt);font-size:16px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;display:flex;align-items:center;justify-content:center">−</button>
+        <span id="adQtyNum" style="font-weight:700;font-size:14px;min-width:20px;text-align:center">1</span>
+        <button onclick="adQty(1)" style="width:28px;height:28px;border-radius:50%;border:1.5px solid var(--brd2);background:var(--bg2);color:var(--txt);font-size:16px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;display:flex;align-items:center;justify-content:center">+</button>
       </div>
     </div>
     <div style="display:flex;gap:8px;margin-top:14px">
@@ -1262,14 +1271,21 @@ function renderOrders(){
           <div class="o-phone"><a href="tel:${o.customer?.phone}">${o.customer?.phone||"—"}</a></div>
           <div class="o-addr">${addr}</div>
         </div>
-        <div class="o-items">${(o.items||[]).map(i=>{
+        <div class="o-items">${(o.items||[]).map((i,idx)=>{
           const hasPhoto=!!i.photo;
-          const dataAttr=hasPhoto?` data-photo="${i.photo}" data-name="${(i.name||'').replace(/"/g,'&quot;')}"  onclick="showItemPhoto(this)"`:'' ;
-          const cursor=hasPhoto?'pointer':'default';
-          const icon=hasPhoto?'📷 ':'';
-          return `<div class="o-item"${dataAttr} style="cursor:${cursor};border-radius:6px;padding:2px 4px;transition:background .15s">
-            <span class="o-item-n">${icon}${i.name} ×${i.qty}</span>
-            <span class="o-item-p">${i.price*i.qty} грн</span>
+          const isDeleted=!!i.deleted;
+          const nameStyle=isDeleted?'text-decoration:line-through;color:var(--dim)':'';
+          const delBtn=o.status!=="completed"&&!isDeleted
+            ?`<button onclick="event.stopPropagation();removeItemFromOrder('${o.id}',${idx})" style="margin-left:6px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:var(--red);cursor:pointer;font-size:10px;padding:2px 6px;border-radius:4px;font-weight:700;font-family:'Inter',sans-serif;flex-shrink:0" title="Видалити">✕</button>`
+            :(isDeleted?'<span style="font-size:9px;font-weight:700;color:var(--red);margin-left:4px;padding:1px 5px;border-radius:3px;background:rgba(239,68,68,.1)">видалено</span>':'');
+          const photoBtn=hasPhoto&&!isDeleted
+            ?`<button onclick="showItemPhoto(this)" data-photo="${i.photo}" data-name="${(i.name||'').replace(/"/g,'&quot;')}" style="background:none;border:none;padding:0 4px;cursor:pointer;font-size:12px;opacity:.6;flex-shrink:0" title="Фото">📷</button>`
+            :'';
+          return `<div class="o-item" style="border-radius:6px;padding:3px 4px;display:flex;align-items:center;gap:2px">
+            <span class="o-item-n" style="${nameStyle}">${i.name} ×${i.qty}</span>
+            ${photoBtn}
+            <span class="o-item-p" style="margin-left:auto;${isDeleted?'text-decoration:line-through;color:var(--dim)':''}">${i.price*i.qty} грн</span>
+            ${delBtn}
           </div>`;
         }).join("")}</div>
         <div class="o-totals">
@@ -1279,9 +1295,9 @@ function renderOrders(){
         ${o.customer?.comment?`<div class="o-comment">${o.customer.comment}</div>`:""}
         <div class="o-actions">
           ${nxt?`<button class="oa ${nxt.cls}" onclick="updStatus('${o.id}','${nxt.status}')">${nxt.label} →</button>`:""}
-          ${o.status==="completed"?`<button class="oa oa-back" onclick="updStatus('${o.id}','shipped')" style="font-size:10px">↩ Скасувати</button>`:""}
-          ${o.status!=="new"&&o.status!=="completed"?`<button class="oa oa-back" onclick="updStatus('${o.id}','new')" style="font-size:10px">↩ Назад</button>`:""}
-          <button class="oa oa-add" onclick="openAddDishToOrder('${o.id}')" title="Додати страву">＋ Страва</button>
+          ${o.status==="completed"?`<button class="oa oa-back" onclick="updStatus('${o.id}','shipped')">↩</button>`:""}
+          ${o.status!=="new"&&o.status!=="completed"?`<button class="oa oa-back" onclick="updStatus('${o.id}','new')">↩</button>`:""}
+          ${o.status!=="completed"?`<button class="oa oa-add" onclick="openAddDishToOrder('${o.id}')">＋</button>`:""}
           <button class="oa oa-del" onclick="delOrder('${o.id}')" title="Видалити">🗑</button>
         </div>
       </div>
@@ -1953,15 +1969,31 @@ window.adPickDish=id=>{
   _adPicked=allDishes.find(d=>d.id===id);
   if(!_adPicked) return;
   _adQty=1;
-  const price=_adPicked.sizes&&_adPicked.sizes.length?_adPicked.sizes[0].price:_adPicked.price;
   const imgEl=document.getElementById("adPickedImg");
   imgEl.innerHTML=_adPicked.photo?`<img src="${_adPicked.photo}" style="width:100%;height:100%;object-fit:cover" alt="">`:(_adPicked.emoji||"🍽");
   document.getElementById("adPickedName").textContent=_adPicked.name;
-  document.getElementById("adPickedPrice").textContent=price+" грн";
+  // Size selector
+  const sizeBlock=document.getElementById("adSizeBlock");
+  const sizeSel=document.getElementById("adSizeSel");
+  if(_adPicked.sizes&&_adPicked.sizes.length){
+    sizeBlock.style.display="block";
+    sizeSel.innerHTML=_adPicked.sizes.map((s,i)=>`<option value="${i}">${s.label} — ${s.price} грн</option>`).join("");
+    document.getElementById("adPickedPrice").textContent=_adPicked.sizes[0].price+" грн";
+  } else {
+    sizeBlock.style.display="none";
+    document.getElementById("adPickedPrice").textContent=_adPicked.price+" грн";
+  }
   document.getElementById("adQtyNum").textContent=_adQty;
   document.getElementById("addDishSelected").style.display="block";
   document.getElementById("adConfirmBtn").disabled=false;
   renderDishPicker();
+};
+
+window.adUpdatePrice=()=>{
+  if(!_adPicked?.sizes) return;
+  const idx=parseInt(document.getElementById("adSizeSel").value)||0;
+  const s=_adPicked.sizes[idx];
+  if(s) document.getElementById("adPickedPrice").textContent=s.price+" грн";
 };
 
 window.adQty=d=>{
@@ -1969,10 +2001,31 @@ window.adQty=d=>{
   document.getElementById("adQtyNum").textContent=_adQty;
 };
 
+window.removeItemFromOrder=async(orderId,itemIdx)=>{
+  const order=Object.values(allOrders).flat().find(o=>o.id===orderId);
+  if(!order) return;
+  const items=[...(order.items||[])];
+  if(itemIdx<0||itemIdx>=items.length) return;
+  const removed=items[itemIdx];
+  // Mark as deleted instead of removing (preserves history, shows in tracking)
+  items[itemIdx]={...removed, deleted:true};
+  const newTotal=Math.max(0,(order.total||0)-removed.price*removed.qty);
+  try{
+    await update(ref(db,`orders/${orderId}`),{items,total:newTotal,updatedAt:Date.now()});
+    logHistory("order",`Видалено: ${removed.name} ×${removed.qty}`,order.orderNum||orderId.slice(0,8));
+  }catch(e){alert("Помилка: "+e.message);}
+};
+
 window.confirmAddDish=async()=>{
   if(!_adOrderId||!_adPicked) return;
-  const price=_adPicked.sizes&&_adPicked.sizes.length?_adPicked.sizes[0].price:_adPicked.price;
-  const newItem={id:_adPicked.id,name:_adPicked.name,qty:_adQty,price,photo:_adPicked.photo||null,emoji:_adPicked.emoji||"",prep:_adPicked.prep||15,addedByAdmin:true};
+  let price=_adPicked.price;
+  let name=_adPicked.name;
+  if(_adPicked.sizes&&_adPicked.sizes.length){
+    const sIdx=parseInt(document.getElementById("adSizeSel")?.value)||0;
+    const sz=_adPicked.sizes[sIdx];
+    if(sz){ price=sz.price; name=_adPicked.name+" "+sz.label; }
+  }
+  const newItem={id:_adPicked.id,name,qty:_adQty,price,photo:_adPicked.photo||null,emoji:_adPicked.emoji||"",prep:_adPicked.prep||15,addedByAdmin:true};
   const order=Object.values(allOrders).flat().find(o=>o.id===_adOrderId);
   if(!order) return;
   const items=[...(order.items||[]),newItem];
