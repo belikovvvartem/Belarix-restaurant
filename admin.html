@@ -504,12 +504,10 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none}
       <div><div class="lname">Panorama</div><div class="lrole">Admin Panel</div></div>
     </div>
     <h2>Вхід</h2>
-    <p>Введіть дані Firebase акаунту</p>
     <div class="lerr" id="lerr"></div>
     <div class="lf"><label>Email</label><input id="lu" type="email" placeholder="admin@panorama.ua" autocomplete="email"></div>
     <div class="lf"><label>Пароль</label><input id="lp" type="password" placeholder="••••••••" autocomplete="current-password"></div>
     <button class="lbtn" onclick="doLogin()">Увійти</button>
-    <p class="lhint">Firebase Console → Authentication → Users</p>
   </div>
 </div>
 
@@ -1173,7 +1171,21 @@ window.doLogout=async()=>{
 /* ——— START ——— */
 function startApp(){
   if(appStarted)return;appStarted=true;
-  listenSettings();listenMenu();listenBanners();listenOrders();listenR2Deletions();
+  listenSettings();listenMenu();listenBanners();listenOrders();listenR2Deletions();listenHistoryFirebase();
+}
+
+function listenHistoryFirebase(){
+  onValue(ref(db,"history"),snap=>{
+    if(!snap.exists()) return;
+    const raw=snap.val();
+    const fbEntries=Object.values(raw).sort((a,b)=>new Date(b.time)-new Date(a.time)).slice(0,500);
+    const localKeys=new Set(historyLog.map(h=>h.time+h.msg));
+    fbEntries.forEach(e=>{if(!localKeys.has(e.time+e.msg))historyLog.push(e);});
+    historyLog.sort((a,b)=>new Date(b.time)-new Date(a.time));
+    if(historyLog.length>500)historyLog.length=500;
+    localStorage.setItem("adm_hist",JSON.stringify(historyLog));
+    if(curSection==="history")renderHistory();
+  },e=>console.warn("History FB:",e.message));
 }
 
 /* ——— R2 PENDING DELETIONS MONITOR ——— */
@@ -1730,11 +1742,16 @@ window.deleteBanner=async id=>{
 };
 
 /* ——— HISTORY ——— */
-function logHistory(type,msg,orderNum){
-  historyLog.unshift({type,msg,time:new Date().toISOString(),orderNum:orderNum||null});
+async function logHistory(type,msg,orderNum){
+  const entry={type,msg,time:new Date().toISOString(),orderNum:orderNum||null};
+  historyLog.unshift(entry);
   if(historyLog.length>500)historyLog.pop();
   localStorage.setItem("adm_hist",JSON.stringify(historyLog));
   if(curSection==="history")renderHistory();
+  // Also save to Firebase
+  try{
+    await push(ref(db,"history"),entry);
+  }catch(e){console.warn("History save:",e.message);}
 }
 window.renderHistory=()=>{
   const type=document.getElementById("histType").value;
