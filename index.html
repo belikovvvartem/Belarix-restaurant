@@ -494,6 +494,22 @@ input,select,textarea{font-size:16px!important} /* prevents iOS zoom on focus */
 @media(max-width:380px){
   .dish-img{width:95px;min-width:95px;height:95px!important}
 }
+
+/* ——— STYLED CONFIRM DIALOG ——— */
+.cfd-overlay{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;pointer-events:none;opacity:0;transition:opacity .2s}
+.cfd-overlay.on{opacity:1;pointer-events:all}
+.cfd-overlay.on .cfd-bg{opacity:1}
+.cfd-bg{position:absolute;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(8px);opacity:0;transition:opacity .2s}
+.cfd-box{position:relative;z-index:1;background:var(--surface);border-radius:20px;padding:28px 24px 22px;max-width:340px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.4);transform:scale(.9) translateY(16px);transition:transform .25s cubic-bezier(.34,1.4,.64,1)}
+.cfd-overlay.on .cfd-box{transform:scale(1) translateY(0)}
+.cfd-emoji{width:56px;height:56px;background:rgba(201,75,31,.12);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 16px}
+.cfd-title{font-size:18px;font-weight:800;text-align:center;margin-bottom:8px;color:var(--text)}
+.cfd-msg{font-size:13px;color:var(--muted);text-align:center;line-height:1.6;margin-bottom:22px}
+.cfd-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cfd-cancel{padding:12px 8px;background:var(--bg2);border:1.5px solid var(--border);border-radius:40px;font-size:13px;font-weight:600;color:var(--text);cursor:pointer;font-family:inherit;transition:all var(--t)}
+.cfd-cancel:hover{border-color:var(--primary);color:var(--primary)}
+.cfd-ok{padding:12px 8px;background:var(--primary);color:#fff;border:none;border-radius:40px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:background var(--t)}
+.cfd-ok:hover{filter:brightness(1.1)}
 </style>
 </head>
 <body>
@@ -585,7 +601,7 @@ input,select,textarea{font-size:16px!important} /* prevents iOS zoom on focus */
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
           </div>
           <h3>Адреса</h3>
-          <p>вул. Шевченка, 42<br>м. Ужгород<br><br><a href="tel:+380501234567">+38 (050) 123-45-67</a><br><a href="mailto:info@panorama.ua">info@panorama.ua</a></p>
+          <p>вул. Шевченка, 42<br>м. Ужгород<br><br><a href="tel:+380501234567">+38 (050) 123-45-67</a><br><a href="/cdn-cgi/l/email-protection#1c75727a735c6c7d72736e7d717d32697d"><span class="__cf_email__" data-cfemail="422b2c242d0232232c2d30232f236c3723">[email&#160;protected]</span></a></p>
         </div>
         <div class="con-card">
           <div class="con-card-icon">
@@ -664,6 +680,10 @@ input,select,textarea{font-size:16px!important} /* prevents iOS zoom on focus */
     <div>
       <div class="sum-row"><span>Сума:</span><span id="sumSub">0 грн</span></div>
       <div class="sum-row"><span>Доставка:</span><span id="sumDlv">50 грн</span></div>
+      <div class="sum-row" id="promoRow" style="display:none;color:var(--green)">
+        <span id="promoRowLabel">Промокод</span>
+        <span id="promoRowVal" style="font-weight:700"></span>
+      </div>
       <div class="sum-row total"><span>Разом:</span><span id="sumTotal">0 грн</span></div>
       <div class="free-note" id="freeNote"></div>
     </div>
@@ -675,7 +695,7 @@ input,select,textarea{font-size:16px!important} /* prevents iOS zoom on focus */
 <!-- CHECKOUT MODAL -->
 <div class="modal-bg" id="checkoutModal" onclick="bgClose(event,'checkoutModal')">
   <div class="modal">
-    <button class="modal-x" onclick="closeModal('checkoutModal')">✕</button>
+    <button class="modal-x" id="checkoutCloseBtn" onclick="(async()=>{await bgClose({target:document.getElementById('checkoutModal')},'checkoutModal')})()">✕</button>
     <h2>Оформлення</h2>
     <div class="steps">
       <div class="step on" id="s1"><div class="step-n">1</div><span>Контакти</span></div>
@@ -718,6 +738,28 @@ input,select,textarea{font-size:16px!important} /* prevents iOS zoom on focus */
     </div>
     <div class="step-body hide" id="sb3">
       <div class="preview-box" id="previewBox"></div>
+      <!-- Promo code input — step 3 only -->
+      <div style="margin-bottom:14px">
+        <div id="promoAppliedBox" style="display:none;padding:10px 14px;background:rgba(42,157,92,.08);border:1.5px solid rgba(42,157,92,.3);border-radius:var(--radius-s);margin-bottom:8px;display:none">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div>
+              <span style="font-size:12px;font-weight:700;color:var(--green)" id="promoAppliedLabel">🏷 Промокод застосовано</span>
+              <div style="font-size:11px;color:var(--muted);margin-top:1px" id="promoAppliedDesc"></div>
+            </div>
+            <button onclick="removePromo()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:4px">✕</button>
+          </div>
+        </div>
+        <div id="promoInputBox" style="display:flex;gap:6px;align-items:center">
+          <div style="position:relative;flex:1">
+            <span style="position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:12px;opacity:.4">🏷</span>
+            <input id="promoInput" placeholder="Промокод" type="text"
+              style="width:100%;padding:9px 12px 9px 30px;border:1.5px solid var(--border);border-radius:var(--radius-s);font-size:13px;font-family:'Jost',sans-serif;background:var(--bg);outline:none;color:var(--text);text-transform:uppercase;letter-spacing:.8px;font-weight:600;transition:border-color var(--t)"
+              onkeydown="if(event.key==='Enter')applyPromo()" oninput="this.value=this.value.toUpperCase()">
+          </div>
+          <button onclick="applyPromo()" style="padding:9px 16px;background:var(--text);color:#fff;border:none;border-radius:var(--radius-s);font-size:12px;font-weight:700;cursor:pointer;font-family:'Jost',sans-serif;white-space:nowrap;flex-shrink:0">OK</button>
+        </div>
+        <div id="promoMsg" style="font-size:11px;min-height:14px;padding:4px 2px;line-height:1.4"></div>
+      </div>
       <div class="row-btns">
         <button class="btn-ghost" onclick="toStep(2)">← Назад</button>
         <button class="btn-pri" id="placeBtn" onclick="placeOrder()">Підтвердити замовлення</button>
@@ -758,9 +800,9 @@ input,select,textarea{font-size:16px!important} /* prevents iOS zoom on focus */
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13.1 19.79 19.79 0 0 1 1.62 4.43 2 2 0 0 1 3.6 2.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.16 6.16l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 17.27z"/></svg>
 </a>
 
-<script type="module">
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script type="module">
 import { initializeApp }    from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, push, get, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getDatabase, ref, push, get, onValue, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 const fbApp = initializeApp({
   apiKey:            "AIzaSyCDHo7-eCu4umw_5A4p1Xx6Mtd7YXtvTno",
@@ -793,6 +835,8 @@ const STATUSES = [
 
 /* ——— STATE ——— */
 let cart       = JSON.parse(localStorage.getItem("pnr_cart") || "[]");
+let appliedPromo = null; // {code, type, value, dishId, freeDelivery}
+
 let activeCat  = "Всі";
 let dlvType    = "delivery";
 let step       = 1;
@@ -800,6 +844,14 @@ let trackUnsub = null;
 
 /* ——— PAGES ——— */
 window.showPage = function(page) {
+  // Clear track state when leaving
+  if (page !== "track") {
+    var ti = document.getElementById("trackInput");
+    var tr = document.getElementById("trackResultWrap");
+    if (ti) ti.value = "";
+    if (tr) tr.innerHTML = "";
+    if (trackUnsub) { trackUnsub(); trackUnsub = null; }
+  }
   document.getElementById("homePage").style.display     = page === "home"     ? "block" : "none";
   document.getElementById("contactsPage").style.display = page === "contacts" ? "block" : "none";
   document.getElementById("trackPage").style.display    = page === "track"    ? "block" : "none";
@@ -899,6 +951,9 @@ function listenFirebase() {
     populateCitySelect();
     checkHours();
   }, function(e) { console.warn("Settings:", e.message); });
+
+  // Promo codes (just read, no realtime needed)
+  // Fetched on demand in applyPromo()
 
   // Banners
   onValue(ref(db, "banners"), function(snap) {
@@ -1233,6 +1288,7 @@ function saveCart() { localStorage.setItem("pnr_cart", JSON.stringify(cart)); }
 function totalSub() { return cart.reduce(function(s, i) { return s + i.price * i.qty; }, 0); }
 function dlvCost(sub) {
   if (dlvType === "pickup") return 0;
+  if (promoFreeDelivery()) return 0;
   if (sub >= FREE) return 0;
   var sel = document.getElementById("fCity");
   if (sel && sel.value) {
@@ -1242,6 +1298,195 @@ function dlvCost(sub) {
   return DLV_COST;
 }
 
+/* ——— PROMO CODE ——— */
+window.applyPromo = async function() {
+  var code = (document.getElementById("promoInput").value || "").trim().toUpperCase();
+  var msgEl = document.getElementById("promoMsg");
+  if (!code) { msgEl.style.color="var(--muted)"; msgEl.textContent="Введіть промокод"; return; }
+  if (appliedPromo) { msgEl.style.color="var(--muted)"; msgEl.textContent="Спочатку видаліть поточний промокод"; return; }
+
+  msgEl.style.color="var(--muted)"; msgEl.textContent="Перевіряємо...";
+
+  try {
+    var snap = await get(ref(db, "promoCodes/" + code));
+    if (!snap.exists()) {
+      msgEl.style.color="var(--red)"; msgEl.textContent="❌ Промокод не знайдено";
+      return;
+    }
+    var p = snap.val();
+
+    // Check active
+    if (!p.active) { msgEl.style.color="var(--red)"; msgEl.textContent="❌ Промокод неактивний"; return; }
+
+    // Check expiry
+    if (p.expiresAt && p.expiresAt < Date.now()) {
+      msgEl.style.color="var(--red)"; msgEl.textContent="❌ Промокод закінчився"; return;
+    }
+
+    // Check single use by phone
+    if (p.singleUse) {
+      var phone = (document.getElementById("fPhone")?.value||"").replace(/\D/g,"");
+      if (phone.length >= 10) {
+        var phoneKey = phone.replace(/\+/g,"");
+        var uses = p.uses || {};
+        if (uses[phoneKey]) {
+          msgEl.style.color="var(--red)"; msgEl.textContent="❌ Ви вже використовували цей промокод"; return;
+        }
+      }
+    }
+
+    // Apply promo
+    appliedPromo = {code: code, type: p.type, value: p.value||0, dishId: p.dishId||null, catId: p.catId||null, singleUse: p.singleUse, raw: p};
+
+    // Validate against current cart
+    var cartValidErr = promoCartValidate(appliedPromo);
+    if (cartValidErr) {
+      appliedPromo = null;
+      msgEl.style.color="var(--red)"; msgEl.textContent="❌ " + cartValidErr;
+      return;
+    }
+
+    // Show applied box, hide input
+    var desc = promoClientDesc(appliedPromo);
+    document.getElementById("promoInputBox").style.display = "none";
+    var appliedBox = document.getElementById("promoAppliedBox");
+    if (appliedBox) {
+      appliedBox.style.display = "block";
+      document.getElementById("promoAppliedLabel").textContent = "🏷 " + code;
+      document.getElementById("promoAppliedDesc").textContent = desc;
+    }
+    msgEl.textContent = "";
+
+    updateCart();
+    buildPreview();
+  } catch(e) {
+    msgEl.style.color="var(--red)"; msgEl.textContent="Помилка перевірки";
+    console.error(e);
+  }
+};
+
+function promoClientDesc(p) {
+  if (p.type === "free_delivery") return "Безкоштовна доставка";
+  if (p.type === "second_free") return "Друга однакова страва безкоштовно";
+  if (p.type === "percent") return "Знижка " + p.value + "% на замовлення";
+  if (p.type === "fixed") return "Знижка " + p.value + " грн";
+  if (p.type === "dish") {
+    var dish = MENU.find(function(d){ return d.id === p.dishId; });
+    return "Знижка " + p.value + "% на " + (dish ? dish.name : "страву");
+  }
+  if (p.type === "category") return "Знижка " + p.value + "% на категорію «" + (p.catId || "") + "»";
+  if (p.type === "buy_x_get_y") return "Купи " + (p.buyX||2) + " — отримай " + (p.getY||1) + " безкоштовно";
+  if (p.type === "min_order") return "Знижка " + p.value + "% від " + (p.minOrderVal||500) + " грн";
+  if (p.type === "nth_free") return "Кожен " + (p.nthN||3) + "-й товар — " + (p.nthDiscount||100) + "% знижка";
+  return "";
+}
+
+function promoDiscount(sub) {
+  if (!appliedPromo) return 0;
+  var p = appliedPromo;
+  if (p.type === "percent") return Math.round(sub * p.value / 100);
+  if (p.type === "fixed") return Math.min(p.value, sub);
+  if (p.type === "dish") {
+    var dishItems = cart.filter(function(i){ return i.id === p.dishId; });
+    var dishSub = dishItems.reduce(function(s,i){ return s + i.price*i.qty; }, 0);
+    return Math.round(dishSub * p.value / 100);
+  }
+  if (p.type === "category") {
+    var catItems = cart.filter(function(i){ return i.cat === p.catId; });
+    var catSub = catItems.reduce(function(s,i){ return s + i.price*i.qty; }, 0);
+    return Math.round(catSub * p.value / 100);
+  }
+  if (p.type === "second_free") {
+    // Find cheapest item with qty>=2, discount = its price
+    var eligible = cart.filter(function(i){ return i.qty >= 2; });
+    if (!eligible.length) return 0;
+    var cheapest = eligible.reduce(function(a,b){ return a.price < b.price ? a : b; });
+    return cheapest.price;
+  }
+  if (p.type === "buy_x_get_y") {
+    // Sort by price asc, give getY cheapest ones free
+    var sorted = cart.slice().sort(function(a,b){ return a.price-b.price; });
+    var totalQty = cart.reduce(function(s,i){ return s+i.qty; },0);
+    var needed = p.buyX || 2;
+    var free = p.getY || 1;
+    if (totalQty < needed + free) return 0;
+    // Cheapest getY items are free
+    var freeItems = sorted.slice(0, free);
+    return freeItems.reduce(function(s,i){ return s+i.price; },0);
+  }
+  if (p.type === "min_order") {
+    if (sub < (p.minOrderVal || 500)) return 0;
+    return Math.round(sub * p.value / 100);
+  }
+  if (p.type === "nth_free") {
+    var nthN = p.nthN || 3;
+    var nthDis = (p.nthDiscount || 100) / 100;
+    var eligible = p.nthDishId
+      ? cart.filter(function(i){ return i.id === p.nthDishId; })
+      : cart.slice().sort(function(a,b){ return a.price-b.price; });
+    var total = eligible.reduce(function(s,i){ return s+i.qty; },0);
+    var freeCount = Math.floor(total / nthN);
+    if (!freeCount) return 0;
+    // Cheapest item price * freeCount * discount
+    var cheapPrice = eligible.length ? eligible.reduce(function(a,b){ return a.price<b.price?a:b; }).price : 0;
+    return Math.round(cheapPrice * freeCount * nthDis);
+  }
+  return 0;
+}
+
+function promoFreeDelivery() {
+  return appliedPromo && appliedPromo.type === "free_delivery";
+}
+
+function promoCartValidate(p) {
+  if (!p) return null;
+  if (p.type === "dish") {
+    var has = cart.some(function(i){ return i.id === p.dishId; });
+    if (!has) {
+      var dish = MENU.find(function(d){ return d.id === p.dishId; });
+      return "Промокод діє лише на «" + (dish ? dish.name : "страву") + "», якої немає в кошику";
+    }
+  }
+  if (p.type === "category") {
+    var hasCat = cart.some(function(i){ return i.cat === p.catId; });
+    if (!hasCat) return "Промокод діє лише на категорію «" + (p.catId || "") + "», якої немає в кошику";
+  }
+  if (p.type === "buy_x_get_y") {
+    var totalQ = cart.reduce(function(s,i){ return s+i.qty; },0);
+    var needed = (p.buyX||2) + (p.getY||1);
+    if (totalQ < needed) return "Промокод діє при замовленні від " + needed + " позицій. У вас: " + totalQ;
+  }
+  if (p.type === "min_order") {
+    var sub2 = cart.reduce(function(s,i){ return s+i.price*i.qty; },0);
+    if (sub2 < (p.minOrderVal||500)) return "Промокод діє від " + (p.minOrderVal||500) + " грн. У вас: " + sub2 + " грн";
+  }
+  if (p.type === "nth_free") {
+    var nthN2 = p.nthN || 3;
+    var pool = p.nthDishId ? cart.filter(function(i){ return i.id===p.nthDishId; }) : cart;
+    var tot2 = pool.reduce(function(s,i){ return s+i.qty; },0);
+    if (tot2 < nthN2) {
+      if (p.nthDishId) {
+        var dish2 = MENU.find(function(d){ return d.id===p.nthDishId; });
+        return "Промокод діє на кожен " + nthN2 + "-й «" + (dish2?dish2.name:"товар") + "». Потрібно " + nthN2 + "+";
+      }
+      return "Промокод діє на кожен " + nthN2 + "-й товар. Потрібно " + nthN2 + "+ позицій";
+    }
+  }
+  return null;
+}
+
+window.removePromo = function() {
+  appliedPromo = null;
+  document.getElementById("promoInput").value = "";
+  document.getElementById("promoMsg").textContent = "";
+  var appliedBox = document.getElementById("promoAppliedBox");
+  if (appliedBox) appliedBox.style.display = "none";
+  var inputBox = document.getElementById("promoInputBox");
+  if (inputBox) inputBox.style.display = "flex";
+  updateCart();
+  buildPreview();
+};
+
 function updateCart() {
   var cnt = cart.reduce(function(s, i) { return s + i.qty; }, 0);
   var cc  = document.getElementById("cartCount");
@@ -1249,9 +1494,26 @@ function updateCart() {
   cc.classList.toggle("on", cnt > 0);
 
   var sub = totalSub(), dlv = dlvCost(sub), tot = sub + dlv;
+  var discount = promoDiscount(sub);
+  var tot2 = Math.max(0, sub + dlv - discount);
   document.getElementById("sumSub").textContent   = sub + " грн";
   document.getElementById("sumDlv").textContent   = dlv === 0 ? "Безкоштовно" : dlv + " грн";
-  document.getElementById("sumTotal").textContent = tot + " грн";
+  // Promo row
+  var promoRow = document.getElementById("promoRow");
+  var promoRowLbl = document.getElementById("promoRowLabel");
+  var promoRowVal = document.getElementById("promoRowVal");
+  if (appliedPromo && discount > 0) {
+    promoRow.style.display = "flex";
+    promoRowLbl.textContent = "🏷 " + appliedPromo.code;
+    promoRowVal.textContent = "−" + discount + " грн";
+  } else if (appliedPromo && appliedPromo.type === "free_delivery") {
+    promoRow.style.display = "flex";
+    promoRowLbl.textContent = "🏷 " + appliedPromo.code;
+    promoRowVal.textContent = "Безкоштовна доставка";
+  } else {
+    promoRow.style.display = "none";
+  }
+  document.getElementById("sumTotal").textContent = tot2 + " грн";
 
   var fn = document.getElementById("freeNote");
   if (dlvType !== "pickup" && sub > 0 && sub < FREE) {
@@ -1307,7 +1569,61 @@ window.toggleBurger = function() { document.getElementById("mobMenu").classList.
 window.closeBurger  = function() { document.getElementById("mobMenu").classList.remove("open"); };
 
 /* ——— MODAL UTILS ——— */
-window.bgClose   = function(e, id) { if (e.target === document.getElementById(id)) closeModal(id); };
+var _cfdResolve = null;
+function showCfd(title, msg, emoji, okLabel, cancelLabel) {
+  return new Promise(function(res) {
+    _cfdResolve = res;
+    document.getElementById("cfd-emoji").textContent = emoji || "⚠️";
+    document.getElementById("cfd-title").textContent = title;
+    document.getElementById("cfd-msg").textContent = msg;
+    document.getElementById("cfd-ok-btn").textContent = okLabel || "Так";
+    document.getElementById("cfd-cancel-btn").textContent = cancelLabel || "Залишитись";
+    document.getElementById("cfd").classList.add("on");
+  });
+}
+window.cfdResolve = function(val) {
+  document.getElementById("cfd").classList.remove("on");
+  if (_cfdResolve) { _cfdResolve(val); _cfdResolve = null; }
+};
+
+window.bgClose = async function(e, id) {
+  if (e.target !== document.getElementById(id)) return;
+  if (id === "checkoutModal") {
+    var nm = (document.getElementById("fName")?.value || "").trim();
+    var ph = (document.getElementById("fPhone")?.value || "").replace(/[^0-9]/g,"");
+    var hasData = nm || (ph.length > 3) || appliedPromo || step > 1;
+    if (hasData) {
+      var ok = await showCfd(
+        "Скасувати оформлення?",
+        "Введені дані та промокод будуть видалені. Це дію неможливо скасувати.",
+        "🚫", "Так, скасувати", "Залишитись"
+      );
+      if (!ok) return;
+    }
+    resetCheckoutForm();
+  }
+  closeModal(id);
+};
+
+function resetCheckoutForm() {
+  // Clear all fields
+  ["fName","fPhone","fStreet","fHouse","fNote"].forEach(function(id) {
+    var el = document.getElementById(id); if (el) el.value = "";
+  });
+  var cs = document.getElementById("fCity"); if (cs) cs.value = "";
+  // Reset promo
+  if (appliedPromo) {
+    appliedPromo = null;
+    var pi = document.getElementById("promoInput"); if (pi) pi.value = "";
+    var pm = document.getElementById("promoMsg"); if (pm) pm.textContent = "";
+    var ab = document.getElementById("promoAppliedBox"); if (ab) ab.style.display = "none";
+    var ib = document.getElementById("promoInputBox"); if (ib) ib.style.display = "flex";
+    updateCart();
+  }
+  // Reset step
+  toStep(1);
+  setDlv("delivery");
+}
 window.closeModal = function(id) { document.getElementById(id).classList.remove("on"); document.body.style.overflow = ""; };
 function openModal(id) { document.getElementById(id).classList.add("on"); document.body.style.overflow = "hidden"; }
 
@@ -1371,6 +1687,7 @@ function flashField(id) {
 
 function buildPreview() {
   var sub  = totalSub(), dlv = dlvCost(sub), tot = sub + dlv;
+  var discount = promoDiscount(sub);
   var nm   = document.getElementById("fName").value;
   var ph   = document.getElementById("fPhone").value;
   var city = dlvType === "delivery" ? document.getElementById("fCity").value : "";
@@ -1400,7 +1717,15 @@ function buildPreview() {
     closedNotice
     + '<h3>Ваше замовлення</h3>'
     + items
-    + '<div class="prev-total"><span>Разом ' + dlvLabel + '</span><span>' + tot + ' грн</span></div>'
+    + (discount > 0 ? '<div class="prev-item" style="color:var(--green)">'
+      + '<span>🏷 ' + appliedPromo.code + '</span>'
+      + '<span>−' + discount + ' грн</span>'
+      + '</div>' : '')
+    + (promoFreeDelivery() ? '<div class="prev-item" style="color:var(--green)">'
+      + '<span>🏷 ' + appliedPromo.code + '</span>'
+      + '<span>Безкоштовна доставка</span>'
+      + '</div>' : '')
+    + '<div class="prev-total"><span>Разом</span><span>' + Math.max(0, tot - discount) + ' грн</span></div>'
     + '<div class="prev-info"><span>' + nm + '</span><span>' + ph + '</span><span>' + addr + '</span>'
     + (note ? '<span>' + note + '</span>' : '')
     + '<span>Орієнтовно ~' + eta + ' хв</span></div>';
@@ -1418,13 +1743,15 @@ window.placeOrder = async function() {
   var streetAddr = streetVal + (houseVal ? ", " + houseVal : "");
   var addr = dlvType === "delivery" ? (city ? city + ", " : "") + streetAddr : "Самовивіз";
   var note = document.getElementById("fNote").value.trim();
-  var sub  = totalSub(), dlv = dlvCost(sub), tot = sub + dlv;
+  var sub  = totalSub(), dlv = dlvCost(sub), discount = promoDiscount(sub), tot = Math.max(0,sub + dlv - discount);
   var eta  = Math.max.apply(null, cart.map(function(i) { return i.prep || 15; })) + (dlvType === "delivery" ? 30 : 10);
   var orderNum = "PA-" + Math.floor(1000 + Math.random() * 9000);
 
   try {
     await push(ref(db, "orders"), {
       orderNum:     orderNum,
+      promoCode:    appliedPromo ? appliedPromo.code : null,
+      promoDiscount:discount || 0,
       items:        cart.map(function(i) { return {id:i.id,name:i.name,emoji:i.emoji||"",photo:i.photo||null,qty:i.qty,price:i.price,prep:i.prep||15}; }),
       customer:     {name:nm, phone:ph, city:city, street:streetAddr, address:addr, comment:note},
       deliveryType: dlvType,
@@ -1437,6 +1764,23 @@ window.placeOrder = async function() {
     });
     closeModal("checkoutModal");
     saveTrackHistory({orderNum:orderNum, date:Date.now(), name:nm});
+    // Mark promo as used
+    if (appliedPromo) {
+      var phone2 = document.getElementById("fPhone").value.replace(/\D/g,"");
+      var pKey2 = phone2.length >= 10 ? phone2.replace(/\+/g,"") : null;
+      if (pKey2) {
+        var usePath = "promoCodes/" + appliedPromo.code + "/uses/" + pKey2;
+        // Always record usage (needed for statistics even for multi-use promos)
+        try { await set(ref(db, usePath), Date.now()); } catch(e) { console.warn(e); }
+      }
+    }
+    appliedPromo = null;
+    document.getElementById("promoInput").value = "";
+    document.getElementById("promoMsg").textContent = "";
+    var aBox = document.getElementById("promoAppliedBox");
+    if (aBox) aBox.style.display = "none";
+    var iBox = document.getElementById("promoInputBox");
+    if (iBox) iBox.style.display = "flex";
     cart = []; saveCart(); buildMenu(); updateCart();
     document.getElementById("succNum").textContent = orderNum;
     document.getElementById("succMsg").textContent = "Ваше замовлення прийнято! Незабаром ми зв'яжемося з вами.";
@@ -1560,6 +1904,10 @@ function renderTrackCard(o, container) {
     + '<div class="track-info">' + addr + ' · ~' + o.eta + ' хв</div>'
     + '<div class="track-items">'
     + items
+    + (o.promoCode ? '<div class="track-item" style="margin-top:4px;color:var(--green)">'
+      + '<span>🏷 Промокод: <strong>' + o.promoCode + '</strong></span>'
+      + '<span style="font-weight:700">' + (o.promoDiscount > 0 ? '−' + o.promoDiscount + ' грн' : 'Знижка') + '</span>'
+      + '</div>' : '')
     + '<div class="track-item" style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border)">'
     + '<span style="color:var(--muted)">Доставка</span>'
     + '<span>' + (o.delivery === 0 ? '<span style="color:var(--green);font-weight:700">Безкоштовно</span>' : o.delivery + ' грн') + '</span>'
@@ -1646,10 +1994,9 @@ function setupPhoneInput() {
     if (!el.value.startsWith(PHONE_PREFIX)) el.value = PHONE_PREFIX;
     var d = el.value.slice(PHONE_PREFIX.length).replace(/\D/g, "");
     var f = PHONE_PREFIX;
-    if (d.length > 0) f += " (" + d.slice(0, 3);
-    if (d.length >= 3) f += ") " + d.slice(3, 6);
-    if (d.length >= 6) f += "-" + d.slice(6, 8);
-    if (d.length >= 8) f += "-" + d.slice(8, 10);
+    if (d.length > 0) f += " " + d.slice(0, 2);
+    if (d.length >= 2) f += " " + d.slice(2, 5);
+    if (d.length >= 5) f += " " + d.slice(5, 9);
     el.value = f;
   });
   el.addEventListener("click", function() {
@@ -1682,5 +2029,19 @@ window.chQtySize = function(id, sizeIdx, d) {
   saveCart(); refreshDishModalCtrl(id); updateCart();
 };
 </script>
+
+<!-- STYLED CONFIRM DIALOG -->
+<div class="cfd-overlay" id="cfd">
+  <div class="cfd-bg" onclick="cfdResolve(false)"></div>
+  <div class="cfd-box">
+    <div class="cfd-emoji" id="cfd-emoji">⚠️</div>
+    <div class="cfd-title" id="cfd-title">Скасувати оформлення?</div>
+    <div class="cfd-msg" id="cfd-msg">Введені дані та промокод будуть видалені.</div>
+    <div class="cfd-btns">
+      <button class="cfd-cancel" onclick="cfdResolve(false)" id="cfd-cancel-btn">Залишитись</button>
+      <button class="cfd-ok" onclick="cfdResolve(true)" id="cfd-ok-btn">Скасувати</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>

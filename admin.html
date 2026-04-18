@@ -95,6 +95,33 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none}
 .theme-btn{flex:1;padding:7px;background:var(--surf2);border:1px solid var(--brd);border-radius:var(--rs);color:var(--sub);font-size:13px;transition:var(--t)}
 .theme-btn.on,.theme-btn:hover{background:var(--p);border-color:var(--p);color:#fff}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.promo-type-btn{padding:10px 12px;border-radius:var(--rs);border:1.5px solid var(--brd2);background:var(--surf2);color:var(--sub);font-size:12px;font-weight:600;cursor:pointer;transition:var(--t);font-family:'Inter',sans-serif;text-align:left}
+.promo-type-btn.on{border-color:var(--p);background:var(--pl);color:var(--p)}
+.promo-card{background:var(--surf);border:1px solid var(--brd);border-radius:var(--r);margin-bottom:10px;overflow:hidden;transition:border-color var(--t),box-shadow var(--t)}
+.promo-card:hover{border-color:var(--brd2);box-shadow:0 2px 12px rgba(0,0,0,.15)}
+.promo-card-bar{height:3px}
+.promo-card-inner{padding:13px 14px}
+.promo-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:8px}
+.promo-card-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex:1;flex-wrap:wrap}
+.promo-code{font-size:16px;font-weight:900;letter-spacing:1.5px;color:var(--txt);font-family:'Inter',sans-serif;line-height:1;margin-bottom:5px}
+.promo-badge{font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+.pb-percent{background:rgba(59,130,246,.15);color:#60A5FA}
+.pb-fixed{background:rgba(168,85,247,.15);color:#C084FC}
+.pb-free_delivery{background:rgba(34,197,94,.15);color:#4ADE80}
+.pb-dish{background:rgba(249,115,22,.15);color:#FB923C}
+.pb-category{background:rgba(236,72,153,.15);color:#F472B6}
+.pb-nth_free{background:rgba(20,184,166,.15);color:#2DD4BF}
+.pb-second_free{background:rgba(234,179,8,.15);color:#FACC15}
+.pb-buy_x_get_y{background:rgba(20,184,166,.15);color:#2DD4BF}
+.pb-min_order{background:rgba(99,102,241,.15);color:#A5B4FC}
+.promo-card-desc{font-size:13px;font-weight:600;color:var(--txt);margin-bottom:7px}
+.promo-card-meta{display:flex;gap:10px;flex-wrap:wrap;font-size:11px;color:var(--sub);margin-bottom:10px}
+.promo-card-foot{display:flex;align-items:center;gap:6px;border-top:1px solid var(--brd);padding-top:9px;flex-wrap:wrap}
+.promo-card-stat{display:flex;flex-direction:column;align-items:center;background:var(--surf2);border-radius:var(--rs);padding:5px 12px}
+.promo-card-stat-num{font-size:15px;font-weight:700;color:var(--txt);line-height:1}
+.promo-card-stat-lbl{font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:.4px;margin-top:2px}
+.promo-card-actions{display:flex;gap:5px;align-items:center}
+.promo-expired{opacity:.4}
 .logout-btn{width:100%;padding:8px;background:transparent;color:var(--sub);border:1px solid var(--brd2);border-radius:var(--rs);font-size:12px;font-weight:600;transition:var(--t)}
 /* Hours big inputs */
 .hours-big-input{
@@ -146,6 +173,7 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none}
 /* ========== PANEL ========== */
 .panel{flex:1;overflow-y:auto;padding:20px;display:none;flex-direction:column}
 .panel.active{display:flex}
+.panel.active.panel-noscroll{overflow:hidden;padding:0}
 
 /* ========== ORDER TABS ========== */
 .order-tabs{display:flex;gap:0;border-bottom:1px solid var(--brd);margin-bottom:16px;flex-shrink:0}
@@ -157,7 +185,7 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none}
 
 /* ========== ORDERS GRID ========== */
 .orders-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;align-content:start}
-.ocard{background:var(--surf);border:1px solid var(--brd);border-radius:var(--r);overflow:hidden;transition:border-color var(--t)}
+.ocard{background:var(--surf);border:1px solid var(--brd);border-radius:var(--r);overflow:hidden;transition:border-color var(--t);display:flex;flex-direction:column}
 .ocard:hover{border-color:var(--brd2)}
 .ocard.is-new{border-color:rgba(249,115,22,.4);animation:pcrd 2s ease-in-out 4}
 @keyframes pcrd{0%,100%{box-shadow:none}50%{box-shadow:0 0 0 4px rgba(249,115,22,.1)}}
@@ -176,7 +204,7 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none}
 .b-in_progress{background:rgba(234,179,8,.15);color:#FACC15}
 .b-shipped{background:rgba(168,85,247,.15);color:#C084FC}
 .b-completed{background:rgba(34,197,94,.15);color:#4ADE80}
-.ocard-body{padding:11px 13px}
+.ocard-body{padding:11px 13px;display:flex;flex-direction:column;flex:1}
 .o-cust{margin-bottom:9px;padding-bottom:9px;border-bottom:1px solid var(--brd)}
 .o-name{font-weight:600;font-size:13px;margin-bottom:2px}
 .o-phone a{font-size:12px;color:var(--blue)}
@@ -190,7 +218,7 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none}
 .o-dlv{font-size:10px;margin-top:2px}
 .o-eta{font-size:11px;color:var(--sub);background:var(--bg2);padding:3px 8px;border-radius:5px}
 .o-comment{background:var(--bg2);border-radius:6px;padding:7px 10px;font-size:11px;color:var(--sub);margin-bottom:9px;font-style:italic;border-left:2px solid var(--brd2)}
-.o-actions{display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin-top:2px}
+.o-actions{display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin-top:auto;padding-top:8px}
 .oa{flex:1;min-width:36px;padding:7px 8px;border-radius:var(--rs);font-size:11px;font-weight:700;text-align:center;cursor:pointer;transition:var(--t);border:none;line-height:1.2;white-space:nowrap}
 /* Main action btn gets more space */
 .oa-accept,.oa-cook,.oa-ship,.oa-done{flex:2;min-width:80px}
@@ -253,23 +281,66 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none}
 .btn-pri:hover:not(:disabled){background:var(--pd)}
 .btn-pri:disabled{opacity:.5;cursor:not-allowed}
 
-/* ========== DISH LIST ========== */
-.dish-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
-.dish-card{background:var(--surf);border:1px solid var(--brd);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:8px;transition:border-color var(--t)}
-.dish-card:hover{border-color:var(--brd2)}
-.dc-head{display:flex;gap:10px;align-items:flex-start}
-.dc-photo{width:56px;height:56px;border-radius:var(--rs);background:var(--surf2);overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:22px}
-.dc-photo img{width:100%;height:100%;object-fit:cover}
-.dc-name{font-weight:600;font-size:13px}
-.dc-price{font-size:12px;color:var(--p);font-weight:700;margin-top:2px}
-.dc-tag{font-size:10px;color:var(--sub);background:var(--surf2);padding:2px 7px;border-radius:4px;display:inline-block;margin-top:3px}
-.dc-desc{font-size:11px;color:var(--sub);line-height:1.5}
-.dc-btns{display:flex;gap:6px}
-.dc-btns button{flex:1;padding:6px;font-size:11px;font-weight:600;border-radius:var(--rs);cursor:pointer;transition:var(--t)}
-.dc-edit{background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.2);color:#60A5FA}
-.dc-edit:hover{background:rgba(59,130,246,.22)}
-.dc-del{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:var(--red)}
-.dc-del:hover{background:rgba(239,68,68,.2)}
+/* ========== DISH LIST — REDESIGN ========== */
+.menu-layout{display:grid;grid-template-columns:340px 1fr;gap:0;min-height:0;flex:1}
+.menu-add-col{border-right:1px solid var(--brd);overflow-y:auto;padding:16px}
+.menu-list-col{overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:0}
+.menu-add-title{font-size:13px;font-weight:700;color:var(--txt);margin-bottom:14px;display:flex;align-items:center;gap:7px}
+.menu-add-title span{flex:1}
+.mf-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.mf-row.single{grid-template-columns:1fr}
+.mf{display:flex;flex-direction:column;gap:3px}
+.mf label{font-size:10px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.5px}
+.mf input,.mf select,.mf textarea{width:100%;padding:8px 10px;background:var(--bg2);border:1.5px solid var(--brd2);border-radius:var(--rs);color:var(--txt);font-size:13px;transition:border-color var(--t),box-shadow var(--t);font-family:'Inter',sans-serif}
+.mf input:focus,.mf select:focus,.mf textarea:focus{border-color:var(--p);box-shadow:0 0 0 3px var(--pl);outline:none}
+.mf textarea{resize:vertical;min-height:54px}
+.mf-photo-zone{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg2);border:1.5px dashed var(--brd2);border-radius:var(--rs);cursor:pointer;transition:border-color var(--t),background var(--t);position:relative;overflow:hidden}
+.mf-photo-zone:hover{border-color:var(--p);background:var(--pl)}
+.mf-photo-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.mf-photo-thumb{width:34px;height:34px;border-radius:5px;object-fit:cover;border:1px solid var(--brd2);display:none;flex-shrink:0}
+.mf-photo-txt{font-size:12px;color:var(--sub);flex:1}
+.mf-toggle-row{display:flex;align-items:center;justify-content:space-between;padding:9px 11px;background:var(--surf2);border-radius:var(--rs);margin-bottom:6px}
+.mf-toggle-label{font-size:12px;font-weight:600;color:var(--txt)}
+.mf-toggle-sub{font-size:10px;color:var(--sub);margin-top:1px}
+.mf-sizes-block{background:var(--bg2);border:1px solid var(--brd);border-radius:var(--rs);padding:10px;margin-bottom:8px}
+.mf-sizes-header{display:flex;justify-content:space-between;font-size:10px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px;padding:0 2px}
+.mf-err{font-size:12px;min-height:14px;margin-bottom:8px;color:var(--red)}
+/* Dish table list */
+.dish-table{width:100%;border-collapse:collapse}
+.dish-table-filters{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.dish-table-filters input,.dish-table-filters select{padding:7px 10px;background:var(--surf);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--txt);font-size:12px;font-family:'Inter',sans-serif;outline:none;transition:border-color var(--t)}
+.dish-table-filters input:focus,.dish-table-filters select:focus{border-color:var(--p)}
+.dish-table-filters input{flex:1;min-width:130px}
+.dish-trow{display:flex;align-items:center;gap:0;padding:0;border-bottom:1px solid var(--brd);transition:background var(--t)}
+.dish-trow:first-child{border-top:1px solid var(--brd);border-radius:var(--rs) var(--rs) 0 0}
+.dish-trow:last-child{border-radius:0 0 var(--rs) var(--rs)}
+.dish-trow:hover{background:var(--surf2)}
+.dt-thumb{width:44px;height:44px;border-radius:6px;background:var(--surf2);overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:18px;margin:8px 10px 8px 8px}
+.dt-thumb img{width:100%;height:100%;object-fit:cover}
+.dt-info{flex:1;min-width:0;padding:8px 0}
+.dt-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
+.dt-meta{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.dt-cat{font-size:10px;color:var(--sub);background:var(--surf2);padding:1px 6px;border-radius:3px;border:1px solid var(--brd)}
+.dt-badge-pop{font-size:9px;background:rgba(249,115,22,.15);color:#FB923C;padding:1px 6px;border-radius:3px;font-weight:700}
+.dt-badge-sale{font-size:9px;background:rgba(234,179,8,.15);color:#FACC15;padding:1px 6px;border-radius:3px;font-weight:700}
+.dt-badge-sizes{font-size:9px;background:rgba(59,130,246,.12);color:#60A5FA;padding:1px 6px;border-radius:3px;font-weight:700}
+.dt-price{font-size:13px;font-weight:700;color:var(--p);flex-shrink:0;padding:0 10px;white-space:nowrap}
+.dt-price-old{font-size:11px;color:var(--sub);text-decoration:line-through;font-weight:400;display:block;text-align:right}
+.dt-actions{display:flex;gap:4px;padding:0 8px;flex-shrink:0}
+.dt-edit{padding:5px 10px;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.2);border-radius:var(--rs);color:#60A5FA;font-size:11px;font-weight:600;cursor:pointer;transition:var(--t);font-family:'Inter',sans-serif}
+.dt-edit:hover{background:rgba(59,130,246,.2)}
+.dt-del{width:28px;height:28px;padding:0;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.18);border-radius:var(--rs);color:var(--red);font-size:13px;font-weight:700;cursor:pointer;transition:var(--t);display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif}
+.dt-del:hover{background:rgba(239,68,68,.18)}
+.dish-count-row{font-size:11px;color:var(--dim);margin-bottom:8px;padding:0 2px}
+@media(max-width:900px){
+  .menu-layout{grid-template-columns:1fr;grid-template-rows:auto auto}
+  .menu-add-col{border-right:none;border-bottom:1px solid var(--brd);padding:14px}
+  .menu-list-col{padding:14px}
+}
+@media(max-width:768px){
+  .dt-cat,.dt-badge-pop,.dt-badge-sale,.dt-badge-sizes{display:none}
+  .dt-actions .dt-edit span{display:none}
+}
 
 /* ========== BANNERS ========== */
 .banners-panel{display:flex;flex-direction:column;gap:16px}
@@ -349,31 +420,91 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none}
 .ht-settings{background:rgba(34,197,94,.15);color:#4ADE80}
 .ht-banner{background:rgba(168,85,247,.15);color:#C084FC}
 
-/* ========== SETTINGS ========== */
-.settings-wrap{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;max-width:1080px}
-.settings-section{display:flex;flex-direction:column;gap:0}
-.settings-section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--sub);padding:14px 0 8px;display:flex;align-items:center;gap:7px}
-/* Settings Tabs */
-.st-tabs{display:flex;gap:4px;margin-bottom:18px;border-bottom:1px solid var(--brd);padding-bottom:0;flex-shrink:0}
-.st-tab{padding:9px 16px;background:transparent;color:var(--sub);font-size:13px;font-weight:500;border:none;border-bottom:2px solid transparent;margin-bottom:-1px;cursor:pointer;transition:color var(--t),border-color var(--t);display:flex;align-items:center;gap:6px;font-family:'Inter',sans-serif}
-.st-tab:hover{color:var(--txt)}
-.st-tab.on{color:var(--p);border-bottom-color:var(--p);font-weight:600}
-.st-body{flex:1}
-.st-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;align-content:start}
-.st-card{background:var(--surf);border:1px solid var(--brd);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;gap:0}
-.st-card-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:16px}
-.st-card-icon{width:38px;height:38px;border-radius:10px;background:var(--pl);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
-.st-card-title{font-size:14px;font-weight:700;color:var(--txt);margin-bottom:3px}
-.st-card-sub{font-size:11px;color:var(--sub);line-height:1.4}
-.st-add-row{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px solid var(--brd)}
-.st-inp{padding:9px 11px;background:var(--bg2);border:1.5px solid var(--brd2);border-radius:var(--rs);color:var(--txt);font-size:13px;font-family:'Inter',sans-serif;transition:border-color var(--t);outline:none;width:100%}
-.st-inp:focus{border-color:var(--p)}
-.st-inp-sm{width:70px!important;flex-shrink:0;text-align:center}
-.st-field{display:flex;flex-direction:column;gap:5px;flex:1}
-.st-field-label{font-size:10px;font-weight:600;color:var(--sub);text-transform:uppercase;letter-spacing:.5px}
-.st-field-input-row{display:flex;align-items:center;gap:6px}
-.st-field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.st-unit{font-size:12px;color:var(--sub);flex-shrink:0}
+/* ========== SETTINGS REDESIGN ========== */
+.sett-page{display:grid;grid-template-columns:200px 1fr;min-height:0;flex:1}
+.sett-nav{border-right:1px solid var(--brd);padding:12px 8px;display:flex;flex-direction:column;gap:2px;overflow-y:auto}
+.sett-nav-item{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:var(--rs);background:transparent;color:var(--sub);font-size:12px;font-weight:500;cursor:pointer;transition:background var(--t),color var(--t);border:none;font-family:'Inter',sans-serif;width:100%;text-align:left}
+.sett-nav-item:hover{background:var(--surf2);color:var(--txt)}
+.sett-nav-item.on{background:var(--pl);color:var(--p);font-weight:600}
+.sett-nav-icon{font-size:15px;width:20px;text-align:center;flex-shrink:0}
+.sett-nav-sep{height:1px;background:var(--brd);margin:6px 4px}
+.sett-content{overflow-y:auto;padding:20px 24px}
+.sett-section{display:none}
+.sett-section.active{display:block}
+.sett-header{margin-bottom:20px}
+.sett-header h2{font-size:16px;font-weight:700;color:var(--txt);margin-bottom:3px}
+.sett-header p{font-size:12px;color:var(--sub)}
+/* Info cards at top */
+.sett-info-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:20px}
+.sett-info-card{background:var(--surf);border:1px solid var(--brd);border-radius:var(--r);padding:13px 15px}
+.sett-info-label{font-size:10px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.sett-info-val{font-size:20px;font-weight:700;color:var(--txt);line-height:1}
+.sett-info-val.accent{color:var(--p)}
+.sett-info-val.green{color:var(--green)}
+.sett-info-sub{font-size:11px;color:var(--sub);margin-top:3px}
+/* Section block */
+.sett-block{background:var(--surf);border:1px solid var(--brd);border-radius:var(--r);margin-bottom:14px;overflow:hidden}
+.sett-block-head{display:flex;align-items:center;gap:11px;padding:14px 16px;border-bottom:1px solid var(--brd)}
+.sett-block-icon{width:32px;height:32px;border-radius:8px;background:var(--pl);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.sett-block-title{font-size:13px;font-weight:700;color:var(--txt)}
+.sett-block-sub{font-size:11px;color:var(--sub);margin-top:1px}
+.sett-block-body{padding:14px 16px}
+/* Inline add row */
+.sett-add-row{display:flex;gap:7px;align-items:center;margin-top:12px;padding-top:12px;border-top:1px solid var(--brd)}
+.sett-inp{padding:8px 11px;background:var(--bg2);border:1.5px solid var(--brd2);border-radius:var(--rs);color:var(--txt);font-size:13px;font-family:'Inter',sans-serif;transition:border-color var(--t);outline:none}
+.sett-inp:focus{border-color:var(--p)}
+.sett-inp-sm{width:72px;flex-shrink:0;text-align:center}
+.sett-inp-full{width:100%}
+/* City row */
+.city-row{display:flex;align-items:center;gap:7px;padding:8px 10px;background:var(--surf2);border-radius:var(--rs);border:1px solid var(--brd);margin-bottom:6px}
+.city-name{flex:2;font-size:13px;font-weight:500}
+.city-price-input{width:68px;padding:5px 8px;background:var(--bg2);border:1.5px solid var(--brd2);border-radius:var(--rs);color:var(--txt);font-size:12px;text-align:center;font-family:'Inter',sans-serif;transition:border-color var(--t)}
+.city-price-input:focus{border-color:var(--p)}
+.city-save{padding:5px 10px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.2);border-radius:var(--rs);color:var(--green);font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:var(--t)}
+.city-save:hover{background:rgba(34,197,94,.22)}
+.city-del{padding:5px 8px;background:transparent;border:1px solid rgba(239,68,68,.2);border-radius:var(--rs);color:var(--red);font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:var(--t)}
+.city-del:hover{background:rgba(239,68,68,.1)}
+/* Amount fields */
+.sett-amount-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.sett-amount-field{display:flex;flex-direction:column;gap:5px}
+.sett-amount-label{font-size:10px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.5px}
+.sett-amount-wrap{display:flex;align-items:center;gap:7px}
+.sett-amount-inp{flex:1;padding:10px 12px;background:var(--bg2);border:1.5px solid var(--brd2);border-radius:var(--rs);color:var(--txt);font-size:15px;font-weight:600;font-family:'Inter',sans-serif;transition:border-color var(--t);outline:none}
+.sett-amount-inp:focus{border-color:var(--p);box-shadow:0 0 0 3px var(--pl)}
+.sett-amount-unit{font-size:12px;color:var(--sub);font-weight:600;flex-shrink:0}
+/* Hours redesign */
+.hours-day-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--brd)}
+.hours-day-row:last-of-type{border-bottom:none;padding-bottom:0}
+.hours-day-label{width:130px;flex-shrink:0}
+.hours-day-name{font-size:13px;font-weight:600;color:var(--txt)}
+.hours-day-sub{font-size:10px;color:var(--sub);margin-top:1px}
+.hours-time-pair{display:flex;align-items:center;gap:7px;flex:1}
+.hours-time-input{width:52px;padding:8px 6px;background:var(--bg2);border:1.5px solid var(--brd2);border-radius:var(--rs);color:var(--txt);font-size:16px;font-weight:700;text-align:center;font-family:'Inter',sans-serif;transition:border-color var(--t),box-shadow var(--t);-moz-appearance:textfield}
+.hours-time-input::-webkit-inner-spin-button,.hours-time-input::-webkit-outer-spin-button{-webkit-appearance:none}
+.hours-time-input:focus{border-color:var(--p);box-shadow:0 0 0 3px var(--pl);outline:none}
+.hours-time-sep{font-size:16px;font-weight:700;color:var(--dim);flex-shrink:0;line-height:1}
+.hours-time-dash{font-size:14px;color:var(--brd2);flex-shrink:0;margin:0 2px}
+.hours-time-label{font-size:10px;font-weight:600;color:var(--dim);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
+.hours-status-badge{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;flex-shrink:0}
+.hsb-open{background:rgba(34,197,94,.12);color:var(--green)}
+.hsb-closed{background:rgba(239,68,68,.1);color:var(--red)}
+/* Settings save bar */
+.sett-save-bar{display:flex;align-items:center;gap:10px;margin-top:16px}
+/* Old compat */
+.st-tabs{display:none}
+.st-body{display:none}
+.st-grid{display:none}
+.st-card{display:none}
+@media(max-width:768px){
+  .sett-page{grid-template-columns:1fr;grid-template-rows:auto 1fr}
+  .sett-nav{flex-direction:row;border-right:none;border-bottom:1px solid var(--brd);padding:8px;overflow-x:auto;overflow-y:hidden;flex-wrap:nowrap;scrollbar-width:none}
+  .sett-nav::-webkit-scrollbar{display:none}
+  .sett-nav-item{flex-shrink:0;padding:7px 12px;flex-direction:row;white-space:nowrap}
+  .sett-nav-sep{display:none}
+  .sett-content{padding:14px}
+  .sett-amount-grid{grid-template-columns:1fr 1fr}
+  .hours-day-label{width:90px}
+}
 .city-row{display:flex;align-items:center;gap:7px;padding:8px 10px;background:var(--surf2);border-radius:var(--rs);border:1px solid var(--brd);margin-bottom:6px}
 .city-name{flex:2;font-size:13px;font-weight:500}
 .city-price-input{width:68px;padding:5px 8px;background:var(--bg2);border:1.5px solid var(--brd2);border-radius:var(--rs);color:var(--txt);font-size:12px;text-align:center;font-family:'Inter',sans-serif;transition:border-color var(--t)}
@@ -391,99 +522,207 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none}
 .hours-row-inline .h-sep{color:var(--dim);font-size:12px}
 .hours-row-inline .h-label{font-size:11px;color:var(--sub);min-width:42px}
 
-/* ========== MODAL ========== */
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(4px);z-index:2000;display:none;align-items:center;justify-content:center;padding:16px}
+/* ========== MODAL — REDESIGN ========== */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);z-index:2000;display:none;align-items:flex-end;justify-content:center}
+@media(min-width:600px){.modal-bg{align-items:center;padding:20px}}
 .modal-bg.on{display:flex}
-.modal-box{background:var(--surf);border:1px solid var(--brd2);border-radius:14px;padding:24px;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;position:relative}
-.modal-box::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:14px 14px 0 0;background:linear-gradient(90deg,var(--p),var(--yellow))}
-.modal-x{position:absolute;top:12px;right:12px;width:28px;height:28px;border-radius:6px;background:var(--surf2);color:var(--sub);font-size:13px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:var(--t)}
-.modal-x:hover{background:rgba(239,68,68,.15);color:var(--red)}
-.modal-box h3{font-size:16px;font-weight:700;margin-bottom:18px}
+.modal-box{
+  background:var(--surf);
+  border-radius:22px 22px 0 0;
+  padding:0;
+  width:100%;max-width:520px;
+  max-height:94svh;
+  overflow:hidden;
+  display:flex;flex-direction:column;
+  position:relative;
+  box-shadow:0 -8px 48px rgba(0,0,0,.28);
+}
+@media(min-width:600px){
+  .modal-box{border-radius:18px;box-shadow:0 24px 64px rgba(0,0,0,.35);max-height:90vh}
+}
+.modal-drag-bar{width:40px;height:4px;background:var(--brd2);border-radius:2px;margin:10px auto 0;flex-shrink:0}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px 12px;border-bottom:1px solid var(--brd);flex-shrink:0}
+.modal-title{font-size:15px;font-weight:700;color:var(--txt)}
+.modal-x{width:30px;height:30px;border-radius:8px;background:var(--surf2);border:none;color:var(--sub);font-size:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:var(--t);flex-shrink:0}
+.modal-x:hover{background:rgba(239,68,68,.12);color:var(--red)}
+.modal-scroll{flex:1;overflow-y:auto;padding:16px 18px}
+.modal-footer{padding:12px 18px 16px;border-top:1px solid var(--brd);display:flex;gap:8px;flex-shrink:0;background:var(--surf)}
+@supports(padding:env(safe-area-inset-bottom)){
+  .modal-footer{padding-bottom:calc(16px + env(safe-area-inset-bottom))}
+}
+.modal-box h3{display:none} /* replaced by modal-header */
+/* btn ghost inside modal */
+.modal-btn-ghost{flex:1;padding:11px;background:var(--surf2);border:1px solid var(--brd2);border-radius:40px;color:var(--sub);font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:var(--t)}
+.modal-btn-ghost:hover{border-color:var(--brd2);color:var(--txt)}
 
-/* ========== RESPONSIVE ========== */
+/* ========== PROMO REDESIGN ========== */
+.promo-layout{display:grid;grid-template-columns:320px 1fr;min-height:0;flex:1}
+.promo-add-col{border-right:1px solid var(--brd);overflow-y:auto;padding:16px}
+.promo-list-col{overflow-y:auto;padding:16px}
+.promo-section-title{font-size:12px;font-weight:700;color:var(--txt);margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+/* Type selector chips */
+.promo-type-chips{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:12px}
+.ptc{padding:8px 10px;border-radius:var(--rs);border:1.5px solid var(--brd2);background:var(--surf2);color:var(--sub);font-size:11px;font-weight:600;cursor:pointer;transition:var(--t);font-family:'Inter',sans-serif;text-align:center;line-height:1.3}
+.ptc:hover{border-color:var(--brd2);color:var(--txt)}
+.ptc.on{border-color:var(--p);background:var(--pl);color:var(--p)}
+/* Promo field */
+.pf{margin-bottom:10px}
+.pf label{display:block;font-size:10px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.pf input,.pf select{width:100%;padding:9px 11px;background:var(--bg2);border:1.5px solid var(--brd2);border-radius:var(--rs);color:var(--txt);font-size:13px;font-family:'Inter',sans-serif;transition:border-color var(--t);outline:none}
+.pf input:focus,.pf select:focus{border-color:var(--p);box-shadow:0 0 0 3px var(--pl)}
+/* Promo code input */
+.promo-code-row{display:flex;gap:7px}
+.promo-code-row input{flex:1;font-size:15px;font-weight:700;letter-spacing:1px;text-transform:uppercase}
+.promo-gen-btn{padding:9px 12px;background:var(--surf);border:1.5px solid var(--brd2);border-radius:var(--rs);color:var(--sub);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;transition:var(--t);flex-shrink:0}
+.promo-gen-btn:hover{border-color:var(--p);color:var(--p)}
+/* Toggle row compact */
+.promo-toggle-row{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:var(--surf2);border-radius:var(--rs);margin-bottom:7px}
+.promo-toggle-label{font-size:12px;font-weight:600;color:var(--txt)}
+.promo-toggle-sub{font-size:10px;color:var(--sub);margin-top:1px}
+/* Promo list cards */
+.promo-list-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 20px;color:var(--sub);text-align:center;gap:8px}
+.promo-list-filters{display:flex;gap:6px;margin-bottom:12px}
+.promo-list-filters input,.promo-list-filters select{padding:7px 10px;background:var(--surf);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--txt);font-size:12px;font-family:'Inter',sans-serif;outline:none;transition:border-color var(--t)}
+.promo-list-filters input:focus,.promo-list-filters select:focus{border-color:var(--p)}
+.promo-list-filters input{flex:1}
+/* Promo row (table style) */
+.promo-row{display:flex;align-items:center;gap:0;padding:0;border-bottom:1px solid var(--brd);transition:background var(--t)}
+.promo-row:first-child{border-top:1px solid var(--brd);border-radius:var(--rs) var(--rs) 0 0}
+.promo-row:last-child{border-radius:0 0 var(--rs) var(--rs);border-bottom:none}
+.promo-row:hover{background:var(--surf2)}
+.pr-stripe{width:3px;align-self:stretch;flex-shrink:0;border-radius:2px 0 0 2px}
+.pr-body{flex:1;padding:10px 12px;min-width:0}
+.pr-code{font-size:14px;font-weight:900;letter-spacing:1px;color:var(--txt);margin-bottom:3px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.pr-desc{font-size:11px;color:var(--sub);margin-bottom:4px}
+.pr-tags{display:flex;gap:4px;flex-wrap:wrap}
+.pr-tag{font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;text-transform:uppercase;letter-spacing:.4px}
+.pr-tag-type{background:rgba(59,130,246,.12);color:#60A5FA}
+.pr-tag-single{background:rgba(234,179,8,.12);color:#FACC15}
+.pr-tag-multi{background:var(--surf2);color:var(--dim)}
+.pr-tag-active{background:rgba(34,197,94,.12);color:var(--green)}
+.pr-tag-inactive{background:rgba(239,68,68,.08);color:var(--red)}
+.pr-tag-exp{background:rgba(239,68,68,.1);color:var(--red)}
+.pr-stat{font-size:10px;color:var(--dim);margin-top:3px}
+.pr-actions{display:flex;gap:4px;padding:0 10px;flex-shrink:0}
+.pr-toggle{padding:5px 10px;border-radius:var(--rs);font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:var(--t);border:none;white-space:nowrap}
+.pr-toggle-on{background:rgba(239,68,68,.08);color:var(--red)}
+.pr-toggle-on:hover{background:rgba(239,68,68,.15)}
+.pr-toggle-off{background:rgba(34,197,94,.1);color:var(--green)}
+.pr-toggle-off:hover{background:rgba(34,197,94,.18)}
+.pr-del{width:28px;height:28px;background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.15);border-radius:var(--rs);color:var(--red);font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif;transition:var(--t)}
+.pr-del:hover{background:rgba(239,68,68,.18)}
+/* nth-free compact */
+.nth-free-grid{display:grid;grid-template-columns:1fr 28px 1fr;align-items:end;gap:6px;margin-bottom:10px}
+.nth-arrow{font-size:16px;color:var(--sub);padding-bottom:10px;text-align:center}
+.nth-inp{width:100%;padding:10px 6px;background:var(--bg2);border:1.5px solid var(--brd2);border-radius:var(--rs);color:var(--txt);font-size:18px;font-weight:700;text-align:center;font-family:'Inter',sans-serif;transition:border-color var(--t);outline:none}
+.nth-inp:focus{border-color:var(--p);box-shadow:0 0 0 3px var(--pl)}
+.nth-sub{font-size:9px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px}
+/* Target radio */
+.nth-target-row{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px}
+.nth-target-label{display:flex;align-items:center;justify-content:center;gap:6px;padding:8px;background:var(--surf);border:1.5px solid var(--brd2);border-radius:var(--rs);cursor:pointer;font-size:11px;font-weight:600;transition:all var(--t)}
+.nth-target-label.on{border-color:var(--p);background:var(--pl);color:var(--p)}
+/* Promo mobile */
 @media(max-width:768px){
-  /* Switch to full-height layout with fixed bottom nav */
+  .promo-layout{grid-template-columns:1fr}
+  .promo-add-col{border-right:none;border-bottom:1px solid var(--brd)}
+  .promo-list-col{padding:12px}
+}
+
+/* ========== MOBILE RESPONSIVE — FULL OVERHAUL ========== */
+@media(max-width:768px){
   html,body{overflow:auto;height:auto}
-  #app{
-    display:flex;flex-direction:column;
-    height:auto;min-height:100svh;
-    grid-template-columns:none;
-  }
-  .main{
-    order:1;flex:1;overflow:visible;
-    padding-bottom:68px;
-  }
-  .topbar{position:sticky;top:0;z-index:90;padding:0 14px;height:52px}
+  #app{display:flex;flex-direction:column;height:auto;min-height:100svh;grid-template-columns:none}
+  .main{order:1;flex:1;overflow:visible;padding-bottom:calc(64px + env(safe-area-inset-bottom,0))}
+  .topbar{position:sticky;top:0;z-index:90;padding:0 12px;height:50px}
   .topbar-title{font-size:15px}
+  .topbar-sub{display:none}
 
-  /* Panel — no flex, just block scroll */
-  .panel{display:none;flex-direction:column;padding:14px}
-  .panel.active{display:block}
+  /* Panel */
+  .panel{display:none;flex-direction:column;padding:12px}
+  .panel.active{display:flex}
+  .panel.active[style*="padding:0"]{padding:0!important}
 
-  /* Sidebar → bottom nav */
+  /* Sidebar → bottom tab bar */
   .side{
-    order:2;
-    position:fixed;bottom:0;left:0;right:0;z-index:150;
-    flex-direction:row;height:62px;
+    order:2;position:fixed;bottom:0;left:0;right:0;z-index:150;
+    flex-direction:row;height:60px;
     border-right:none;border-top:1px solid var(--brd);
-    background:var(--bg2);
+    background:var(--bg2);padding-bottom:env(safe-area-inset-bottom,0);
   }
   .side-head,.side-foot{display:none}
-  .side-nav{
-    flex-direction:row;flex:1;padding:0;gap:0;
-    overflow-x:auto;overflow-y:hidden;align-items:stretch;
-    -webkit-overflow-scrolling:touch;scrollbar-width:none;
-  }
+  .side-nav{flex-direction:row;flex:1;padding:0;gap:0;overflow-x:auto;overflow-y:hidden;align-items:stretch;-webkit-overflow-scrolling:touch;scrollbar-width:none}
   .side-nav::-webkit-scrollbar{display:none}
   .nav-label{display:none}
-  .nb{
-    flex:1;flex-direction:column;align-items:center;justify-content:center;
-    gap:3px;min-width:52px;padding:6px 4px;
-    font-size:9px;font-weight:600;border-radius:0;
-    color:var(--sub);-webkit-tap-highlight-color:transparent;
-  }
+  .nb{flex:1;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:48px;padding:5px 3px;font-size:9px;font-weight:600;border-radius:0;color:var(--sub);-webkit-tap-highlight-color:transparent}
   .nb:hover{background:transparent}
   .nb.on{background:transparent;color:var(--p)}
-  .nb-icon{font-size:20px;line-height:1;width:auto;display:block}
-  .nb-lbl{display:block}
-  .nb-badge{position:absolute;top:4px;right:10px;font-size:8px;padding:1px 4px}
+  .nb-icon{font-size:19px;line-height:1;width:auto;display:block}
+  .nb-lbl{display:block;font-size:8.5px}
+  .nb-badge{position:absolute;top:4px;right:8px;font-size:8px;padding:1px 4px}
 
-  /* Grids */
+  /* Orders */
   .orders-grid{grid-template-columns:1fr}
-  .stats-grid{grid-template-columns:1fr 1fr}
-  .fgrid{grid-template-columns:1fr}
-  .settings-wrap{grid-template-columns:1fr}
-  .settings-cols{grid-template-columns:1fr}
-  .dish-grid{grid-template-columns:1fr}
-  .form-card{padding:14px}
-  .hours-grid{grid-template-columns:1fr}
-
-  /* Actions */
   .o-actions{flex-wrap:wrap}
   .oa{min-width:calc(50% - 3px);flex:none;flex-grow:1}
 
-  /* Modal */
-  .modal-bg{padding:0;align-items:flex-end}
-  .modal-box{border-radius:16px 16px 0 0;max-height:90svh;max-width:100%;padding:20px 16px}
-  .modal-box::before{border-radius:16px 16px 0 0}
+  /* Stats */
+  .stats-grid{grid-template-columns:1fr 1fr}
+
+  /* Menu layout: stack vertically */
+  .menu-layout{grid-template-columns:1fr}
+  .menu-add-col{border-right:none;border-bottom:1px solid var(--brd)}
+  .menu-list-col{padding:12px}
+  .mf-row{grid-template-columns:1fr 1fr}
+
+  /* Dish table */
+  .dt-cat,.dt-badge-sizes{display:none}
+
+  /* Settings */
+  .sett-page{grid-template-columns:1fr}
+  .sett-nav{flex-direction:row;border-right:none;border-bottom:1px solid var(--brd);padding:8px 10px;overflow-x:auto;overflow-y:hidden;flex-wrap:nowrap;scrollbar-width:none}
+  .sett-nav::-webkit-scrollbar{display:none}
+  .sett-nav-item{flex-shrink:0;padding:7px 12px;white-space:nowrap}
+  .sett-nav-sep{display:none}
+  .sett-content{padding:12px}
+  .sett-amount-grid{grid-template-columns:1fr}
+  .sett-info-row{grid-template-columns:1fr 1fr 1fr}
+  .hours-day-label{width:80px}
+  .hours-day-sub{display:none}
+
+  /* Promo */
+  .promo-layout{grid-template-columns:1fr}
+  .promo-add-col{border-right:none;border-bottom:1px solid var(--brd);padding:12px}
+  .promo-list-col{padding:12px}
+  .promo-type-chips{grid-template-columns:1fr 1fr}
+
+  /* Banners */
+  .banners-grid{grid-template-columns:1fr}
+
+  /* Modal - always bottom sheet */
+  .modal-bg{align-items:flex-end;padding:0}
+  .modal-box{border-radius:22px 22px 0 0;max-height:94svh}
 
   /* Login */
-  #loginScreen{padding:16px;align-items:center}
-  .lbox{border-radius:16px;padding:28px 20px}
+  #loginScreen{padding:16px}
+  .lbox{border-radius:16px;padding:26px 18px}
 
-  /* Topbar */
+  /* Topbar right */
   .topbar-right .upd-txt,.topbar-right #sortSel{display:none}
 }
+@media(min-width:600px){
+  .modal-bg{align-items:center;padding:20px}
+  .modal-box{border-radius:18px;max-height:90vh}
+  .modal-drag-bar{display:none}
+}
 @media(max-width:400px){
-  .nb{min-width:46px;font-size:8px}
+  .nb{min-width:44px}
   .nb-icon{font-size:18px}
-  .stats-grid{grid-template-columns:1fr}
-  .stat-val{font-size:22px}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .sett-info-row{grid-template-columns:1fr 1fr}
 }
 @supports(height:100svh){
   #app{min-height:100svh}
-  .side{bottom:env(safe-area-inset-bottom,0)}
-  .main{padding-bottom:calc(68px + env(safe-area-inset-bottom,0))}
+  .side{bottom:0}
 }
 </style>
 </head>
@@ -539,6 +778,9 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none}
       <button class="nb" id="nb-history" onclick="setSection('history')">
         <span class="nb-icon">◷</span><span class="nb-lbl">Історія</span>
       </button>
+      <button class="nb" id="nb-promo" onclick="setSection('promo')">
+        <span class="nb-icon" style="font-size:15px;opacity:.7;filter:grayscale(1)">🏷</span><span class="nb-lbl">Промо</span>
+      </button>
       <button class="nb" id="nb-settings" onclick="setSection('settings')">
         <span class="nb-icon">⊙</span><span class="nb-lbl">Налашт.</span>
       </button>
@@ -590,9 +832,9 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none}
       <!-- Status row -->
       <div id="statsStatusRow" style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--surf);border:1px solid var(--brd);border-radius:var(--r);margin-bottom:16px;flex-shrink:0;flex-wrap:wrap">
         <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
-          <div id="spDot" style="width:12px;height:12px;border-radius:50%;background:var(--green);flex-shrink:0;box-shadow:0 0 0 3px rgba(34,197,94,.2)"></div>
-          <span id="spStatus" style="font-size:14px;font-weight:700">Визначення...</span>
-          <span id="spTime" style="font-size:11px;color:var(--sub)"></span>
+              <div id="spDot2" style="width:12px;height:12px;border-radius:50%;background:var(--green);flex-shrink:0;box-shadow:0 0 0 3px rgba(34,197,94,.2)"></div>
+              <span id="spStatus2" style="font-size:14px;font-weight:700">...</span>
+              <span id="spTime2" style="font-size:11px;color:var(--sub)"></span>
         </div>
         <div style="display:flex;gap:12px;font-size:12px;color:var(--sub);flex-wrap:wrap;margin-left:auto">
           <span>Міст: <strong id="spCities" style="color:var(--txt)">—</strong></span>
@@ -607,75 +849,85 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none}
     </div>
 
     <!-- MENU -->
-    <div id="sec-menu" class="panel">
-      <div class="panel-tabs">
-        <button class="ptab on" id="pt-add"  onclick="setMenuTab('add')">+ Додати</button>
-        <button class="ptab"    id="pt-list" onclick="setMenuTab('list')">Всі страви</button>
-      </div>
-      <div id="mt-add">
-        <div class="form-card">
-          <h3>Нова страва</h3>
-          <div class="fgrid">
-            <div class="fg"><label>Назва *</label><input id="mName" placeholder="Назва страви"></div>
-            <div class="fg"><label>Категорія *</label><select id="mCat"></select></div>
-            <div class="fg" id="mPriceRow"><label>Ціна (грн) *</label><input id="mPrice" type="number" min="1" placeholder="150"></div>
-            <div class="fg"><label>Час (хв)</label><input id="mPrep" type="number" min="1" placeholder="15"></div>
+    <div id="sec-menu" class="panel" style="padding:0;overflow:hidden">
+      <div class="menu-layout">
+        <!-- LEFT: Add dish form -->
+        <div class="menu-add-col">
+          <div class="menu-add-title">
+            <span>Нова страва</span>
+            <span style="font-size:10px;color:var(--dim);font-weight:400">* — обов'язкові</span>
           </div>
-          <div class="fg"><label>Опис</label><textarea id="mDesc" placeholder="Опис страви..." rows="2"></textarea></div>
-          <div class="fg">
-            <label>Фото</label>
-            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:4px">
-              <label class="photo-label">Вибрати файл<input type="file" id="mPhoto" accept="image/*" style="display:none" onchange="previewPhoto('mPhoto','mPhotoPreview')"></label>
-              <img id="mPhotoPreview" class="photo-preview">
-              <span id="mPhotoStatus" style="font-size:11px;color:var(--sub)"></span>
+          <!-- Name + Category -->
+          <div class="mf-row">
+            <div class="mf" style="grid-column:1/-1"><label>Назва *</label><input id="mName" placeholder="Назва страви"></div>
+          </div>
+          <div class="mf-row">
+            <div class="mf"><label>Категорія *</label><select id="mCat"></select></div>
+            <div class="mf" id="mPriceRow"><label>Ціна (грн) *</label><input id="mPrice" type="number" min="1" placeholder="150"></div>
+          </div>
+          <div class="mf-row">
+            <div class="mf"><label>Час (хв)</label><input id="mPrep" type="number" min="1" placeholder="15"></div>
+            <div class="mf">
+              <label>Фото</label>
+              <label class="mf-photo-zone">
+                <input type="file" id="mPhoto" accept="image/*" onchange="previewPhotoNew('mPhoto','mPhotoPreview')">
+                <img id="mPhotoPreview" class="mf-photo-thumb">
+                <span class="mf-photo-txt" id="mPhotoStatus">Вибрати файл</span>
+              </label>
             </div>
           </div>
-          <!-- iOS toggles row -->
-          <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px">
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--surf2);border-radius:var(--rs)">
+          <div class="mf mf-row single" style="margin-bottom:8px">
+            <label>Опис</label><textarea id="mDesc" placeholder="Короткий опис страви..." rows="2"></textarea>
+          </div>
+          <!-- Toggles compact -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px">
+            <div class="mf-toggle-row">
               <div>
-                <div style="font-size:13px;font-weight:600;color:var(--txt)">Хіт продажів</div>
-                <div style="font-size:11px;color:var(--sub);margin-top:1px">Відображати бейдж «Хіт»</div>
+                <div class="mf-toggle-label">Хіт</div>
+                <div class="mf-toggle-sub">бейдж «Хіт»</div>
               </div>
               <label class="ios-toggle"><input type="checkbox" id="mPop"><span class="ios-toggle-slider"></span></label>
             </div>
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--surf2);border-radius:var(--rs)">
+            <div class="mf-toggle-row">
               <div>
-                <div style="font-size:13px;font-weight:600;color:var(--txt)">Розміри</div>
-                <div style="font-size:11px;color:var(--sub);margin-top:1px">Кілька варіантів з різними цінами</div>
+                <div class="mf-toggle-label">Розміри</div>
+                <div class="mf-toggle-sub">варіанти цін</div>
               </div>
               <label class="ios-toggle"><input type="checkbox" id="mHasSizes" onchange="toggleAddSizes()"><span class="ios-toggle-slider"></span></label>
             </div>
           </div>
-          <!-- Sizes editor (shown when mHasSizes is on) -->
-          <div id="mSizesBlock" style="display:none;margin-bottom:12px;background:var(--surf2);border-radius:var(--rs);padding:12px">
-            <div style="display:grid;grid-template-columns:1fr auto;gap:6px;margin-bottom:6px;padding:0 4px">
-              <span style="font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.5px">Розмір / назва варіанту</span>
-              <span style="font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;width:80px;text-align:center">Ціна грн</span>
+          <!-- Sizes editor -->
+          <div id="mSizesBlock" style="display:none;margin-bottom:8px">
+            <div class="mf-sizes-block">
+              <div class="mf-sizes-header">
+                <span>Назва варіанту</span>
+                <span style="width:76px;text-align:center">Ціна</span>
+              </div>
+              <div id="mSizesList" style="display:flex;flex-direction:column;gap:5px"></div>
+              <button onclick="addSizeRow('mSizesList')" type="button" style="margin-top:7px;padding:6px 12px;background:transparent;border:1px dashed var(--brd2);border-radius:var(--rs);color:var(--sub);font-size:11px;font-weight:600;cursor:pointer;width:100%;transition:border-color var(--t);font-family:'Inter',sans-serif" onmouseover="this.style.borderColor='var(--p)'" onmouseout="this.style.borderColor='var(--brd2)'">+ Варіант</button>
             </div>
-            <div id="mSizesList" style="display:flex;flex-direction:column;gap:6px"></div>
-            <button onclick="addSizeRow('mSizesList')" type="button" style="margin-top:8px;padding:7px 14px;background:var(--surf);border:1.5px dashed var(--brd2);border-radius:var(--rs);color:var(--sub);font-size:12px;font-weight:600;cursor:pointer;width:100%;transition:border-color var(--t);font-family:'Inter',sans-serif" onmouseover="this.style.borderColor='var(--p)'" onmouseout="this.style.borderColor='var(--brd2)'">+ Додати розмір</button>
-            <div style="font-size:11px;color:var(--dim);margin-top:8px">Наприклад: «30 см» або «Маленька» — і ціна за цей варіант</div>
           </div>
-          <div id="mErr" style="font-size:12px;min-height:14px;margin-bottom:8px"></div>
-          <button class="btn-pri" onclick="addDish()">Додати страву</button>
+          <div id="mErr" class="mf-err"></div>
+          <button class="btn-pri" onclick="addDish()" style="width:100%;justify-content:center">Додати страву</button>
         </div>
-      </div>
-      <div id="mt-list" style="display:none">
-        <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
-          <input class="tb-sel" id="dishSearch" placeholder="🔍 Пошук страви..." style="flex:2;min-width:160px;padding:9px 12px;font-size:13px" oninput="renderDishList()">
-          <select class="tb-sel" id="dishFilterCat" onchange="renderDishList()" style="min-width:140px;padding:9px 10px">
-            <option value="">Всі категорії</option>
-          </select>
-          <select class="tb-sel" id="dishFilterSort" onchange="renderDishList()" style="min-width:140px;padding:9px 10px">
-            <option value="name">А → Я</option>
-            <option value="price_asc">Ціна ↑</option>
-            <option value="price_desc">Ціна ↓</option>
-            <option value="newest">Нові спочатку</option>
-          </select>
+
+        <!-- RIGHT: Dish list -->
+        <div class="menu-list-col">
+          <div class="dish-table-filters">
+            <input id="dishSearch" placeholder="Пошук страви..." oninput="renderDishList()">
+            <select id="dishFilterCat" onchange="renderDishList()">
+              <option value="">Всі категорії</option>
+            </select>
+            <select id="dishFilterSort" onchange="renderDishList()">
+              <option value="name">А → Я</option>
+              <option value="price_asc">Ціна ↑</option>
+              <option value="price_desc">Ціна ↓</option>
+              <option value="newest">Нові</option>
+            </select>
+          </div>
+          <div id="dishCount" class="dish-count-row"></div>
+          <div id="dishGrid"></div>
         </div>
-        <div id="dishCount" style="font-size:12px;color:var(--sub);margin-bottom:10px"></div>
-        <div class="dish-grid" id="dishGrid"></div>
       </div>
     </div>
 
@@ -713,174 +965,416 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none}
       <div id="histList"></div>
     </div>
 
+
+    <!-- PROMO CODES -->
+    <div id="sec-promo" class="panel" style="padding:0;overflow:hidden">
+      <div class="promo-layout">
+
+        <!-- LEFT: Create promo -->
+        <div class="promo-add-col">
+          <div class="promo-section-title">
+            <span>Новий промокод</span>
+            <span style="font-size:10px;color:var(--dim);font-weight:400">* — обов'язкові</span>
+          </div>
+
+          <!-- Code -->
+          <div class="pf">
+            <label>Код *</label>
+            <div class="promo-code-row">
+              <input id="pcCode" placeholder="ЛІТО20" class="pf" style="margin:0">
+              <button class="promo-gen-btn" onclick="pcGenCode()">⚡ Авто</button>
+            </div>
+          </div>
+
+          <!-- Type chips -->
+          <div class="pf">
+            <label>Тип знижки *</label>
+            <div class="promo-type-chips">
+              <button class="ptc on" onclick="pcSetType('percent')" id="ptc-percent">% Відсоток</button>
+              <button class="ptc" onclick="pcSetType('fixed')" id="ptc-fixed">грн Сума</button>
+              <button class="ptc" onclick="pcSetType('dish')" id="ptc-dish">🍽 На страву</button>
+              <button class="ptc" onclick="pcSetType('category')" id="ptc-category">📋 Категорія</button>
+              <button class="ptc" onclick="pcSetType('nth_free')" id="ptc-nth_free" style="grid-column:1/-1">🎁 N-й безкоштовно</button>
+            </div>
+            <!-- hidden select for JS compatibility -->
+            <select id="pcTypeSelect" style="display:none" onchange="pcSetType(this.value)">
+              <option value="percent">percent</option>
+              <option value="fixed">fixed</option>
+              <option value="dish">dish</option>
+              <option value="category">category</option>
+              <option value="nth_free">nth_free</option>
+            </select>
+          </div>
+
+          <!-- Value -->
+          <div class="pf" id="pcValueRow">
+            <label id="pcValueLabel">Розмір знижки *</label>
+            <div style="display:flex;align-items:center;gap:8px">
+              <input id="pcValue" type="number" min="1" placeholder="20" style="flex:1;padding:9px 11px;background:var(--bg2);border:1.5px solid var(--brd2);border-radius:var(--rs);color:var(--txt);font-size:13px;font-family:'Inter',sans-serif;outline:none;transition:border-color var(--t)">
+              <span id="pcValueUnit" style="color:var(--sub);font-size:13px;flex-shrink:0;min-width:22px">%</span>
+            </div>
+          </div>
+
+          <!-- Dish grid -->
+          <div class="pf" id="pcDishRow" style="display:none">
+            <label>Страва</label>
+            <div id="pcDishGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:6px;max-height:220px;overflow-y:auto;padding:2px 0"></div>
+          </div>
+
+          <!-- Category select -->
+          <div class="pf" id="pcCatRow" style="display:none">
+            <label>Категорія</label>
+            <select id="pcCatId" style="width:100%;padding:9px 11px;background:var(--bg2);border:1.5px solid var(--brd2);border-radius:var(--rs);color:var(--txt);font-size:13px;font-family:'Inter',sans-serif;outline:none">
+              <option value="">— Обрати —</option>
+            </select>
+          </div>
+
+          <!-- nth_free block -->
+          <div id="pcNthFreeRow" style="display:none;margin-bottom:10px">
+            <div style="background:var(--surf2);border-radius:var(--rs);padding:12px">
+              <div style="font-size:10px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Умова подарунку</div>
+              <div class="nth-free-grid">
+                <div>
+                  <div class="nth-sub">Купи</div>
+                  <input id="pcNthBuy" type="number" min="1" value="2" class="nth-inp" oninput="updateNthPreview()">
+                </div>
+                <div class="nth-arrow">→</div>
+                <div>
+                  <div class="nth-sub">Подарунок</div>
+                  <input id="pcNthFree" type="number" min="1" value="1" class="nth-inp" oninput="updateNthPreview()">
+                </div>
+              </div>
+              <div style="font-size:10px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Застосовувати до</div>
+              <div class="nth-target-row">
+                <label class="nth-target-label on" id="pcNthLabelAll">
+                  <input type="radio" name="pcNthTarget" id="pcNthTargetAll" value="all" checked style="accent-color:var(--p)" onchange="pcNthTargetChange()"> Будь-яка
+                </label>
+                <label class="nth-target-label" id="pcNthLabelDish">
+                  <input type="radio" name="pcNthTarget" id="pcNthTargetDish" value="dish" style="accent-color:var(--p)" onchange="pcNthTargetChange()"> Конкретна
+                </label>
+              </div>
+              <div id="pcNthDishPicker" style="display:none;margin-top:8px">
+                <input id="pcNthDishSearch" placeholder="Пошук страви..." style="width:100%;padding:7px 10px;background:var(--bg2);border:1.5px solid var(--brd2);border-radius:var(--rs);color:var(--txt);font-size:12px;font-family:'Inter',sans-serif;margin-bottom:6px;outline:none" oninput="rebuildNthDishGrid()">
+                <div id="pcNthDishGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:5px;max-height:180px;overflow-y:auto"></div>
+              </div>
+            </div>
+            <div id="pcNthPreview" style="font-size:11px;color:var(--sub);padding:5px 2px 0"></div>
+          </div>
+
+          <!-- Toggles -->
+          <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px">
+            <div class="promo-toggle-row">
+              <div><div class="promo-toggle-label">Безстроковий</div><div class="promo-toggle-sub">без дати закінчення</div></div>
+              <label class="ios-toggle"><input type="checkbox" id="pcNoExpiry" onchange="pcToggleExpiry()" checked><span class="ios-toggle-slider"></span></label>
+            </div>
+            <div id="pcExpiryWrap" style="display:none;padding:10px 12px;background:var(--surf2);border-radius:var(--rs)">
+              <div style="font-size:10px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px">Дійсний до</div>
+              <input type="date" id="pcExpiry" style="width:100%;padding:9px 11px;background:var(--bg2);border:1.5px solid var(--brd2);border-radius:var(--rs);color:var(--txt);font-size:14px;font-family:'Inter',sans-serif;outline:none">
+            </div>
+            <div class="promo-toggle-row">
+              <div><div class="promo-toggle-label">Одноразовий</div><div class="promo-toggle-sub">на кожен номер телефону</div></div>
+              <label class="ios-toggle"><input type="checkbox" id="pcSingleUse" checked><span class="ios-toggle-slider"></span></label>
+            </div>
+          </div>
+
+          <div id="pcErr" style="font-size:12px;min-height:14px;margin-bottom:8px;color:var(--red)"></div>
+          <button class="btn-pri" onclick="createPromo()" style="width:100%;justify-content:center">Створити промокод</button>
+        </div>
+
+        <!-- RIGHT: Promo list -->
+        <div class="promo-list-col">
+          <div class="promo-section-title">
+            <span>Промокоди</span>
+            <span id="promoCountBadge" style="font-size:11px;color:var(--dim);font-weight:400"></span>
+          </div>
+          <div class="promo-list-filters">
+            <input id="promoSearch" placeholder="Пошук коду..." oninput="renderPromoList()">
+            <select id="promoFilterType" onchange="renderPromoList()">
+              <option value="">Всі типи</option>
+              <option value="percent">Відсоток</option>
+              <option value="fixed">Фіксована</option>
+              <option value="dish">На страву</option>
+              <option value="category">Категорія</option>
+              <option value="nth_free">N-й</option>
+            </select>
+          </div>
+          <div id="promoList"></div>
+        </div>
+      </div>
+    </div>
+
     <!-- SETTINGS -->
-    <div id="sec-settings" class="panel">
-      <!-- Settings tabs -->
-      <div class="st-tabs">
-        <button class="st-tab on" id="stt-delivery" onclick="setSettTab('delivery')">🚚 Доставка</button>
-        <button class="st-tab" id="stt-hours" onclick="setSettTab('hours')">⏰ Графік</button>
-      </div>
+    <div id="sec-settings" class="panel" style="padding:0;overflow:hidden">
+      <div class="sett-page">
 
-      <!-- TAB: Delivery (cities, categories, min order) -->
-      <div id="stb-delivery" class="st-body">
-        <div class="st-grid">
-          <!-- Cities -->
-          <div class="st-card">
-            <div class="st-card-head">
-              <div class="st-card-icon">🏙</div>
-              <div>
-                <div class="st-card-title">Міста доставки</div>
-                <div class="st-card-sub">Список міст та ціна доставки</div>
-              </div>
-            </div>
-            <div id="citiesList"></div>
-            <div class="st-add-row">
-              <input class="st-inp" id="newCityName" placeholder="Місто або село">
-              <input class="st-inp st-inp-sm" id="newCityPrice" placeholder="грн" type="number">
-              <button class="btn-pri" onclick="addCity()" style="padding:8px 14px;font-size:12px;flex-shrink:0">+ Додати</button>
-            </div>
-          </div>
-
-          <!-- Categories -->
-          <div class="st-card">
-            <div class="st-card-head">
-              <div class="st-card-icon">📋</div>
-              <div>
-                <div class="st-card-title">Категорії меню</div>
-                <div class="st-card-sub">Розділи в каталозі страв</div>
-              </div>
-            </div>
-            <div id="catsList"></div>
-            <div class="st-add-row">
-              <input class="st-inp" id="newCatName" placeholder="Назва категорії">
-              <button class="btn-pri" onclick="addCategory()" style="padding:8px 14px;font-size:12px;flex-shrink:0">+ Додати</button>
-            </div>
-          </div>
-
-          <!-- Min order / Free delivery -->
-          <div class="st-card">
-            <div class="st-card-head">
-              <div class="st-card-icon">💰</div>
-              <div>
-                <div class="st-card-title">Умови замовлення</div>
-                <div class="st-card-sub">Мінімальна сума та безкоштовна доставка</div>
-              </div>
-            </div>
-            <div class="st-field-row">
-              <div class="st-field">
-                <div class="st-field-label">Мінімальне замовлення</div>
-                <div class="st-field-input-row">
-                  <input id="sMin" type="number" placeholder="200" class="st-inp">
-                  <span class="st-unit">грн</span>
-                </div>
-              </div>
-              <div class="st-field">
-                <div class="st-field-label">Безкоштовна доставка від</div>
-                <div class="st-field-input-row">
-                  <input id="sFree" type="number" placeholder="500" class="st-inp">
-                  <span class="st-unit">грн</span>
-                </div>
-              </div>
-            </div>
-            <div style="display:flex;align-items:center;gap:10px;margin-top:14px">
-              <button class="btn-pri" onclick="saveSettings()">Зберегти</button>
-              <span id="settMsg" style="font-size:12px;color:var(--green)"></span>
-            </div>
-          </div>
+        <!-- LEFT NAV -->
+        <div class="sett-nav">
+          <button class="sett-nav-item on" id="snav-delivery" onclick="setSettTab('delivery')">
+            <span class="sett-nav-icon">🚚</span>Доставка
+          </button>
+          <button class="sett-nav-item" id="snav-categories" onclick="setSettTab('categories')">
+            <span class="sett-nav-icon">📋</span>Категорії
+          </button>
+          <div class="sett-nav-sep"></div>
+          <button class="sett-nav-item" id="snav-hours" onclick="setSettTab('hours')">
+            <span class="sett-nav-icon">⏰</span>Графік
+          </button>
+          <button class="sett-nav-item" id="snav-conditions" onclick="setSettTab('conditions')">
+            <span class="sett-nav-icon">💰</span>Умови
+          </button>
         </div>
-      </div>
 
-      <!-- TAB: Hours -->
-      <div id="stb-hours" class="st-body" style="display:none">
-        <div class="st-grid">
-          <div class="st-card" style="max-width:520px">
-            <div class="st-card-head">
-              <div class="st-card-icon">⏰</div>
-              <div>
-                <div class="st-card-title">Графік роботи</div>
-                <div class="st-card-sub">Автоматичне визначення статусу ресторану</div>
+        <!-- RIGHT CONTENT -->
+        <div class="sett-content">
+
+          <!-- ── DELIVERY ── -->
+          <div class="sett-section active" id="stab-delivery">
+            <div class="sett-header">
+              <h2>Міста доставки</h2>
+              <p>Зони доставки та вартість для кожного міста чи села</p>
+            </div>
+
+            <!-- Info strip -->
+            <div class="sett-info-row" id="sett-delivery-info">
+              <div class="sett-info-card">
+                <div class="sett-info-label">Міст / сіл</div>
+                <div class="sett-info-val accent" id="si-cities">—</div>
+                <div class="sett-info-sub">в зоні доставки</div>
+              </div>
+              <div class="sett-info-card">
+                <div class="sett-info-label">Мін. замовлення</div>
+                <div class="sett-info-val" id="si-min">—</div>
+                <div class="sett-info-sub">для оформлення</div>
+              </div>
+              <div class="sett-info-card">
+                <div class="sett-info-label">Безкоштовно від</div>
+                <div class="sett-info-val green" id="si-free">—</div>
+                <div class="sett-info-sub">сума замовлення</div>
               </div>
             </div>
 
-            <!-- Weekdays -->
-            <div style="margin-bottom:20px">
-              <div style="font-size:12px;font-weight:700;color:var(--txt);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--brd)">Понеділок — П'ятниця</div>
-              <div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:end;gap:12px">
+            <div class="sett-block">
+              <div class="sett-block-head">
+                <div class="sett-block-icon">🏙</div>
                 <div>
-                  <div style="font-size:10px;font-weight:600;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Відкриття</div>
-                  <div class="time-input-wrap">
-                    <input id="sWdOpen" type="number" min="0" max="23" placeholder="10" class="hours-big-input time-h">
-                    <span class="time-colon">:</span>
-                    <input id="sWdOpenM" type="number" min="0" max="59" placeholder="00" class="hours-big-input time-m">
-                  </div>
-                </div>
-                <div style="font-size:22px;color:var(--dim);padding-bottom:14px;line-height:1">—</div>
-                <div>
-                  <div style="font-size:10px;font-weight:600;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Закриття</div>
-                  <div class="time-input-wrap">
-                    <input id="sWdClose" type="number" min="0" max="23" placeholder="22" class="hours-big-input time-h">
-                    <span class="time-colon">:</span>
-                    <input id="sWdCloseM" type="number" min="0" max="59" placeholder="00" class="hours-big-input time-m">
-                  </div>
+                  <div class="sett-block-title">Список міст</div>
+                  <div class="sett-block-sub">Назва та ціна доставки</div>
                 </div>
               </div>
-            </div>
-
-            <!-- Saturday -->
-            <div style="margin-bottom:20px">
-              <div style="font-size:12px;font-weight:700;color:var(--txt);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--brd)">Субота</div>
-              <div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:end;gap:12px">
-                <div>
-                  <div style="font-size:10px;font-weight:600;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Відкриття</div>
-                  <div class="time-input-wrap">
-                    <input id="sSatOpen" type="number" min="0" max="23" placeholder="11" class="hours-big-input time-h">
-                    <span class="time-colon">:</span>
-                    <input id="sSatOpenM" type="number" min="0" max="59" placeholder="00" class="hours-big-input time-m">
-                  </div>
-                </div>
-                <div style="font-size:22px;color:var(--dim);padding-bottom:14px;line-height:1">—</div>
-                <div>
-                  <div style="font-size:10px;font-weight:600;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Закриття</div>
-                  <div class="time-input-wrap">
-                    <input id="sSatClose" type="number" min="0" max="23" placeholder="23" class="hours-big-input time-h">
-                    <span class="time-colon">:</span>
-                    <input id="sSatCloseM" type="number" min="0" max="59" placeholder="00" class="hours-big-input time-m">
-                  </div>
+              <div class="sett-block-body">
+                <div id="citiesList"></div>
+                <div class="sett-add-row">
+                  <input class="sett-inp" id="newCityName" placeholder="Місто або село" style="flex:1">
+                  <input class="sett-inp sett-inp-sm" id="newCityPrice" placeholder="грн" type="number">
+                  <button class="btn-pri" onclick="addCity()" style="padding:8px 14px;font-size:12px;flex-shrink:0">+ Додати</button>
                 </div>
               </div>
-            </div>
-            <!-- Sunday -->
-            <div style="margin-bottom:20px">
-              <div style="font-size:12px;font-weight:700;color:var(--txt);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--brd)">Неділя</div>
-              <div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:end;gap:12px">
-                <div>
-                  <div style="font-size:10px;font-weight:600;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Відкриття</div>
-                  <div class="time-input-wrap">
-                    <input id="sSunOpen" type="number" min="0" max="23" placeholder="11" class="hours-big-input time-h">
-                    <span class="time-colon">:</span>
-                    <input id="sSunOpenM" type="number" min="0" max="59" placeholder="00" class="hours-big-input time-m">
-                  </div>
-                </div>
-                <div style="font-size:22px;color:var(--dim);padding-bottom:14px;line-height:1">—</div>
-                <div>
-                  <div style="font-size:10px;font-weight:600;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Закриття</div>
-                  <div class="time-input-wrap">
-                    <input id="sSunClose" type="number" min="0" max="23" placeholder="23" class="hours-big-input time-h">
-                    <span class="time-colon">:</span>
-                    <input id="sSunCloseM" type="number" min="0" max="59" placeholder="00" class="hours-big-input time-m">
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div style="display:flex;align-items:center;gap:10px">
-              <button class="btn-pri" onclick="saveWorkHours()">Зберегти графік</button>
-              <span id="hoursMsg" style="font-size:12px;color:var(--green)"></span>
             </div>
           </div>
-        </div>
-      </div>
 
+          <!-- ── CATEGORIES ── -->
+          <div class="sett-section" id="stab-categories">
+            <div class="sett-header">
+              <h2>Категорії меню</h2>
+              <p>Розділи в каталозі страв. Перетягніть для зміни порядку</p>
+            </div>
+            <div class="sett-block">
+              <div class="sett-block-head">
+                <div class="sett-block-icon">📋</div>
+                <div>
+                  <div class="sett-block-title">Категорії страв</div>
+                  <div class="sett-block-sub">Відображаються у фільтрах меню</div>
+                </div>
+                <span style="margin-left:auto;font-size:11px;color:var(--dim)" id="catCountBadge"></span>
+              </div>
+              <div class="sett-block-body">
+                <div id="catsList"></div>
+                <div class="sett-add-row">
+                  <input class="sett-inp" id="newCatName" placeholder="Назва категорії" style="flex:1">
+                  <button class="btn-pri" onclick="addCategory()" style="padding:8px 14px;font-size:12px;flex-shrink:0">+ Додати</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── HOURS ── -->
+          <div class="sett-section" id="stab-hours">
+            <div class="sett-header">
+              <h2>Графік роботи</h2>
+              <p>Визначає статус «Відкрито / Зачинено» на сайті в реальному часі</p>
+            </div>
+
+            <!-- Live status -->
+            <div class="sett-block" style="margin-bottom:14px">
+              <div class="sett-block-head" style="border-bottom:none;padding-bottom:12px">
+                <div id="spDot" style="width:10px;height:10px;border-radius:50%;background:var(--green);flex-shrink:0;box-shadow:0 0 0 3px rgba(34,197,94,.2)"></div>
+                <div>
+                  <div id="spStatus" style="font-size:13px;font-weight:700;color:var(--txt)">Визначення...</div>
+                  <div id="spTime" style="font-size:11px;color:var(--sub);margin-top:1px"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="sett-block">
+              <div class="sett-block-head">
+                <div class="sett-block-icon">⏰</div>
+                <div>
+                  <div class="sett-block-title">Години роботи</div>
+                  <div class="sett-block-sub">Відкриття та закриття по днях тижня</div>
+                </div>
+              </div>
+              <div class="sett-block-body">
+                <!-- Weekdays -->
+                <div class="hours-day-row">
+                  <div class="hours-day-label">
+                    <div class="hours-day-name">Пн — Пт</div>
+                    <div class="hours-day-sub">Будні дні</div>
+                  </div>
+                  <div class="hours-time-pair">
+                    <div>
+                      <div class="hours-time-label">Відкриття</div>
+                      <div style="display:flex;align-items:center;gap:3px">
+                        <input id="sWdOpen" type="number" min="0" max="23" placeholder="10" class="hours-time-input">
+                        <span class="hours-time-sep">:</span>
+                        <input id="sWdOpenM" type="number" min="0" max="59" placeholder="00" class="hours-time-input">
+                      </div>
+                    </div>
+                    <span class="hours-time-dash" style="margin-top:18px">—</span>
+                    <div>
+                      <div class="hours-time-label">Закриття</div>
+                      <div style="display:flex;align-items:center;gap:3px">
+                        <input id="sWdClose" type="number" min="0" max="23" placeholder="22" class="hours-time-input">
+                        <span class="hours-time-sep">:</span>
+                        <input id="sWdCloseM" type="number" min="0" max="59" placeholder="00" class="hours-time-input">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- Saturday -->
+                <div class="hours-day-row">
+                  <div class="hours-day-label">
+                    <div class="hours-day-name">Субота</div>
+                    <div class="hours-day-sub">Вихідний</div>
+                  </div>
+                  <div class="hours-time-pair">
+                    <div>
+                      <div class="hours-time-label">Відкриття</div>
+                      <div style="display:flex;align-items:center;gap:3px">
+                        <input id="sSatOpen" type="number" min="0" max="23" placeholder="11" class="hours-time-input">
+                        <span class="hours-time-sep">:</span>
+                        <input id="sSatOpenM" type="number" min="0" max="59" placeholder="00" class="hours-time-input">
+                      </div>
+                    </div>
+                    <span class="hours-time-dash" style="margin-top:18px">—</span>
+                    <div>
+                      <div class="hours-time-label">Закриття</div>
+                      <div style="display:flex;align-items:center;gap:3px">
+                        <input id="sSatClose" type="number" min="0" max="23" placeholder="23" class="hours-time-input">
+                        <span class="hours-time-sep">:</span>
+                        <input id="sSatCloseM" type="number" min="0" max="59" placeholder="00" class="hours-time-input">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- Sunday -->
+                <div class="hours-day-row">
+                  <div class="hours-day-label">
+                    <div class="hours-day-name">Неділя</div>
+                    <div class="hours-day-sub">Вихідний</div>
+                  </div>
+                  <div class="hours-time-pair">
+                    <div>
+                      <div class="hours-time-label">Відкриття</div>
+                      <div style="display:flex;align-items:center;gap:3px">
+                        <input id="sSunOpen" type="number" min="0" max="23" placeholder="11" class="hours-time-input">
+                        <span class="hours-time-sep">:</span>
+                        <input id="sSunOpenM" type="number" min="0" max="59" placeholder="00" class="hours-time-input">
+                      </div>
+                    </div>
+                    <span class="hours-time-dash" style="margin-top:18px">—</span>
+                    <div>
+                      <div class="hours-time-label">Закриття</div>
+                      <div style="display:flex;align-items:center;gap:3px">
+                        <input id="sSunClose" type="number" min="0" max="23" placeholder="23" class="hours-time-input">
+                        <span class="hours-time-sep">:</span>
+                        <input id="sSunCloseM" type="number" min="0" max="59" placeholder="00" class="hours-time-input">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="sett-save-bar">
+                  <button class="btn-pri" onclick="saveWorkHours()">Зберегти графік</button>
+                  <span id="hoursMsg" style="font-size:12px;color:var(--green)"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── CONDITIONS ── -->
+          <div class="sett-section" id="stab-conditions">
+            <div class="sett-header">
+              <h2>Умови замовлення</h2>
+              <p>Мінімальна сума та поріг безкоштовної доставки</p>
+            </div>
+
+            <div class="sett-block">
+              <div class="sett-block-head">
+                <div class="sett-block-icon">💰</div>
+                <div>
+                  <div class="sett-block-title">Фінансові умови</div>
+                  <div class="sett-block-sub">Відображаються на сайті та в кошику</div>
+                </div>
+              </div>
+              <div class="sett-block-body">
+                <div class="sett-amount-grid">
+                  <div class="sett-amount-field">
+                    <div class="sett-amount-label">Мінімальне замовлення</div>
+                    <div class="sett-amount-wrap">
+                      <input id="sMin" type="number" placeholder="200" class="sett-amount-inp">
+                      <span class="sett-amount-unit">грн</span>
+                    </div>
+                    <div style="font-size:11px;color:var(--sub);margin-top:5px">Нижче цієї суми замовлення не приймається</div>
+                  </div>
+                  <div class="sett-amount-field">
+                    <div class="sett-amount-label">Безкоштовна доставка від</div>
+                    <div class="sett-amount-wrap">
+                      <input id="sFree" type="number" placeholder="500" class="sett-amount-inp">
+                      <span class="sett-amount-unit">грн</span>
+                    </div>
+                    <div style="font-size:11px;color:var(--sub);margin-top:5px">Клієнт не платить за доставку від цієї суми</div>
+                  </div>
+                </div>
+                <div class="sett-save-bar">
+                  <button class="btn-pri" onclick="saveSettings()">Зберегти</button>
+                  <span id="settMsg" style="font-size:12px;color:var(--green)"></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Preview card -->
+            <div class="sett-block">
+              <div class="sett-block-head" style="border-bottom:none;padding-bottom:10px">
+                <div class="sett-block-icon" style="background:rgba(34,197,94,.12)">ℹ</div>
+                <div>
+                  <div class="sett-block-title">Як це виглядає для клієнта</div>
+                </div>
+              </div>
+              <div style="padding:0 16px 14px;display:flex;gap:10px;flex-wrap:wrap">
+                <div style="flex:1;min-width:140px;padding:12px 14px;background:var(--surf2);border-radius:var(--rs);border-left:3px solid var(--p)">
+                  <div style="font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">В кошику</div>
+                  <div style="font-size:12px;color:var(--txt)">«Мінімальне замовлення <strong id="prev-min" style="color:var(--p)">200 грн</strong>»</div>
+                </div>
+                <div style="flex:1;min-width:140px;padding:12px 14px;background:var(--surf2);border-radius:var(--rs);border-left:3px solid var(--green)">
+                  <div style="font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Банер</div>
+                  <div style="font-size:12px;color:var(--txt)">«Безкоштовна доставка від <strong id="prev-free" style="color:var(--green)">500 грн</strong>»</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /sett-content -->
+      </div><!-- /sett-page -->
     </div>
   </main>
 </div>
@@ -888,40 +1382,43 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none}
 <!-- ADD DISH TO ORDER MODAL -->
 <div class="modal-bg" id="addDishModal" onclick="if(event.target===this)document.getElementById('addDishModal').classList.remove('on')">
   <div class="modal-box" style="max-width:560px">
-    <button class="modal-x" onclick="document.getElementById('addDishModal').classList.remove('on')">✕</button>
-    <h3>Додати страву до замовлення</h3>
-    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
-      <input id="addDishSearch" class="tb-sel" placeholder="🔍 Пошук страви..." style="flex:2;min-width:140px;padding:10px 13px;font-size:13px" oninput="renderDishPicker()">
-      <select id="addDishCat" class="tb-sel" style="min-width:140px;padding:10px 10px;font-size:13px" onchange="renderDishPicker()">
-        <option value="">Всі категорії</option>
-      </select>
+    <div class="modal-drag-bar"></div>
+    <div class="modal-header">
+      <span class="modal-title">Додати страву</span>
+      <button class="modal-x" onclick="document.getElementById('addDishModal').classList.remove('on')">✕</button>
     </div>
-    <div id="addDishList" style="display:flex;flex-direction:column;gap:8px;max-height:420px;overflow-y:auto"></div>
-    <div id="addDishSelected" style="display:none;margin-top:14px;padding:12px 14px;background:var(--surf2);border-radius:var(--rs);border:1.5px solid var(--p)">
-      <div style="font-size:11px;font-weight:600;color:var(--sub);text-transform:uppercase;letter-spacing:.4px;margin-bottom:10px">Обрана страва</div>
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-        <div id="adPickedImg" style="width:44px;height:44px;border-radius:var(--rs);background:var(--surf);overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px"></div>
-        <div style="flex:1;min-width:0">
-          <div id="adPickedName" style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
-          <div id="adPickedPrice" style="font-size:12px;color:var(--p);font-weight:700;margin-top:1px"></div>
+    <div class="modal-scroll">
+      <div style="display:flex;gap:7px;margin-bottom:12px;flex-wrap:wrap">
+        <input id="addDishSearch" class="sett-inp sett-inp-full" placeholder="Пошук страви..." style="flex:2;min-width:120px" oninput="renderDishPicker()">
+        <select id="addDishCat" class="sett-inp" style="min-width:120px" onchange="renderDishPicker()">
+          <option value="">Всі категорії</option>
+        </select>
+      </div>
+      <div id="addDishList" style="display:flex;flex-direction:column;gap:7px;max-height:320px;overflow-y:auto"></div>
+      <div id="addDishSelected" style="display:none;margin-top:12px;padding:12px 14px;background:var(--surf2);border-radius:var(--r);border:1.5px solid var(--p)">
+        <div style="font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:9px">Обрана страва</div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+          <div id="adPickedImg" style="width:44px;height:44px;border-radius:var(--rs);background:var(--surf);overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px"></div>
+          <div style="flex:1;min-width:0">
+            <div id="adPickedName" style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
+            <div id="adPickedPrice" style="font-size:12px;color:var(--p);font-weight:700;margin-top:1px"></div>
+          </div>
+        </div>
+        <div id="adSizeBlock" style="display:none;margin-bottom:10px">
+          <div style="font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px">Розмір</div>
+          <select id="adSizeSel" class="sett-inp sett-inp-full" onchange="adUpdatePrice()"></select>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:12px;color:var(--sub);flex:1">Кількість:</span>
+          <button onclick="adQty(-1)" style="width:30px;height:30px;border-radius:50%;border:1.5px solid var(--brd2);background:var(--bg2);color:var(--txt);font-size:17px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;display:flex;align-items:center;justify-content:center">−</button>
+          <span id="adQtyNum" style="font-weight:700;font-size:15px;min-width:22px;text-align:center">1</span>
+          <button onclick="adQty(1)" style="width:30px;height:30px;border-radius:50%;border:1.5px solid var(--brd2);background:var(--bg2);color:var(--txt);font-size:17px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;display:flex;align-items:center;justify-content:center">+</button>
         </div>
       </div>
-      <!-- Size selector (shown only when dish has sizes) -->
-      <div id="adSizeBlock" style="display:none;margin-bottom:10px">
-        <div style="font-size:11px;font-weight:600;color:var(--sub);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Розмір</div>
-        <select id="adSizeSel" style="width:100%;padding:9px 10px;background:var(--bg2);border:1.5px solid var(--brd2);border-radius:var(--rs);color:var(--txt);font-size:13px;font-family:'Inter',sans-serif" onchange="adUpdatePrice()"></select>
-      </div>
-      <!-- Qty -->
-      <div style="display:flex;align-items:center;gap:8px">
-        <span style="font-size:12px;color:var(--sub);flex:1">Кількість:</span>
-        <button onclick="adQty(-1)" style="width:28px;height:28px;border-radius:50%;border:1.5px solid var(--brd2);background:var(--bg2);color:var(--txt);font-size:16px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;display:flex;align-items:center;justify-content:center">−</button>
-        <span id="adQtyNum" style="font-weight:700;font-size:14px;min-width:20px;text-align:center">1</span>
-        <button onclick="adQty(1)" style="width:28px;height:28px;border-radius:50%;border:1.5px solid var(--brd2);background:var(--bg2);color:var(--txt);font-size:16px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;display:flex;align-items:center;justify-content:center">+</button>
-      </div>
     </div>
-    <div style="display:flex;gap:8px;margin-top:14px">
-      <button class="btn-pri" id="adConfirmBtn" onclick="confirmAddDish()" style="flex:2" disabled>Додати до замовлення</button>
-      <button onclick="document.getElementById('addDishModal').classList.remove('on')" style="flex:1;padding:9px;background:var(--surf2);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--sub);font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif">Скасувати</button>
+    <div class="modal-footer">
+      <button class="btn-pri" id="adConfirmBtn" onclick="confirmAddDish()" style="flex:2;justify-content:center" disabled>Додати до замовлення</button>
+      <button class="modal-btn-ghost" onclick="document.getElementById('addDishModal').classList.remove('on')">Скасувати</button>
     </div>
   </div>
 </div>
@@ -929,72 +1426,69 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none}
 <!-- EDIT DISH MODAL -->
 <div class="modal-bg" id="editModal" onclick="if(event.target===this)closeEditModal()">
   <div class="modal-box">
-    <button class="modal-x" onclick="closeEditModal()">✕</button>
-    <h3>Редагувати страву</h3>
-    <div class="fgrid">
-      <div class="fg"><label>Назва *</label><input id="eName"></div>
-      <div class="fg"><label>Категорія *</label><select id="eCat"></select></div>
-      <div class="fg"><label>Ціна (грн) *</label><input id="ePrice" type="number" min="1"></div>
-      <div class="fg"><label>Час (хв)</label><input id="ePrep" type="number" min="1"></div>
+    <div class="modal-drag-bar"></div>
+    <div class="modal-header">
+      <span class="modal-title">Редагувати страву</span>
+      <button class="modal-x" onclick="closeEditModal()">✕</button>
     </div>
-    <!-- Sale toggle -->
-    <div style="margin-bottom:12px">
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--surf2);border-radius:var(--rs)">
-        <div>
-          <div style="font-size:13px;font-weight:600;color:var(--txt)">Акційна ціна</div>
-          <div style="font-size:11px;color:var(--sub);margin-top:1px">Показати перекреслену стару ціну</div>
-        </div>
-        <label class="ios-toggle">
-          <input type="checkbox" id="eSaleOn" onchange="toggleSaleField()">
-          <span class="ios-toggle-slider"></span>
-        </label>
+    <div class="modal-scroll">
+      <div class="fgrid" style="margin-bottom:0">
+        <div class="fg"><label>Назва *</label><input id="eName"></div>
+        <div class="fg"><label>Категорія *</label><select id="eCat"></select></div>
+        <div class="fg"><label>Ціна (грн) *</label><input id="ePrice" type="number" min="1"></div>
+        <div class="fg"><label>Час (хв)</label><input id="ePrep" type="number" min="1"></div>
       </div>
-      <div id="eSaleField" style="display:none;margin-top:8px">
-        <div class="fg" style="margin:0">
-          <label>Нова ціна зі знижкою (грн)</label>
-          <input id="eOldPrice" type="number" min="1" placeholder="напр. 450 — менше ніж ціна вище">
+      <!-- Sale toggle -->
+      <div style="margin-bottom:10px">
+        <div class="mf-toggle-row">
+          <div>
+            <div class="mf-toggle-label">Акційна ціна</div>
+            <div class="mf-toggle-sub">Показати перекреслену стару ціну</div>
+          </div>
+          <label class="ios-toggle"><input type="checkbox" id="eSaleOn" onchange="toggleSaleField()"><span class="ios-toggle-slider"></span></label>
         </div>
-        <div style="font-size:11px;color:var(--sub);margin-top:6px;padding:8px 10px;background:var(--surf2);border-radius:var(--rs)">
-          «Ціна» вище — стара (буде перекреслена) &nbsp;·&nbsp; Тут — нова акційна ціна
+        <div id="eSaleField" style="display:none;margin-top:7px">
+          <div class="fg" style="margin:0">
+            <label>Нова ціна зі знижкою (грн)</label>
+            <input id="eOldPrice" type="number" min="1" placeholder="напр. 450 — менше ніж ціна вище">
+          </div>
+          <div style="font-size:11px;color:var(--sub);margin-top:5px;padding:7px 10px;background:var(--surf2);border-radius:var(--rs)">«Ціна» вище — стара (буде перекреслена) · Тут — нова акційна ціна</div>
+        </div>
+      </div>
+      <div class="fg"><label>Опис</label><textarea id="eDesc" rows="2"></textarea></div>
+      <!-- Photo -->
+      <div class="fg" style="margin-bottom:10px">
+        <label>Фото</label>
+        <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:4px">
+          <label class="photo-label">Замінити<input type="file" id="ePhoto" accept="image/*" style="display:none" onchange="previewPhoto('ePhoto','ePhotoPreview')"></label>
+          <img id="ePhotoPreview" class="photo-preview">
+          <img id="ePhotoExisting" class="photo-preview">
+          <span id="ePhotoStatus" style="font-size:11px;color:var(--sub)"></span>
+        </div>
+      </div>
+      <!-- Toggles -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px">
+        <div class="mf-toggle-row">
+          <div><div class="mf-toggle-label">Хіт</div><div class="mf-toggle-sub">бейдж «Хіт»</div></div>
+          <label class="ios-toggle"><input type="checkbox" id="ePop"><span class="ios-toggle-slider"></span></label>
+        </div>
+        <div class="mf-toggle-row">
+          <div><div class="mf-toggle-label">Розміри</div><div class="mf-toggle-sub">варіанти цін</div></div>
+          <label class="ios-toggle"><input type="checkbox" id="eHasSizes" onchange="toggleEditSizes()"><span class="ios-toggle-slider"></span></label>
+        </div>
+      </div>
+      <!-- Edit sizes block -->
+      <div id="eSizesBlock" style="display:none;margin-bottom:10px">
+        <div class="mf-sizes-block">
+          <div class="mf-sizes-header"><span>Назва варіанту</span><span style="width:76px;text-align:center">Ціна</span></div>
+          <div id="eSizesList" style="display:flex;flex-direction:column;gap:5px"></div>
+          <button onclick="addSizeRow('eSizesList')" type="button" style="margin-top:7px;padding:6px 12px;background:transparent;border:1px dashed var(--brd2);border-radius:var(--rs);color:var(--sub);font-size:11px;font-weight:600;cursor:pointer;width:100%;font-family:'Inter',sans-serif">+ Варіант</button>
         </div>
       </div>
     </div>
-    <div class="fg"><label>Опис</label><textarea id="eDesc" rows="2"></textarea></div>
-    <div class="fg">
-      <label>Фото</label>
-      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:4px">
-        <label class="photo-label">Замінити<input type="file" id="ePhoto" accept="image/*" style="display:none" onchange="previewPhoto('ePhoto','ePhotoPreview')"></label>
-        <img id="ePhotoPreview" class="photo-preview">
-        <img id="ePhotoExisting" class="photo-preview">
-        <span id="ePhotoStatus" style="font-size:11px;color:var(--sub)"></span>
-      </div>
-    </div>
-    <!-- iOS toggles -->
-    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px">
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--surf2);border-radius:var(--rs)">
-        <div>
-          <div style="font-size:13px;font-weight:600;color:var(--txt)">Хіт продажів</div>
-          <div style="font-size:11px;color:var(--sub);margin-top:1px">Відображати бейдж «Хіт»</div>
-        </div>
-        <label class="ios-toggle"><input type="checkbox" id="ePop"><span class="ios-toggle-slider"></span></label>
-      </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--surf2);border-radius:var(--rs)">
-        <div>
-          <div style="font-size:13px;font-weight:600;color:var(--txt)">Розміри</div>
-          <div style="font-size:11px;color:var(--sub);margin-top:1px">Кілька варіантів з різними цінами</div>
-        </div>
-        <label class="ios-toggle"><input type="checkbox" id="eHasSizes" onchange="toggleEditSizes()"><span class="ios-toggle-slider"></span></label>
-      </div>
-    </div>
-    <!-- Edit sizes block -->
-    <div id="eSizesBlock" style="display:none;margin-bottom:14px">
-      <div style="font-size:11px;font-weight:600;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Варіанти розміру</div>
-      <div id="eSizesList" style="display:flex;flex-direction:column;gap:6px"></div>
-      <button onclick="addSizeRow('eSizesList')" type="button" style="margin-top:8px;padding:7px 14px;background:var(--surf2);border:1.5px dashed var(--brd2);border-radius:var(--rs);color:var(--sub);font-size:12px;font-weight:600;cursor:pointer;width:100%">+ Додати варіант</button>
-    </div>
-    <div style="display:flex;gap:8px">
-      <button class="btn-pri" onclick="saveDishEdit()" style="flex:2">Зберегти</button>
-      <button onclick="closeEditModal()" style="flex:1;padding:9px;background:var(--surf2);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--sub);font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif">Скасувати</button>
+    <div class="modal-footer">
+      <button class="btn-pri" onclick="saveDishEdit()" style="flex:2;justify-content:center">Зберегти</button>
+      <button class="modal-btn-ghost" onclick="closeEditModal()">Скасувати</button>
     </div>
   </div>
 </div>
@@ -1057,6 +1551,14 @@ window.previewPhoto=(inputId,previewId)=>{
   const p=document.getElementById(previewId);
   if(!f||!p) return;
   p.src=URL.createObjectURL(f); p.style.display="block";
+};
+window.previewPhotoNew=(inputId,previewId)=>{
+  const f=document.getElementById(inputId)?.files?.[0];
+  const p=document.getElementById(previewId);
+  const s=document.getElementById("mPhotoStatus");
+  if(!f||!p) return;
+  p.src=URL.createObjectURL(f); p.style.display="block";
+  if(s) s.textContent=f.name.length>18?f.name.slice(0,15)+"…":f.name;
 };
 
 /* ——— R2 DELETE ——— 
@@ -1171,7 +1673,7 @@ window.doLogout=async()=>{
 /* ——— START ——— */
 function startApp(){
   if(appStarted)return;appStarted=true;
-  listenSettings();listenMenu();listenBanners();listenOrders();listenR2Deletions();listenHistoryFirebase();
+  listenSettings();listenMenu();listenBanners();listenOrders();listenR2Deletions();listenHistoryFirebase();listenPromos();
 }
 
 function listenHistoryFirebase(){
@@ -1301,7 +1803,12 @@ function renderOrders(){
           </div>`;
         }).join("")}</div>
         <div class="o-totals">
-          <div><div class="o-total">${o.total} грн</div><div class="o-dlv" style="color:${o.delivery===0?"var(--green)":"var(--dim)"}">${o.delivery===0?"Доставка безкоштовна":"+"+o.delivery+" грн доставка"}</div></div>
+          <div>
+            <div class="o-total">${o.total} грн</div>
+            ${o.promoCode?`<div style="font-size:10px;margin-top:2px;color:var(--p);font-weight:700">🏷 ${o.promoCode}${o.promoDiscount?" −"+o.promoDiscount+" грн":""}</div>`:""}
+            <div class="o-dlv" style="color:${o.delivery===0?"var(--green)":"var(--dim)"}">${o.delivery===0?"Доставка безкоштовна":"+"+o.delivery+" грн доставка"}</div>
+
+          </div>
           <div class="o-eta">~${o.eta} хв</div>
         </div>
         ${o.customer?.comment?`<div class="o-comment">${o.customer.comment}</div>`:""}
@@ -1333,21 +1840,35 @@ window.delOrder=async id=>{
 
 /* ——— STATS ——— */
 function renderStats(){
-  const all=Object.values(allOrders).flat();
+  const all=Object.values(allOrders).flat().filter(o=>o&&o.status);
+  if(all.length===0&&Object.values(allOrders).every(a=>!a||!a.length)){
+    document.getElementById("statsCards").innerHTML=`<div class="state-box" style="min-height:120px"><div class="spinner"></div><strong>Завантаження...</strong></div>`;
+    document.getElementById("topDishes").innerHTML="";
+    document.getElementById("catChart").innerHTML="";
+    return;
+  }
   const now=new Date();now.setHours(0,0,0,0);
   const todayN=all.filter(o=>o.createdAt>=now.getTime()).length;
   const todayRev=all.filter(o=>o.status==="completed"&&o.createdAt>=now.getTime()).reduce((s,o)=>s+(o.total||0),0);
   const totalRev=allOrders.completed.reduce((s,o)=>s+(o.total||0),0);
   const avgOrder=allOrders.completed.length?Math.round(totalRev/allOrders.completed.length):0;
+  const promoCount=Object.keys(allPromos).length;
+  const promoUses=Object.values(allPromos).reduce((s,p)=>s+Object.keys(p.uses||{}).length,0);
+  const promoActive=Object.values(allPromos).filter(p=>p.active&&(!p.expiresAt||p.expiresAt>Date.now())).length;
   document.getElementById("statsCards").innerHTML=`
     <div class="stat-card"><div class="stat-label">Сьогодні</div><div class="stat-val accent">${todayN}</div><div class="stat-sub">Всього: ${all.length}</div></div>
     <div class="stat-card"><div class="stat-label">Виручка сьогодні</div><div class="stat-val">${todayRev}<span style="font-size:14px;color:var(--sub)"> грн</span></div><div class="stat-sub">Загалом: ${totalRev} грн</div></div>
     <div class="stat-card"><div class="stat-label">Виконано</div><div class="stat-val">${allOrders.completed.length}</div><div class="stat-sub">Активних: ${all.length-allOrders.completed.length}</div></div>
-    <div class="stat-card"><div class="stat-label">Середній чек</div><div class="stat-val">${avgOrder}<span style="font-size:14px;color:var(--sub)"> грн</span></div></div>`;
+    <div class="stat-card"><div class="stat-label">Середній чек</div><div class="stat-val">${avgOrder}<span style="font-size:14px;color:var(--sub)"> грн</span></div></div>
+    <div class="stat-card"><div class="stat-label">Промокодів</div><div class="stat-val">${promoActive}<span style="font-size:14px;color:var(--sub)"> акт.</span></div><div class="stat-sub">Всього: ${promoCount} · Використань: ${promoUses}</div></div>`;
   const dc={},cc={};
   all.forEach(o=>(o.items||[]).forEach(i=>{
+    if(i.deleted) return; // skip deleted items
     const k=i.name;if(!dc[k])dc[k]={qty:0,rev:0};dc[k].qty+=i.qty;dc[k].rev+=i.price*i.qty;
-    const c=i.cat||"Інше";if(!cc[c])cc[c]=0;cc[c]+=i.qty;
+    // Look up category from allDishes if not stored in order item
+    const dish=allDishes.find(d=>d.id===i.id);
+    const cat=i.cat||(dish?dish.cat:null)||"Інше";
+    if(!cc[cat])cc[cat]=0;cc[cat]+=i.qty;
   }));
   const td=Object.entries(dc).sort((a,b)=>b[1].qty-a[1].qty).slice(0,8);
   const maxD=td[0]?.[1].qty||1;
@@ -1403,18 +1924,19 @@ function rebuildCatSelects(){
   ["mCat","eCat"].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=opts;});
 }
 function renderSettings(){
-  document.getElementById("sMin").value=siteSettings.minOrder||200;
-  document.getElementById("sFree").value=siteSettings.freeDelivery||500;
+  const minVal=siteSettings.minOrder||200;
+  const freeVal=siteSettings.freeDelivery||500;
+  const sMin=document.getElementById("sMin"); if(sMin) sMin.value=minVal;
+  const sFree=document.getElementById("sFree"); if(sFree) sFree.value=freeVal;
+  // Preview cards
+  const pm=document.getElementById("prev-min"); if(pm) pm.textContent=minVal+" грн";
+  const pf=document.getElementById("prev-free"); if(pf) pf.textContent=freeVal+" грн";
   // Work hours
   const wh=siteSettings.workHours||{weekdays:{open:10,openMin:0,close:22,closeMin:0},weekends:{open:11,openMin:0,close:23,closeMin:0}};
   const wdO=document.getElementById("sWdOpen");   if(wdO) wdO.value=wh.weekdays?.open??10;
   const wdOM=document.getElementById("sWdOpenM");  if(wdOM)wdOM.value=wh.weekdays?.openMin??0;
   const wdC=document.getElementById("sWdClose");  if(wdC) wdC.value=wh.weekdays?.close??22;
   const wdCM=document.getElementById("sWdCloseM"); if(wdCM)wdCM.value=wh.weekdays?.closeMin??0;
-  const weO=document.getElementById("sWeOpen");   if(weO) weO.value=wh.weekends?.open??11;
-  const weOM=document.getElementById("sWeOpenM");  if(weOM)weOM.value=wh.weekends?.openMin??0;
-  const weC=document.getElementById("sWeClose");  if(weC) weC.value=wh.weekends?.close??23;
-  const weCM=document.getElementById("sWeCloseM"); if(weCM)weCM.value=wh.weekends?.closeMin??0;
   const satO=document.getElementById("sSatOpen");   if(satO) satO.value=wh.saturday?.open??wh.weekends?.open??11;
   const satOM=document.getElementById("sSatOpenM");  if(satOM)satOM.value=wh.saturday?.openMin??wh.weekends?.openMin??0;
   const satC=document.getElementById("sSatClose");  if(satC) satC.value=wh.saturday?.close??wh.weekends?.close??23;
@@ -1425,57 +1947,69 @@ function renderSettings(){
   const sunCM=document.getElementById("sSunCloseM"); if(sunCM)sunCM.value=wh.sunday?.closeMin??wh.weekends?.closeMin??0;
   // Categories
   const cats=Array.isArray(siteSettings.categories)?siteSettings.categories:[];
-  document.getElementById("catsList").innerHTML=cats.length
+  const catsEl=document.getElementById("catsList");
+  if(catsEl) catsEl.innerHTML=cats.length
     ?cats.map((c,i)=>`<div class="cat-drag-item" draggable="true" ondragstart="catDragStart(${i})" ondragover="catDragOver(event,${i})" ondragend="catDragEnd()" ondrop="catDrop(${i})"><span class="cat-drag-handle">⠿</span><span class="cat-drag-name">${c}</span><button class="city-del" onclick="removeCategory(${i})">✕</button></div>`).join("")
     :`<p style="color:var(--dim);font-size:12px;margin-bottom:8px">Немає категорій</p>`;
+  const catBadge=document.getElementById("catCountBadge"); if(catBadge) catBadge.textContent=cats.length+" шт";
   rebuildCatSelects();
   // Cities
   const cities=Array.isArray(siteSettings.cities)?siteSettings.cities:[];
-  document.getElementById("citiesList").innerHTML=cities.length
+  const citiesEl=document.getElementById("citiesList");
+  if(citiesEl) citiesEl.innerHTML=cities.length
     ?cities.map((c,i)=>`<div class="city-row"><span class="city-name">${c.name}</span><input type="number" class="city-price-input" value="${c.price}" oninput="updateCityPrice(${i},this.value)"><span style="font-size:11px;color:var(--sub)">грн</span><button id="cpSave${i}" class="city-save" onclick="saveCityPrice(${i})">✓</button><button class="city-del" onclick="removeCity(${i})">✕</button></div>`).join("")
     :`<p style="color:var(--dim);font-size:12px;margin-bottom:8px">Немає міст</p>`;
-  // Status preview (col 3)
-  const now=new Date(), d=now.getDay(), h=now.getHours()+now.getMinutes()/60;
+  // Info strip cards
+  const siCities=document.getElementById("si-cities"); if(siCities) siCities.textContent=cities.length;
+  const siMin=document.getElementById("si-min"); if(siMin) siMin.textContent=minVal+" грн";
+  const siFree=document.getElementById("si-free"); if(siFree) siFree.textContent=freeVal+" грн";
+  // Status banner
+  const now=new Date(), d=now.getDay(), h2=now.getHours()+now.getMinutes()/60;
   const isWe=d===0||d===6;
   const hrs=isWe?wh.weekends:wh.weekdays;
-  const open=h>=hrs.open&&h<hrs.close;
+  const open=h2>=(hrs.open+(hrs.openMin||0)/60)&&h2<(hrs.close+(hrs.closeMin||0)/60);
   const spDot=document.getElementById("spDot");
   const spStatus=document.getElementById("spStatus");
   const spTime=document.getElementById("spTime");
-  if(spDot) spDot.style.background=open?"var(--green)":"var(--red)";
+  if(spDot){spDot.style.background=open?"var(--green)":"var(--red)";spDot.style.boxShadow=open?"0 0 0 3px rgba(34,197,94,.2)":"0 0 0 3px rgba(239,68,68,.15)";}
   if(spStatus) spStatus.textContent=open?"Відкрито зараз":"Зачинено зараз";
-  const todayHrs=isWe?wh.weekends:wh.weekdays;
-  if(spTime) spTime.textContent=`Пн–Пт ${wh.weekdays?.open??10}:00–${wh.weekdays?.close??22}:00 · Сб–Нд ${wh.weekends?.open??11}:00–${wh.weekends?.close??23}:00`;
-  const spCities=document.getElementById("spCities"); if(spCities) spCities.textContent=cities.length;
-  const spCats=document.getElementById("spCats"); if(spCats) spCats.textContent=cats.length;
-  const spMin=document.getElementById("spMin"); if(spMin) spMin.textContent=(siteSettings.minOrder||200)+" грн";
-  const spFree=document.getElementById("spFree"); if(spFree) spFree.textContent=(siteSettings.freeDelivery||500)+" грн";
+  const fmt=(hh,mm)=>hh+":"+(mm<10?"0":"")+mm;
+  if(spTime) spTime.textContent=`Пн–Пт ${fmt(wh.weekdays?.open??10,wh.weekdays?.openMin??0)}–${fmt(wh.weekdays?.close??22,wh.weekdays?.closeMin??0)} · Сб ${fmt(wh.saturday?.open??11,wh.saturday?.openMin??0)}–${fmt(wh.saturday?.close??23,wh.saturday?.closeMin??0)} · Нд ${fmt(wh.sunday?.open??11,wh.sunday?.openMin??0)}–${fmt(wh.sunday?.close??23,wh.sunday?.closeMin??0)}`;
+  // Legacy statsSection elements (used by stats panel)
+  const spCities2=document.getElementById("spCities"); if(spCities2) spCities2.textContent=cities.length;
+  const spCats2=document.getElementById("spCats"); if(spCats2) spCats2.textContent=cats.length;
+  const spMin2=document.getElementById("spMin"); if(spMin2) spMin2.textContent=minVal+" грн";
+  const spFree2=document.getElementById("spFree"); if(spFree2) spFree2.textContent=freeVal+" грн";
+  // Stats panel status dot (spStatus2)
+  const spDot2=document.getElementById("spDot2");
+  const spStatus2=document.getElementById("spStatus2");
+  const spTime2=document.getElementById("spTime2");
+  if(spDot2) spDot2.style.background=open?"var(--green)":"var(--red)";
+  if(spStatus2) spStatus2.textContent=open?"Відкрито":"Зачинено";
+  if(spTime2) spTime2.textContent=`Пн–Пт ${fmt(wh.weekdays?.open??10,wh.weekdays?.openMin??0)}–${fmt(wh.weekdays?.close??22,wh.weekdays?.closeMin??0)}`;
 }
 window.saveWorkHours=async()=>{
   const wdOpen=parseInt(document.getElementById("sWdOpen").value)||0;
   const wdOpenM=parseInt(document.getElementById("sWdOpenM").value)||0;
   const wdClose=parseInt(document.getElementById("sWdClose").value)||0;
   const wdCloseM=parseInt(document.getElementById("sWdCloseM").value)||0;
-  const weOpen=parseInt(document.getElementById("sWeOpen").value)||0;
-  const weOpenM=parseInt(document.getElementById("sWeOpenM").value)||0;
-  const weClose=parseInt(document.getElementById("sWeClose").value)||0;
-  const weCloseM=parseInt(document.getElementById("sWeCloseM").value)||0;
-  const satOpen=parseInt(document.getElementById("sSatOpen").value)||0;
-  const satOpenM=parseInt(document.getElementById("sSatOpenM").value)||0;
-  const satClose=parseInt(document.getElementById("sSatClose").value)||0;
-  const satCloseM=parseInt(document.getElementById("sSatCloseM").value)||0;
+  const satOpen=parseInt(document.getElementById("sSatOpen")?.value)||0;
+  const satOpenM=parseInt(document.getElementById("sSatOpenM")?.value)||0;
+  const satClose=parseInt(document.getElementById("sSatClose")?.value)||0;
+  const satCloseM=parseInt(document.getElementById("sSatCloseM")?.value)||0;
+  // Use Saturday as "weekends" fallback
+  const weOpen=satOpen, weOpenM=satOpenM, weClose=satClose, weCloseM=satCloseM;
   const sunOpen=parseInt(document.getElementById("sSunOpen").value)||0;
   const sunOpenM=parseInt(document.getElementById("sSunOpenM").value)||0;
   const sunClose=parseInt(document.getElementById("sSunClose").value)||0;
   const sunCloseM=parseInt(document.getElementById("sSunCloseM").value)||0;
   const wdOpenTotal=wdOpen*60+wdOpenM, wdCloseTotal=wdClose*60+wdCloseM;
-  const weOpenTotal=weOpen*60+weOpenM, weCloseTotal=weClose*60+weCloseM;
-  if(wdOpenTotal>=wdCloseTotal||weOpenTotal>=weCloseTotal){
-    alert("Перевірте значення — відкриття повинно бути раніше за закриття");return;
+  if(wdOpenTotal>=wdCloseTotal){
+    alert("Перевірте значення Пн–Пт — відкриття повинно бути раніше за закриття");return;
   }
   if(!siteSettings.workHours)siteSettings.workHours={};
   siteSettings.workHours.weekdays={open:wdOpen,openMin:wdOpenM,close:wdClose,closeMin:wdCloseM};
-  siteSettings.workHours.weekends={open:weOpen,openMin:weOpenM,close:weClose,closeMin:weCloseM};
+  siteSettings.workHours.weekends={open:satOpen,openMin:satOpenM,close:satClose,closeMin:satCloseM};
   siteSettings.workHours.saturday={open:satOpen,openMin:satOpenM,close:satClose,closeMin:satCloseM};
   siteSettings.workHours.sunday={open:sunOpen,openMin:sunOpenM,close:sunClose,closeMin:sunCloseM};
   try{
@@ -1590,20 +2124,18 @@ window.deleteDish=async id=>{
 };
 function renderDishList(){
   const el=document.getElementById("dishGrid");if(!el)return;
-  // Update category filter options
   const catSel=document.getElementById("dishFilterCat");
   if(catSel){
     const cats=[...new Set(allDishes.map(d=>d.cat).filter(Boolean))];
     const cur=catSel.value;
     catSel.innerHTML='<option value="">Всі категорії</option>'+cats.map(c=>`<option value="${c}"${c===cur?' selected':''}>${c}</option>`).join("");
   }
-  // Apply search / filter / sort
-  const q=(document.getElementById("dishSearch")?.value||"" ).toLowerCase();
+  const q=(document.getElementById("dishSearch")?.value||"").toLowerCase();
   const filterCat=document.getElementById("dishFilterCat")?.value||"";
   const sortMode=document.getElementById("dishFilterSort")?.value||"name";
   let dishes=allDishes.filter(d=>{
     if(filterCat && d.cat!==filterCat) return false;
-    if(q && !d.name.toLowerCase().includes(q) && !(d.desc||" ").toLowerCase().includes(q)) return false;
+    if(q && !d.name.toLowerCase().includes(q) && !(d.desc||"").toLowerCase().includes(q)) return false;
     return true;
   });
   if(sortMode==="name") dishes.sort((a,b)=>a.name.localeCompare(b.name,"uk"));
@@ -1611,24 +2143,37 @@ function renderDishList(){
   else if(sortMode==="price_desc") dishes.sort((a,b)=>b.price-a.price);
   else if(sortMode==="newest") dishes.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
   const cnt=document.getElementById("dishCount");
-  if(cnt) cnt.textContent=dishes.length!==allDishes.length?`Знайдено: ${dishes.length} з ${allDishes.length}`:`Всього страв: ${allDishes.length}`;
-  if(!dishes.length){el.innerHTML=`<div class="state-box"><div class="state-icon">○</div><strong>${allDishes.length?'Нічого не знайдено':'Меню порожнє'}</strong><p>${allDishes.length?'Спробуйте інший запит':'Додайте страви у вкладці "Додати"'}</p></div>`;return;}
-  el.innerHTML=dishes.map(d=>`
-    <div class="dish-card">
-      <div class="dc-head">
-        <div class="dc-photo">${d.photo?`<img src="${d.photo}" alt="${d.name}">`:""}</div>
-        <div style="flex:1;min-width:0">
-          <div class="dc-name">${d.name}</div>
-          <div class="dc-price">${d.price} грн${d.oldPrice?` <s style="font-size:10px;font-weight:400;color:var(--dim)">${d.oldPrice}</s>`:""}</div>
-          <span class="dc-tag">${d.cat}</span>
+  if(cnt) cnt.textContent=dishes.length!==allDishes.length
+    ?`Знайдено: ${dishes.length} з ${allDishes.length} страв`
+    :`${allDishes.length} страв`;
+  if(!dishes.length){
+    el.innerHTML=`<div class="state-box" style="min-height:200px"><div class="state-icon" style="font-size:28px;opacity:.3">${allDishes.length?'⊘':'☰'}</div><strong>${allDishes.length?'Нічого не знайдено':'Меню порожнє'}</strong><p>${allDishes.length?'Спробуйте інший запит':'Заповніть форму зліва'}</p></div>`;
+    return;
+  }
+  el.innerHTML=dishes.map(d=>{
+    const sizesTag=d.sizes&&d.sizes.length?`<span class="dt-badge-sizes">${d.sizes.length} розм.</span>`:"";
+    const popTag=d.pop?`<span class="dt-badge-pop">Хіт</span>`:"";
+    const saleTag=d.oldPrice?`<span class="dt-badge-sale">Акція</span>`:"";
+    const priceHtml=d.oldPrice
+      ?`<span class="dt-price-old">${d.oldPrice} грн</span>${d.price} грн`
+      :`${d.price} грн`;
+    return `<div class="dish-trow">
+      <div class="dt-thumb">${d.photo?`<img src="${d.photo}" alt="${d.name}">`:"🍽"}</div>
+      <div class="dt-info">
+        <div class="dt-name">${d.name}</div>
+        <div class="dt-meta">
+          <span class="dt-cat">${d.cat||""}</span>
+          ${popTag}${saleTag}${sizesTag}
+          <span style="font-size:10px;color:var(--dim)">${d.prep||15} хв</span>
         </div>
       </div>
-      ${d.desc?`<div class="dc-desc">${d.desc}</div>`:""}
-      <div class="dc-btns">
-        <button class="dc-edit" onclick="openEditDish('${d.id}')">Редагувати</button>
-        <button class="dc-del" onclick="deleteDish('${d.id}')">Видалити</button>
+      <div class="dt-price">${priceHtml}</div>
+      <div class="dt-actions">
+        <button class="dt-edit" onclick="openEditDish('${d.id}')">Редагувати</button>
+        <button class="dt-del" onclick="deleteDish('${d.id}')" title="Видалити">✕</button>
       </div>
-    </div>`).join("");
+    </div>`;
+  }).join("");
 }
 
 /* ——— BANNERS ——— */
@@ -1804,7 +2349,7 @@ window.toggleHist=id=>{
 };
 
 /* ——— SECTION ROUTING ——— */
-const SECTIONS=["orders","stats","menu","banners","history","settings"];
+const SECTIONS=["orders","stats","menu","banners","history","promo","settings"];
 window.setSection=sec=>{
   curSection=sec;
   SECTIONS.forEach(s=>{
@@ -1812,8 +2357,8 @@ window.setSection=sec=>{
     el.classList.toggle("active",s===sec);
     document.getElementById("nb-"+s).classList.toggle("on",s===sec);
   });
-  const titles={orders:"Замовлення",stats:"Статистика",menu:"Меню",banners:"Банери",history:"Історія",settings:"Налаштування"};
-  const subs={orders:"Управління замовленнями",stats:"Аналітика продажів",menu:"Страви та категорії",banners:"Слайдер на сайті",history:"Журнал подій",settings:"Налаштування сайту"};
+  const titles={orders:"Замовлення",stats:"Статистика",menu:"Меню",banners:"Банери",history:"Історія",promo:"Промокоди",settings:"Налаштування"};
+  const subs={orders:"Управління замовленнями",stats:"Аналітика продажів",menu:"Страви та категорії",banners:"Слайдер на сайті",history:"Журнал подій",promo:"Управління промокодами",settings:"Налаштування сайту"};
   document.getElementById("topTitle").textContent=titles[sec];
   document.getElementById("topSub").textContent=subs[sec];
   document.getElementById("sortSel").style.display=sec==="orders"?"block":"none";
@@ -1823,22 +2368,20 @@ window.setSection=sec=>{
   if(sec==="menu"){renderDishList();rebuildCatSelects();}
   if(sec==="banners"){renderBannerList();}
   if(sec==="history")renderHistory();
+  if(sec==="promo"){renderPromoList();rebuildPromoDishSelect();}
   if(sec==="settings")renderSettings();
 };
-window.setMenuTab=tab=>{
-  ["add","list"].forEach(t=>{document.getElementById("pt-"+t).classList.toggle("on",t===tab);document.getElementById("mt-"+t).style.display=t===tab?"block":"none";});
-  if(tab==="list")renderDishList();
-};
+window.setMenuTab=()=>{renderDishList();};
 
 /* ——— MISC ——— */
 window.setSettTab=tab=>{
-  ["delivery","hours"].forEach(t=>{
-    const tb=document.getElementById("stt-"+t);
-    const bd=document.getElementById("stb-"+t);
-    if(tb) tb.classList.toggle("on",t===tab);
-    if(bd) bd.style.display=t===tab?"block":"none";
+  const tabs=["delivery","categories","hours","conditions"];
+  tabs.forEach(t=>{
+    const btn=document.getElementById("snav-"+t);
+    const body=document.getElementById("stab-"+t);
+    if(btn) btn.classList.toggle("on",t===tab);
+    if(body) body.classList.toggle("active",t===tab);
   });
-  // Always re-render settings when switching tabs so inputs get values
   renderSettings();
 };
 
@@ -2052,6 +2595,296 @@ window.confirmAddDish=async()=>{
     logHistory("order",`Додано: ${_adPicked.name} ×${_adQty}`,order.orderNum||_adOrderId.slice(0,8));
     document.getElementById("addDishModal").classList.remove("on");
   }catch(e){alert("Помилка: "+e.message);}
+};
+
+
+/* ==============================
+   PROMO CODES SYSTEM
+   ============================== */
+let allPromos = {};
+let _pcType = "percent";
+
+// Listen to promo codes from Firebase
+function listenPromos(){
+  onValue(ref(db,"promoCodes"),snap=>{
+    allPromos={};
+    if(snap.exists()){const raw=snap.val();Object.keys(raw).forEach(k=>{allPromos[k]=raw[k];allPromos[k]._key=k;});}
+    if(curSection==="promo") renderPromoList();
+  },e=>console.warn("Promos:",e.message));
+}
+
+// Tab switching
+window.setPromoTab=()=>{renderPromoList();};
+
+// Generate random code
+window.pcGenCode=()=>{
+  const chars="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let code="";
+  for(let i=0;i<8;i++) code+=chars[Math.floor(Math.random()*chars.length)];
+  document.getElementById("pcCode").value=code;
+};
+
+// Type selection
+window.pcSetType=type=>{
+  _pcType=type;
+  const sel=document.getElementById("pcTypeSelect");
+  if(sel&&sel.value!==type) sel.value=type;
+  // Sync chip buttons
+  ["percent","fixed","dish","category","nth_free"].forEach(t=>{
+    const btn=document.getElementById("ptc-"+t);
+    if(btn) btn.classList.toggle("on",t===type);
+  });
+  const valueRow=document.getElementById("pcValueRow");
+  const dishRow=document.getElementById("pcDishRow");
+  const catRow=document.getElementById("pcCatRow");
+  const nthRow=document.getElementById("pcNthFreeRow");
+  const unit=document.getElementById("pcValueUnit");
+  const lbl=document.getElementById("pcValueLabel");
+  dishRow.style.display="none"; catRow.style.display="none";
+  if(nthRow) nthRow.style.display="none";
+  if(type==="nth_free"){
+    valueRow.style.display="none";
+    if(nthRow) nthRow.style.display="block";
+  } else if(type==="free_delivery"||type==="second_free"){
+    valueRow.style.display="none";
+  } else if(type==="dish"){
+    valueRow.style.display="block"; dishRow.style.display="block";
+    unit.textContent="%"; lbl.textContent="Знижка (%) *";
+    rebuildPromoDishGrid();
+  } else if(type==="category"){
+    valueRow.style.display="block"; catRow.style.display="block";
+    unit.textContent="%"; lbl.textContent="Знижка на категорію (%) *";
+    rebuildPromoCatSelect();
+  } else if(type==="percent"){
+    valueRow.style.display="block";
+    unit.textContent="%"; lbl.textContent="Відсоток знижки *";
+  } else {
+    valueRow.style.display="block";
+    unit.textContent="грн"; lbl.textContent="Сума знижки (грн) *";
+  }
+};
+
+// Toggle expiry date
+window.pcToggleExpiry=()=>{
+  const noExp=document.getElementById("pcNoExpiry").checked;
+  const wrap=document.getElementById("pcExpiryWrap");
+  if(wrap) wrap.style.display=noExp?"none":"block";
+  // Set min date to tomorrow
+  if(!noExp){
+    const expEl=document.getElementById("pcExpiry");
+    if(expEl&&!expEl.value){
+      const d=new Date();d.setDate(d.getDate()+1);
+      expEl.min=d.toISOString().split("T")[0];
+      expEl.value=d.toISOString().split("T")[0];
+    }
+  }
+};
+
+let _pcDishId=null;
+// Rebuild dish grid with photos in promo form
+function rebuildPromoDishGrid(){
+  const grid=document.getElementById("pcDishGrid");
+  if(!grid) return;
+  grid.innerHTML=allDishes.map(d=>`
+    <div onclick="pcPickDish('${d.id}')" id="pcDishCard-${d.id}" style="border:2px solid ${_pcDishId===d.id?"var(--p)":"var(--brd)"};border-radius:var(--rs);overflow:hidden;cursor:pointer;background:${_pcDishId===d.id?"var(--pl)":"var(--surf)"};transition:border-color var(--t),background var(--t)">
+      <div style="height:80px;background:var(--bg2);overflow:hidden;position:relative">
+        ${d.photo?`<img src="${d.photo}" style="width:100%;height:100%;object-fit:cover" alt="">`:`<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:28px">${d.emoji||"🍽"}</div>`}
+      </div>
+      <div style="padding:5px 6px">
+        <div style="font-size:11px;font-weight:600;line-height:1.2;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">${d.name}</div>
+        <div style="font-size:10px;color:var(--p);font-weight:700;margin-top:2px">${d.price} грн</div>
+      </div>
+    </div>`).join("");
+}
+window.pcPickDish=id=>{
+  _pcDishId=id;
+  document.querySelectorAll("[id^='pcDishCard-']").forEach(el=>{
+    const isSelected=el.id==="pcDishCard-"+id;
+    el.style.borderColor=isSelected?"var(--p)":"var(--brd)";
+    el.style.background=isSelected?"var(--pl)":"var(--surf)";
+  });
+};
+function rebuildPromoCatSelect(){
+  const sel=document.getElementById("pcCatId");
+  if(!sel) return;
+  const cats=Array.isArray(siteSettings.categories)?siteSettings.categories:[];
+  sel.innerHTML='<option value="">— Обрати категорію —</option>'+cats.map(c=>`<option value="${c}">${c}</option>`).join("");
+}
+function rebuildPromoDishSelect(){ rebuildPromoDishGrid(); }
+
+// Create promo
+window.createPromo=async()=>{
+  const errEl=document.getElementById("pcErr");
+  const code=(document.getElementById("pcCode").value||"").trim().toUpperCase();
+  if(!code){errEl.textContent="Введіть код";return;}
+  if(allPromos[code]){errEl.textContent="Такий код вже існує";return;}
+
+  const type=_pcType;
+  let value=0;
+  if(type!=="free_delivery"&&type!=="nth_free"){
+    value=parseInt(document.getElementById("pcValue").value)||0;
+    if(!value){errEl.textContent="Введіть розмір знижки";return;}
+    if(type==="percent"&&value>100){errEl.textContent="Відсоток не може бути більше 100";return;}
+  }
+
+  const dishId=type==="dish"?(_pcDishId||""):"";
+  const catId=type==="category"?(document.getElementById("pcCatId")?.value||""):"";
+  if(type==="dish"&&!dishId){errEl.textContent="Оберіть страву";return;}
+  if(type==="category"&&!catId){errEl.textContent="Оберіть категорію";return;}
+
+  const noExpiry=document.getElementById("pcNoExpiry").checked;
+  let expiresAt=null;
+  if(!noExpiry){
+    const dateVal=document.getElementById("pcExpiry").value;
+    if(!dateVal){errEl.textContent="Оберіть дату закінчення";return;}
+    expiresAt=new Date(dateVal).getTime();
+    if(expiresAt<=Date.now()){errEl.textContent="Дата вже минула";return;}
+  }
+
+  const singleUse=document.getElementById("pcSingleUse").checked;
+
+  // Collect type-specific fields
+  const buyX=null, getY=null, minOrderVal=null;
+  const nthBuy=type==="nth_free"?parseInt(document.getElementById("pcNthBuy")?.value)||2:null;
+  const nthFreeCount=type==="nth_free"?parseInt(document.getElementById("pcNthFree")?.value)||1:null;
+  const nthTarget=type==="nth_free"?(document.querySelector("input[name='pcNthTarget']:checked")?.value||"all"):null;
+  const nthDishId=type==="nth_free"&&nthTarget==="dish"?(_pcNthDishId||null):null;
+  // Legacy fields
+  const nthN=nthBuy, nthDiscount=100;
+  if(type==="nth_free"&&(!nthBuy||!nthFreeCount)){errEl.textContent="Вкажіть кількість";return;}
+
+  const promo={type,value,dishId:dishId||null,catId:catId||null,buyX,getY,minOrderVal,nthN,nthDiscount,nthTarget,nthDishId,singleUse,expiresAt,active:true,createdAt:Date.now(),uses:{}};
+
+  try{
+    await set(ref(db,"promoCodes/"+code),promo);
+    await logHistory("promo","Промокод "+code+": "+promoDescription(promo));
+    errEl.style.color="var(--green)";errEl.textContent="✓ Промокод створено!";
+    // Reset form
+    document.getElementById("pcCode").value="";
+    document.getElementById("pcValue").value="";
+    document.getElementById("pcSingleUse").checked=false;
+    _pcDishId=null;
+    document.getElementById("pcNoExpiry").checked=true;
+    pcToggleExpiry();
+    pcSetType("percent");
+    setTimeout(()=>{errEl.textContent="";errEl.style.color="var(--red)";},3000);
+  }catch(e){errEl.textContent="Помилка: "+e.message;}
+};
+
+function promoDescription(p){
+  if(p.type==="percent") return p.value+"% на замовлення";
+  if(p.type==="fixed") return p.value+" грн знижка";
+  if(p.type==="free_delivery") return "Безкоштовна доставка";
+  if(p.type==="second_free") return "Другий товар безкоштовно";
+  if(p.type==="dish"){
+    const dish=allDishes.find(d=>d.id===p.dishId);
+    return p.value+"% на "+(dish?dish.name:(p.dishId||"страву"));
+  }
+  if(p.type==="category") return p.value+"% на категорію «"+(p.catId||"")+"»";
+  return "";
+}
+
+function promoTypeName(t){
+  return {percent:"% Відсоток",fixed:"грн Фіксована",dish:"🍽 На страву",category:"📋 Категорія",nth_free:"🎁 N-й безкоштовно",free_delivery:"🚚 Доставка",second_free:"2️⃣ 2-й безкоштовно",buy_x_get_y:"🎁 Купи N+M",min_order:"💰 Від суми"}[t]||t;
+}
+
+// Toggle promo active/inactive
+window.togglePromoActive=async(code,active)=>{
+  try{await update(ref(db,"promoCodes/"+code),{active});}catch(e){alert("Помилка");}
+};
+
+// Delete promo
+window.deletePromo=async code=>{
+  if(!confirm("Видалити промокод "+code+"?"))return;
+  try{
+    await remove(ref(db,"promoCodes/"+code));
+    await logHistory("promo","Промокод "+code+" видалено");
+  }catch(e){alert("Помилка: "+e.message);}
+};
+
+// Render promo list
+window.renderPromoList=()=>{
+  const q=(document.getElementById("promoSearch")?.value||"").toLowerCase();
+  const filterType=document.getElementById("promoFilterType")?.value||"";
+  const el=document.getElementById("promoList");
+  if(!el) return;
+  const promos=Object.values(allPromos).filter(p=>{
+    if(filterType&&p.type!==filterType) return false;
+    if(q&&!(p._key||"").toLowerCase().includes(q)) return false;
+    return true;
+  }).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  const badge=document.getElementById("promoCountBadge");
+  if(badge) badge.textContent=promos.length+" шт";
+  if(!promos.length){
+    el.innerHTML=`<div class="promo-list-empty"><div style="font-size:32px;opacity:.3">🏷</div><strong style="color:var(--txt)">Промокодів немає</strong><span style="font-size:12px">Створіть перший зліва</span></div>`;
+    return;
+  }
+  const now=Date.now();
+  const typeColors={percent:"#60A5FA",fixed:"#C084FC",dish:"#FB923C",category:"#F472B6",nth_free:"#2DD4BF"};
+  el.innerHTML=promos.map(p=>{
+    const code=p._key;
+    const isExpired=p.expiresAt&&p.expiresAt<now;
+    const usesCount=Object.keys(p.uses||{}).length;
+    const desc=promoDescription(p);
+    const expText=p.expiresAt?new Date(p.expiresAt).toLocaleDateString("uk-UA",{day:"2-digit",month:"2-digit",year:"2-digit"}):"∞";
+    const barColor=typeColors[p.type]||"var(--p)";
+    const dim=isExpired||!p.active;
+    return `<div class="promo-row" style="${dim?"opacity:.5":""}">
+      <div class="pr-stripe" style="background:${barColor}"></div>
+      <div class="pr-body">
+        <div class="pr-code">
+          <span style="font-family:'Inter',sans-serif;font-size:14px;font-weight:900;letter-spacing:1.5px">${code}</span>
+          <div class="pr-tags">
+            <span class="pr-tag pr-tag-type">${promoTypeName(p.type)}</span>
+            ${p.singleUse?'<span class="pr-tag pr-tag-single">1×</span>':'<span class="pr-tag pr-tag-multi">∞</span>'}
+            ${p.active&&!isExpired?'<span class="pr-tag pr-tag-active">Активний</span>':isExpired?'<span class="pr-tag pr-tag-exp">Закінчився</span>':'<span class="pr-tag pr-tag-inactive">Вимкнено</span>'}
+          </div>
+        </div>
+        <div class="pr-desc">${desc}</div>
+        <div class="pr-stat">До: ${expText} · Використань: ${usesCount}</div>
+      </div>
+      <div class="pr-actions">
+        <button class="pr-toggle ${p.active?"pr-toggle-on":"pr-toggle-off"}" onclick="togglePromoActive('${code}',${!p.active})">${p.active?"Вимкнути":"Увімкнути"}</button>
+        <button class="pr-del" onclick="deletePromo('${code}')" title="Видалити">✕</button>
+      </div>
+    </div>`;
+  }).join("");
+};
+
+/* ——— NTH FREE DISH PICKER ——— */
+let _pcNthDishId=null;
+window.rebuildNthDishGrid=function(){
+  const grid=document.getElementById("pcNthDishGrid");if(!grid)return;
+  const q=(document.getElementById("pcNthDishSearch")?.value||"").toLowerCase();
+  const dishes=allDishes.filter(d=>!q||d.name.toLowerCase().includes(q));
+  grid.innerHTML=dishes.map(d=>`
+    <div onclick="pcPickNthDish('${d.id}')" id="pcNthDishCard-${d.id}" style="border:2px solid ${_pcNthDishId===d.id?"var(--p)":"var(--brd)"};border-radius:var(--rs);overflow:hidden;cursor:pointer;background:${_pcNthDishId===d.id?"var(--pl)":"var(--surf)"};transition:all var(--t)">
+      <div style="height:60px;background:var(--bg2);overflow:hidden">
+        ${d.photo?`<img src="${d.photo}" style="width:100%;height:100%;object-fit:cover">`:`<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:20px">${d.emoji||"🍽"}</div>`}
+      </div>
+      <div style="padding:4px 5px;font-size:10px;font-weight:600;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${d.name}</div>
+      ${_pcNthDishId===d.id?'<div style="text-align:center;font-size:9px;font-weight:700;color:var(--p);padding:0 0 3px">✓</div>':""}
+    </div>`).join("")||`<div style="color:var(--sub);font-size:12px;padding:8px">Немає страв</div>`;
+};
+window.pcPickNthDish=id=>{_pcNthDishId=id;rebuildNthDishGrid();updateNthPreview();};
+window.pcNthTargetChange=()=>{
+  const isDish=document.getElementById("pcNthTargetDish")?.checked;
+  const dishPicker=document.getElementById("pcNthDishPicker");
+  if(dishPicker)dishPicker.style.display=isDish?"block":"none";
+  const lAll=document.getElementById("pcNthLabelAll");const lDish=document.getElementById("pcNthLabelDish");
+  if(lAll){lAll.style.background=isDish?"var(--surf)":"var(--pl)";lAll.style.borderColor=isDish?"var(--brd2)":"var(--p)";}
+  if(lDish){lDish.style.background=isDish?"var(--pl)":"var(--surf)";lDish.style.borderColor=isDish?"var(--p)":"var(--brd2)";}
+  if(isDish)rebuildNthDishGrid();
+  updateNthPreview();
+};
+window.updateNthPreview=()=>{
+  const buy=parseInt(document.getElementById("pcNthBuy")?.value)||2;
+  const free=parseInt(document.getElementById("pcNthFree")?.value)||1;
+  const isDish=document.getElementById("pcNthTargetDish")?.checked;
+  const dish=isDish&&_pcNthDishId?allDishes.find(d=>d.id===_pcNthDishId):null;
+  const name=dish?dish.name:"товару";
+  const preview=document.getElementById("pcNthPreview");
+  if(preview)preview.textContent=`Напр.: купи ${buy} ${name} → ${free} в подарунок`;
 };
 
 window.manualRefresh=()=>{const btn=document.getElementById("refreshBtn");btn.textContent="↻ ...";setTimeout(()=>btn.textContent="↻ Оновити",700);setUpd();};
