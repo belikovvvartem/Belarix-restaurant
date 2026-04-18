@@ -421,14 +421,30 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none}
 .ht-banner{background:rgba(168,85,247,.15);color:#C084FC}
 
 /* ========== SETTINGS REDESIGN ========== */
-.sett-page{display:grid;grid-template-columns:200px 1fr;min-height:0;flex:1}
-.sett-nav{border-right:1px solid var(--brd);padding:12px 8px;display:flex;flex-direction:column;gap:2px;overflow-y:auto}
-.sett-nav-item{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:var(--rs);background:transparent;color:var(--sub);font-size:12px;font-weight:500;cursor:pointer;transition:background var(--t),color var(--t);border:none;font-family:'Inter',sans-serif;width:100%;text-align:left}
+.sett-page{display:flex;flex-direction:column;min-height:0;flex:1;overflow:hidden}
+.sett-nav{
+  border-bottom:1px solid var(--brd);
+  padding:8px 16px;
+  display:flex;flex-direction:row;gap:4px;
+  overflow-x:auto;overflow-y:hidden;flex-wrap:nowrap;
+  scrollbar-width:none;flex-shrink:0;width:100%;
+  background:var(--bg2);
+}
+.sett-nav::-webkit-scrollbar{display:none}
+.sett-nav-item{
+  display:flex;align-items:center;gap:7px;
+  padding:7px 14px;border-radius:20px;
+  background:transparent;color:var(--sub);
+  font-size:12px;font-weight:500;cursor:pointer;
+  transition:background var(--t),color var(--t);
+  border:none;font-family:'Inter',sans-serif;
+  white-space:nowrap;flex-shrink:0;
+}
 .sett-nav-item:hover{background:var(--surf2);color:var(--txt)}
-.sett-nav-item.on{background:var(--pl);color:var(--p);font-weight:600}
-.sett-nav-icon{font-size:15px;width:20px;text-align:center;flex-shrink:0}
-.sett-nav-sep{height:1px;background:var(--brd);margin:6px 4px}
-.sett-content{overflow-y:auto;padding:20px 24px}
+.sett-nav-item.on{background:var(--p);color:#fff;font-weight:600}
+.sett-nav-icon{font-size:14px;flex-shrink:0}
+.sett-nav-sep{width:1px;background:var(--brd);margin:4px 2px;flex-shrink:0;align-self:stretch}
+.sett-content{overflow-y:auto;padding:18px 20px;flex:1;min-width:0}
 .sett-section{display:none}
 .sett-section.active{display:block}
 .sett-header{margin-bottom:20px}
@@ -496,14 +512,12 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none}
 .st-grid{display:none}
 .st-card{display:none}
 @media(max-width:768px){
-  .sett-page{grid-template-columns:1fr;grid-template-rows:auto 1fr}
-  .sett-nav{flex-direction:row;border-right:none;border-bottom:1px solid var(--brd);padding:8px;overflow-x:auto;overflow-y:hidden;flex-wrap:nowrap;scrollbar-width:none}
-  .sett-nav::-webkit-scrollbar{display:none}
-  .sett-nav-item{flex-shrink:0;padding:7px 12px;flex-direction:row;white-space:nowrap}
-  .sett-nav-sep{display:none}
-  .sett-content{padding:14px}
+  .sett-nav{padding:6px 10px}
+  .sett-content{padding:12px}
   .sett-amount-grid{grid-template-columns:1fr 1fr}
-  .hours-day-label{width:90px}
+  .sett-info-row{grid-template-columns:1fr 1fr 1fr}
+  .hours-day-label{width:80px}
+  .hours-day-sub{display:none}
 }
 .city-row{display:flex;align-items:center;gap:7px;padding:8px 10px;background:var(--surf2);border-radius:var(--rs);border:1px solid var(--brd);margin-bottom:6px}
 .city-name{flex:2;font-size:13px;font-weight:500}
@@ -677,18 +691,6 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none}
   /* Dish table */
   .dt-cat,.dt-badge-sizes{display:none}
 
-  /* Settings */
-  .sett-page{grid-template-columns:1fr}
-  .sett-nav{flex-direction:row;border-right:none;border-bottom:1px solid var(--brd);padding:8px 10px;overflow-x:auto;overflow-y:hidden;flex-wrap:nowrap;scrollbar-width:none}
-  .sett-nav::-webkit-scrollbar{display:none}
-  .sett-nav-item{flex-shrink:0;padding:7px 12px;white-space:nowrap}
-  .sett-nav-sep{display:none}
-  .sett-content{padding:12px}
-  .sett-amount-grid{grid-template-columns:1fr}
-  .sett-info-row{grid-template-columns:1fr 1fr 1fr}
-  .hours-day-label{width:80px}
-  .hours-day-sub{display:none}
-
   /* Promo */
   .promo-layout{grid-template-columns:1fr}
   .promo-add-col{border-right:none;border-bottom:1px solid var(--brd);padding:12px}
@@ -724,6 +726,90 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none}
   #app{min-height:100svh}
   .side{bottom:0}
 }
+/* ========== CUSTOM CONFIRM DIALOG ========== */
+.adm-confirm-overlay{
+  position:fixed;inset:0;z-index:9999;
+  background:rgba(0,0,0,.7);backdrop-filter:blur(8px);
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  opacity:0;pointer-events:none;transition:opacity .2s;
+}
+.adm-confirm-overlay.on{opacity:1;pointer-events:all}
+.adm-confirm-box{
+  background:var(--surf);border:1px solid var(--brd2);border-radius:18px;
+  padding:24px 22px 20px;max-width:320px;width:100%;
+  transform:scale(.92) translateY(12px);transition:transform .25s cubic-bezier(.34,1.4,.64,1);
+  box-shadow:0 24px 60px rgba(0,0,0,.45);
+}
+.adm-confirm-overlay.on .adm-confirm-box{transform:scale(1) translateY(0)}
+.adm-confirm-icon{
+  width:52px;height:52px;border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:24px;margin:0 auto 14px;
+}
+.adm-confirm-icon.danger{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.2)}
+.adm-confirm-icon.warn{background:rgba(234,179,8,.12);border:1px solid rgba(234,179,8,.2)}
+.adm-confirm-title{font-size:16px;font-weight:700;text-align:center;color:var(--txt);margin-bottom:7px}
+.adm-confirm-msg{font-size:13px;color:var(--sub);text-align:center;line-height:1.6;margin-bottom:20px}
+.adm-confirm-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.adm-confirm-cancel{
+  padding:11px;background:var(--surf2);border:1.5px solid var(--brd2);
+  border-radius:40px;font-size:13px;font-weight:600;color:var(--txt);
+  cursor:pointer;font-family:'Inter',sans-serif;transition:var(--t);
+}
+.adm-confirm-cancel:hover{border-color:var(--brd);background:var(--bg2)}
+.adm-confirm-ok{
+  padding:11px;border:none;border-radius:40px;
+  font-size:13px;font-weight:700;cursor:pointer;
+  font-family:'Inter',sans-serif;transition:var(--t);
+}
+.adm-confirm-ok.danger{background:var(--red);color:#fff}
+.adm-confirm-ok.danger:hover{filter:brightness(1.1)}
+.adm-confirm-ok.warn{background:var(--yellow);color:#000}
+/* ========== TOAST NOTIFICATIONS ========== */
+#toastContainer{
+  position:fixed;top:16px;right:16px;z-index:9998;
+  display:flex;flex-direction:column;gap:8px;
+  pointer-events:none;
+  max-width:320px;
+}
+.toast{
+  display:flex;align-items:center;gap:10px;
+  background:var(--surf);border:1px solid var(--brd2);
+  border-radius:12px;padding:11px 14px;
+  box-shadow:0 8px 32px rgba(0,0,0,.22);
+  pointer-events:all;position:relative;overflow:hidden;
+  animation:toastIn .35s cubic-bezier(.34,1.4,.64,1) both;
+  min-width:220px;
+}
+.toast.removing{animation:toastOut .28s ease forwards}
+@keyframes toastIn{
+  from{opacity:0;transform:translateX(110%);scale:.94}
+  to{opacity:1;transform:translateX(0);scale:1}
+}
+@keyframes toastOut{
+  from{opacity:1;transform:translateX(0);max-height:80px;margin-bottom:0}
+  to{opacity:0;transform:translateX(110%);max-height:0;margin-bottom:-8px}
+}
+.toast-bar{
+  position:absolute;bottom:0;left:0;height:3px;border-radius:0 0 0 12px;
+  animation:toastBar linear both;
+}
+@keyframes toastBar{from{width:100%}to{width:0%}}
+.toast-icon{font-size:18px;flex-shrink:0;line-height:1}
+.toast-body{flex:1;min-width:0}
+.toast-title{font-size:13px;font-weight:700;color:var(--txt);line-height:1.3}
+.toast-msg{font-size:11px;color:var(--sub);margin-top:2px;line-height:1.4}
+.toast-x{width:22px;height:22px;border-radius:6px;background:var(--surf2);border:none;color:var(--sub);font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'Inter',sans-serif;transition:var(--t)}
+.toast-x:hover{background:var(--brd2);color:var(--txt)}
+.toast-success .toast-bar{background:var(--green)}
+.toast-error   .toast-bar{background:var(--red)}
+.toast-warn    .toast-bar{background:var(--yellow)}
+.toast-info    .toast-bar{background:var(--blue)}
+/* Order item qty editor */
+.o-item-qty-ctrl{display:flex;align-items:center;gap:3px;margin-left:auto;flex-shrink:0}
+.o-qty-btn{width:20px;height:20px;border-radius:50%;border:1px solid var(--brd2);background:var(--bg2);color:var(--txt);font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif;transition:var(--t);flex-shrink:0;line-height:1;padding:0}
+.o-qty-btn:hover{border-color:var(--p);color:var(--p)}
+.o-qty-num{font-size:11px;font-weight:700;min-width:16px;text-align:center;color:var(--txt)}
 </style>
 </head>
 <body>
@@ -1493,6 +1579,22 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none}
   </div>
 </div>
 
+<!-- TOAST NOTIFICATIONS -->
+<div id="toastContainer"></div>
+
+<!-- CUSTOM CONFIRM DIALOG -->
+<div class="adm-confirm-overlay" id="admConfirm">
+  <div class="adm-confirm-box">
+    <div class="adm-confirm-icon danger" id="admConfirmIcon">🗑</div>
+    <div class="adm-confirm-title" id="admConfirmTitle">Підтвердити дію</div>
+    <div class="adm-confirm-msg" id="admConfirmMsg">Цю дію неможливо скасувати.</div>
+    <div class="adm-confirm-btns">
+      <button class="adm-confirm-cancel" onclick="admConfirmResolve(false)">Скасувати</button>
+      <button class="adm-confirm-ok danger" id="admConfirmOk" onclick="admConfirmResolve(true)">Видалити</button>
+    </div>
+  </div>
+</div>
+
 <script type="module">
 import { initializeApp }    from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getDatabase, ref, onValue, set, push, update, remove, get }
@@ -1789,17 +1891,33 @@ function renderOrders(){
           const hasPhoto=!!i.photo;
           const isDeleted=!!i.deleted;
           const nameStyle=isDeleted?'text-decoration:line-through;color:var(--dim)':'';
-          const delBtn=o.status!=="completed"&&!isDeleted
-            ?`<button onclick="event.stopPropagation();removeItemFromOrder('${o.id}',${idx})" style="margin-left:6px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:var(--red);cursor:pointer;font-size:10px;padding:2px 6px;border-radius:4px;font-weight:700;font-family:'Inter',sans-serif;flex-shrink:0" title="Видалити">✕</button>`
-            :(isDeleted?'<span style="font-size:9px;font-weight:700;color:var(--red);margin-left:4px;padding:1px 5px;border-radius:3px;background:rgba(239,68,68,.1)">видалено</span>':'');
           const photoBtn=hasPhoto&&!isDeleted
-            ?`<button onclick="showItemPhoto(this)" data-photo="${i.photo}" data-name="${(i.name||'').replace(/"/g,'&quot;')}" style="background:none;border:none;padding:0 4px;cursor:pointer;font-size:12px;opacity:.6;flex-shrink:0" title="Фото">📷</button>`
+            ?`<button onclick="showItemPhoto(this)" data-photo="${i.photo}" data-name="${(i.name||'').replace(/"/g,'&quot;')}" style="background:none;border:none;padding:0 3px;cursor:pointer;font-size:11px;opacity:.5;flex-shrink:0" title="Фото">📷</button>`
             :'';
+          if(isDeleted){
+            return `<div class="o-item" style="padding:3px 4px;display:flex;align-items:center;gap:2px;opacity:.45">
+              <span class="o-item-n" style="${nameStyle}">${i.name} ×${i.qty}</span>
+              <span class="o-item-p" style="margin-left:auto;text-decoration:line-through;color:var(--dim)">${i.price*i.qty} грн</span>
+              <span style="font-size:9px;font-weight:700;color:var(--red);margin-left:5px;padding:1px 5px;border-radius:3px;background:rgba(239,68,68,.1)">видалено</span>
+            </div>`;
+          }
+          if(o.status==="completed"){
+            return `<div class="o-item" style="padding:3px 4px;display:flex;align-items:center;gap:2px">
+              <span class="o-item-n">${i.name}</span>
+              ${photoBtn}
+              <span class="o-item-p" style="margin-left:auto">${i.price*i.qty} грн</span>
+              <span style="font-size:10px;color:var(--sub);margin-left:4px">×${i.qty}</span>
+            </div>`;
+          }
           return `<div class="o-item" style="border-radius:6px;padding:3px 4px;display:flex;align-items:center;gap:2px">
-            <span class="o-item-n" style="${nameStyle}">${i.name} ×${i.qty}</span>
+            <span class="o-item-n">${i.name}</span>
             ${photoBtn}
-            <span class="o-item-p" style="margin-left:auto;${isDeleted?'text-decoration:line-through;color:var(--dim)':''}">${i.price*i.qty} грн</span>
-            ${delBtn}
+            <span class="o-item-p" style="margin-left:auto">${i.price*i.qty} грн</span>
+            <div class="o-item-qty-ctrl" onclick="event.stopPropagation()">
+              <button class="o-qty-btn" onclick="changeOrderItemQty('${o.id}',${idx},-1)" title="Зменшити">−</button>
+              <span class="o-qty-num">${i.qty}</span>
+              <button class="o-qty-btn" onclick="changeOrderItemQty('${o.id}',${idx},1)" title="Збільшити">+</button>
+            </div>
           </div>`;
         }).join("")}</div>
         <div class="o-totals">
@@ -1832,7 +1950,6 @@ window.updStatus=async(id,st)=>{
   }catch(e){console.error(e);}
 };
 window.delOrder=async id=>{
-  if(!confirm("Видалити замовлення?"))return;
   const prev=Object.values(allOrders).flat().find(o=>o.id===id);
   try{await remove(ref(db,`orders/${id}`));if(prev)logHistory("order","Видалено",prev.orderNum||id.slice(0,8));}
   catch(e){console.error(e);}
@@ -1899,7 +2016,6 @@ window.addCity=async()=>{
   await set(ref(db,"settings"),siteSettings);logHistory("settings","Місто: "+name+" ("+price+" грн)");renderSettings();
 };
 window.removeCity=async idx=>{
-  const c=siteSettings.cities[idx];if(!confirm("Видалити "+c.name+"?"))return;
   siteSettings.cities.splice(idx,1);await set(ref(db,"settings"),siteSettings);renderSettings();
 };
 window.updateCityPrice=(idx,val)=>siteSettings.cities[idx].price=parseInt(val)||0;
@@ -1915,7 +2031,6 @@ window.addCategory=async()=>{
   await set(ref(db,"settings"),siteSettings);renderSettings();rebuildCatSelects();
 };
 window.removeCategory=async idx=>{
-  if(!confirm("Видалити категорію?"))return;
   siteSettings.categories.splice(idx,1);await set(ref(db,"settings"),siteSettings);renderSettings();rebuildCatSelects();
 };
 function rebuildCatSelects(){
@@ -2055,6 +2170,7 @@ window.addDish=async()=>{
     const pr=document.getElementById("mPhotoPreview");if(pr){pr.src="";pr.style.display="none";}
     document.getElementById("mPhotoStatus").textContent="";
     errEl.style.color="var(--green)";errEl.textContent="Страву додано!";
+    showToast("Страву додано","«"+name+"» з'явиться в меню","🍽","success");
     setTimeout(()=>errEl.textContent="",3000);
   }catch(e){errEl.style.color="var(--red)";errEl.textContent="Помилка: "+e.message;}
   if(btn){btn.disabled=false;btn.textContent="Додати страву";}
@@ -2115,7 +2231,6 @@ window.saveDishEdit=async()=>{
 };
 window.deleteDish=async id=>{
   const d=allDishes.find(x=>x.id===id);
-  if(!confirm("Видалити "+d?.name+"?"))return;
   try{
     await remove(ref(db,`menu/${id}`));
     if(d?.photo) await deleteFromR2(d.photo);
@@ -2277,7 +2392,6 @@ window.onBannerDragEnd=()=>{
 };
 window.toggleBanner=async(id,active)=>{try{await update(ref(db,"banners/"+id),{active});}catch(e){alert("Помилка");}};
 window.deleteBanner=async id=>{
-  if(!confirm("Видалити банер?"))return;
   try{
     const b=allBanners.find(x=>x.id===id);
     await remove(ref(db,"banners/"+id));
@@ -2561,20 +2675,35 @@ window.adQty=d=>{
   document.getElementById("adQtyNum").textContent=_adQty;
 };
 
-window.removeItemFromOrder=async(orderId,itemIdx)=>{
+window.changeOrderItemQty=async(orderId,itemIdx,delta)=>{
   const order=Object.values(allOrders).flat().find(o=>o.id===orderId);
   if(!order) return;
   const items=[...(order.items||[])];
   if(itemIdx<0||itemIdx>=items.length) return;
-  const removed=items[itemIdx];
-  // Mark as deleted instead of removing (preserves history, shows in tracking)
-  items[itemIdx]={...removed, deleted:true};
-  const newTotal=Math.max(0,(order.total||0)-removed.price*removed.qty);
-  try{
-    await update(ref(db,`orders/${orderId}`),{items,total:newTotal,updatedAt:Date.now()});
-    logHistory("order",`Видалено: ${removed.name} ×${removed.qty}`,order.orderNum||orderId.slice(0,8));
-  }catch(e){alert("Помилка: "+e.message);}
+  const item=items[itemIdx];
+  if(item.deleted) return;
+  const newQty=(item.qty||1)+delta;
+  const pricePer=item.price;
+  const oldTotal=pricePer*(item.qty||1);
+  if(newQty<=0){
+    // Mark as deleted
+    items[itemIdx]={...item,deleted:true};
+    const newTotal=Math.max(0,(order.total||0)-oldTotal);
+    try{
+      await update(ref(db,`orders/${orderId}`),{items,total:newTotal,updatedAt:Date.now()});
+      logHistory("order",`Видалено: ${item.name}`,order.orderNum||orderId.slice(0,8));
+      showToast("Позицію видалено","«"+item.name+"» прибрано із замовлення","🗑","warn");
+    }catch(e){showToast("Помилка",e.message,"⚠","error");}
+  } else {
+    items[itemIdx]={...item,qty:newQty};
+    const newTotal=Math.max(0,(order.total||0)-oldTotal+pricePer*newQty);
+    try{
+      await update(ref(db,`orders/${orderId}`),{items,total:newTotal,updatedAt:Date.now()});
+    }catch(e){showToast("Помилка",e.message,"⚠","error");}
+  }
 };
+// Keep old name as alias for compatibility
+window.removeItemFromOrder=async(orderId,itemIdx)=>changeOrderItemQty(orderId,itemIdx,-999);
 
 window.confirmAddDish=async()=>{
   if(!_adOrderId||!_adPicked) return;
@@ -2795,7 +2924,6 @@ window.togglePromoActive=async(code,active)=>{
 
 // Delete promo
 window.deletePromo=async code=>{
-  if(!confirm("Видалити промокод "+code+"?"))return;
   try{
     await remove(ref(db,"promoCodes/"+code));
     await logHistory("promo","Промокод "+code+" видалено");
@@ -2921,6 +3049,332 @@ function playBeep(){
     });
   }catch(e){}
 }
+
+/* ==============================
+   TOAST NOTIFICATION SYSTEM
+   ============================== */
+const TOAST_DURATION=3800; // ms
+
+function showToast(title, msg="", icon="✓", variant="success", duration=TOAST_DURATION){
+  const container=document.getElementById("toastContainer");
+  if(!container) return;
+  const id="t"+Date.now()+Math.random().toString(36).slice(2,5);
+  const t=document.createElement("div");
+  t.className=`toast toast-${variant}`;
+  t.id=id;
+  t.innerHTML=`
+    <span class="toast-icon">${icon}</span>
+    <div class="toast-body">
+      <div class="toast-title">${title}</div>
+      ${msg?`<div class="toast-msg">${msg}</div>`:""}
+    </div>
+    <button class="toast-x" onclick="dismissToast('${id}')">✕</button>
+    <div class="toast-bar toast-${variant}" style="animation-duration:${duration}ms"></div>
+  `;
+  container.prepend(t);
+  const timer=setTimeout(()=>dismissToast(id), duration);
+  t._timer=timer;
+  // Limit to 5 toasts
+  const all=container.querySelectorAll(".toast:not(.removing)");
+  if(all.length>5) dismissToast(all[all.length-1].id);
+}
+window.showToast=showToast;
+
+window.dismissToast=id=>{
+  const el=document.getElementById(id);
+  if(!el||el.classList.contains("removing")) return;
+  if(el._timer) clearTimeout(el._timer);
+  el.classList.add("removing");
+  setTimeout(()=>el.remove(), 300);
+};
+
+/* ——— Hook toasts into key actions ——— */
+// addDish — patch success toast
+const _origAddDish=window.addDish;
+const _addDishOrig=window.addDish;
+// Patch via wrapping the btn click result — we hook logHistory instead
+const _origLogHistory=logHistory;
+
+// Patch updStatus for status change toast
+const _origUpdStatus=window.updStatus;
+window.updStatus=async(id,st)=>{
+  const prev=Object.values(allOrders).flat().find(o=>o.id===id);
+  try{
+    await update(ref(db,`orders/${id}`),{status:st,updatedAt:Date.now()});
+    if(prev) logHistory("order","Статус: "+(SL[prev.status]||prev.status)+" → "+(SL[st]||st),prev.orderNum||id.slice(0,8));
+    const labels={new:"Нове",accepted:"Прийнято",in_progress:"Готується",shipped:"В дорозі",completed:"Виконано"};
+    showToast("Статус оновлено", labels[st]||st, st==="completed"?"✓":st==="shipped"?"🚚":"⏳", st==="completed"?"success":"info");
+  }catch(e){showToast("Помилка",e.message,"⚠","error");}
+};
+
+// Patch saveSettings
+const _origSaveSettings=window.saveSettings;
+window.saveSettings=async()=>{
+  siteSettings.minOrder=parseInt(document.getElementById("sMin").value)||200;
+  siteSettings.freeDelivery=parseInt(document.getElementById("sFree").value)||500;
+  try{
+    await set(ref(db,"settings"),siteSettings);
+    logHistory("settings","Мін. "+siteSettings.minOrder+" грн, безкоштовна від "+siteSettings.freeDelivery+" грн");
+    showToast("Збережено","Умови замовлення оновлено","✓","success");
+    const m=document.getElementById("settMsg");if(m){m.textContent="✓ Збережено";setTimeout(()=>m.textContent="",2500);}
+  }catch(e){showToast("Помилка",e.message,"⚠","error");}
+};
+
+// Patch saveWorkHours
+const _origSaveWorkHours=window.saveWorkHours;
+window.saveWorkHours=async()=>{
+  const wdOpen=parseInt(document.getElementById("sWdOpen").value)||0;
+  const wdOpenM=parseInt(document.getElementById("sWdOpenM").value)||0;
+  const wdClose=parseInt(document.getElementById("sWdClose").value)||0;
+  const wdCloseM=parseInt(document.getElementById("sWdCloseM").value)||0;
+  const satOpen=parseInt(document.getElementById("sSatOpen")?.value)||0;
+  const satOpenM=parseInt(document.getElementById("sSatOpenM")?.value)||0;
+  const satClose=parseInt(document.getElementById("sSatClose")?.value)||0;
+  const satCloseM=parseInt(document.getElementById("sSatCloseM")?.value)||0;
+  const sunOpen=parseInt(document.getElementById("sSunOpen").value)||0;
+  const sunOpenM=parseInt(document.getElementById("sSunOpenM").value)||0;
+  const sunClose=parseInt(document.getElementById("sSunClose").value)||0;
+  const sunCloseM=parseInt(document.getElementById("sSunCloseM").value)||0;
+  if(wdOpen*60+wdOpenM>=wdClose*60+wdCloseM){showToast("Невірний графік","Відкриття Пн–Пт має бути раніше за закриття","⚠","warn");return;}
+  if(!siteSettings.workHours)siteSettings.workHours={};
+  siteSettings.workHours.weekdays={open:wdOpen,openMin:wdOpenM,close:wdClose,closeMin:wdCloseM};
+  siteSettings.workHours.weekends={open:satOpen,openMin:satOpenM,close:satClose,closeMin:satCloseM};
+  siteSettings.workHours.saturday={open:satOpen,openMin:satOpenM,close:satClose,closeMin:satCloseM};
+  siteSettings.workHours.sunday={open:sunOpen,openMin:sunOpenM,close:sunClose,closeMin:sunCloseM};
+  try{
+    await set(ref(db,"settings"),siteSettings);
+    const fmt=(h,m)=>h+":"+(m<10?"0":"")+m;
+    logHistory("settings","Графік: Пн-Пт "+fmt(wdOpen,wdOpenM)+"–"+fmt(wdClose,wdCloseM)+", Сб "+fmt(satOpen,satOpenM)+"–"+fmt(satClose,satCloseM)+", Нд "+fmt(sunOpen,sunOpenM)+"–"+fmt(sunClose,sunCloseM));
+    showToast("Графік збережено","Зміни набудуть чинності одразу","⏰","success");
+    const m=document.getElementById("hoursMsg");if(m){m.textContent="✓ Збережено";setTimeout(()=>m.textContent="",2500);}
+  }catch(e){showToast("Помилка",e.message,"⚠","error");}
+};
+
+// Patch addCity
+const _origAddCity=window.addCity;
+window.addCity=async()=>{
+  const name=document.getElementById("newCityName").value.trim();
+  const price=parseInt(document.getElementById("newCityPrice").value)||50;
+  if(!name){showToast("Введіть назву","Вкажіть місто або село","⚠","warn");return;}
+  if(!Array.isArray(siteSettings.cities))siteSettings.cities=[];
+  if(siteSettings.cities.find(c=>c.name.toLowerCase()===name.toLowerCase())){showToast("Вже існує","Це місто вже в списку","ℹ","info");return;}
+  siteSettings.cities.push({name,price});
+  document.getElementById("newCityName").value="";document.getElementById("newCityPrice").value="";
+  await set(ref(db,"settings"),siteSettings);
+  logHistory("settings","Місто: "+name+" ("+price+" грн)");
+  renderSettings();
+  showToast("Місто додано","«"+name+"» — "+price+" грн доставка","🏙","success");
+};
+
+// Patch addCategory
+const _origAddCategory=window.addCategory;
+window.addCategory=async()=>{
+  const name=document.getElementById("newCatName").value.trim();
+  if(!name){showToast("Введіть назву категорії","","⚠","warn");return;}
+  if(!Array.isArray(siteSettings.categories))siteSettings.categories=[];
+  if(siteSettings.categories.includes(name)){showToast("Вже існує","Ця категорія вже є в списку","ℹ","info");return;}
+  siteSettings.categories.push(name);
+  document.getElementById("newCatName").value="";
+  await set(ref(db,"settings"),siteSettings);
+  renderSettings();rebuildCatSelects();
+  showToast("Категорію додано","«"+name+"»","📋","success");
+};
+
+// Patch confirmAddDish (add dish to order)
+const _origConfirmAddDish=window.confirmAddDish;
+window.confirmAddDish=async()=>{
+  if(!_adOrderId||!_adPicked) return;
+  let price=_adPicked.price;
+  let name=_adPicked.name;
+  if(_adPicked.sizes&&_adPicked.sizes.length){
+    const sIdx=parseInt(document.getElementById("adSizeSel")?.value)||0;
+    const sz=_adPicked.sizes[sIdx];
+    if(sz){ price=sz.price; name=_adPicked.name+" "+sz.label; }
+  }
+  const newItem={id:_adPicked.id,name,qty:_adQty,price,photo:_adPicked.photo||null,emoji:_adPicked.emoji||"",prep:_adPicked.prep||15,addedByAdmin:true};
+  const order=Object.values(allOrders).flat().find(o=>o.id===_adOrderId);
+  if(!order) return;
+  const items=[...(order.items||[]),newItem];
+  const newTotal=(order.total||0)+price*_adQty;
+  try{
+    await update(ref(db,`orders/${_adOrderId}`),{items,total:newTotal,updatedAt:Date.now()});
+    logHistory("order",`Додано: ${_adPicked.name} ×${_adQty}`,order.orderNum||_adOrderId.slice(0,8));
+    document.getElementById("addDishModal").classList.remove("on");
+    showToast("Додано до замовлення","«"+name+"» ×"+_adQty,"✓","success");
+  }catch(e){showToast("Помилка",e.message,"⚠","error");}
+};
+
+// Patch createPromo
+const _origCreatePromo=window.createPromo;
+window.createPromo=async()=>{
+  const errEl=document.getElementById("pcErr");
+  const code=(document.getElementById("pcCode").value||"").trim().toUpperCase();
+  if(!code){errEl.textContent="Введіть код";return;}
+  if(allPromos[code]){errEl.textContent="Такий код вже існує";return;}
+  const type=_pcType;
+  let value=0;
+  if(type!=="free_delivery"&&type!=="nth_free"){
+    value=parseInt(document.getElementById("pcValue").value)||0;
+    if(!value){errEl.textContent="Введіть розмір знижки";return;}
+    if(type==="percent"&&value>100){errEl.textContent="Відсоток не може бути більше 100";return;}
+  }
+  const dishId=type==="dish"?(_pcDishId||""):"";
+  const catId=type==="category"?(document.getElementById("pcCatId")?.value||""):"";
+  if(type==="dish"&&!dishId){errEl.textContent="Оберіть страву";return;}
+  if(type==="category"&&!catId){errEl.textContent="Оберіть категорію";return;}
+  const noExpiry=document.getElementById("pcNoExpiry").checked;
+  let expiresAt=null;
+  if(!noExpiry){
+    const dateVal=document.getElementById("pcExpiry").value;
+    if(!dateVal){errEl.textContent="Оберіть дату закінчення";return;}
+    expiresAt=new Date(dateVal).getTime();
+    if(expiresAt<=Date.now()){errEl.textContent="Дата вже минула";return;}
+  }
+  const singleUse=document.getElementById("pcSingleUse").checked;
+  const nthBuy=type==="nth_free"?parseInt(document.getElementById("pcNthBuy")?.value)||2:null;
+  const nthFreeCount=type==="nth_free"?parseInt(document.getElementById("pcNthFree")?.value)||1:null;
+  const nthTarget=type==="nth_free"?(document.querySelector("input[name='pcNthTarget']:checked")?.value||"all"):null;
+  const nthDishId=type==="nth_free"&&nthTarget==="dish"?(_pcNthDishId||null):null;
+  const nthN=nthBuy,nthDiscount=100;
+  if(type==="nth_free"&&(!nthBuy||!nthFreeCount)){errEl.textContent="Вкажіть кількість";return;}
+  const promo={type,value,dishId:dishId||null,catId:catId||null,buyX:null,getY:null,minOrderVal:null,nthN,nthDiscount,nthTarget,nthDishId,singleUse,expiresAt,active:true,createdAt:Date.now(),uses:{}};
+  try{
+    await set(ref(db,"promoCodes/"+code),promo);
+    await logHistory("promo","Промокод "+code);
+    errEl.style.color="var(--green)";errEl.textContent="✓ Промокод створено!";
+    document.getElementById("pcCode").value="";
+    document.getElementById("pcValue").value="";
+    document.getElementById("pcSingleUse").checked=false;
+    _pcDishId=null;
+    document.getElementById("pcNoExpiry").checked=true;pcToggleExpiry();
+    pcSetType("percent");
+    setTimeout(()=>{errEl.textContent="";errEl.style.color="var(--red)";},3000);
+    showToast("Промокод створено","«"+code+"» активний","🏷","success");
+  }catch(e){errEl.textContent="Помилка: "+e.message;showToast("Помилка",e.message,"⚠","error");}
+};
+
+// Patch addDish to show toast on success
+const _baseSaveDishEdit=window.saveDishEdit;
+window.saveDishEdit=async()=>{
+  const id=editingDishId;if(!id)return;
+  const name=document.getElementById("eName").value.trim();
+  const price=parseInt(document.getElementById("ePrice").value)||0;
+  if(!name||!price)return;
+  const saveBtn=document.querySelector("#editModal .btn-pri");
+  if(saveBtn){saveBtn.disabled=true;saveBtn.textContent="Зберігаємо...";}
+  let photoUrl=allDishes.find(x=>x.id===id)?.photo||null;
+  const pf=document.getElementById("ePhoto")?.files?.[0];
+  if(pf){try{document.getElementById("ePhotoStatus").textContent="Завантаження...";photoUrl=await uploadToR2(pf);document.getElementById("ePhotoStatus").textContent="Оновлено";}catch(e){console.warn(e);}}
+  const saleOn=document.getElementById("eSaleOn").checked;
+  const saleNewPrice=parseInt(document.getElementById("eOldPrice").value)||null;
+  const finalPrice=saleOn&&saleNewPrice?saleNewPrice:price;
+  const finalOldPrice=saleOn&&saleNewPrice?price:null;
+  const eHasSizes=document.getElementById("eHasSizes").checked;
+  const eSizes=eHasSizes?getSizesFromList("eSizesList"):null;
+  const data={name,price:finalPrice,cat:document.getElementById("eCat").value,prep:parseInt(document.getElementById("ePrep").value)||15,desc:document.getElementById("eDesc").value.trim(),pop:document.getElementById("ePop").checked,oldPrice:finalOldPrice,sizes:eSizes&&eSizes.length?eSizes:null,photo:photoUrl};
+  try{
+    await update(ref(db,`menu/${id}`),data);
+    logHistory("menu","Відредаговано: "+name);
+    closeEditModal();
+    showToast("Страву збережено","«"+name+"» оновлено","✓","success");
+  }catch(e){showToast("Помилка",e.message,"⚠","error");}
+  if(saveBtn){saveBtn.disabled=false;saveBtn.textContent="Зберегти";}
+};
+let _admConfirmResolve=null;
+
+function admConfirm(title,msg,icon="🗑",variant="danger",okLabel="Видалити"){
+  return new Promise(resolve=>{
+    _admConfirmResolve=resolve;
+    const overlay=document.getElementById("admConfirm");
+    document.getElementById("admConfirmIcon").textContent=icon;
+    document.getElementById("admConfirmIcon").className="adm-confirm-icon "+variant;
+    document.getElementById("admConfirmTitle").textContent=title;
+    document.getElementById("admConfirmMsg").textContent=msg;
+    const okBtn=document.getElementById("admConfirmOk");
+    okBtn.textContent=okLabel;
+    okBtn.className="adm-confirm-ok "+variant;
+    overlay.classList.add("on");
+  });
+}
+
+window.admConfirmResolve=val=>{
+  const overlay=document.getElementById("admConfirm");
+  overlay.classList.remove("on");
+  if(_admConfirmResolve){_admConfirmResolve(val);_admConfirmResolve=null;}
+};
+
+// Close on overlay click
+document.getElementById("admConfirm").addEventListener("click",e=>{
+  if(e.target===e.currentTarget) admConfirmResolve(false);
+});
+
+// ---- Replace all confirm() usages ----
+// Patch delOrder
+const _origDelOrder=window.delOrder;
+window.delOrder=async id=>{
+  const prev=Object.values(allOrders).flat().find(o=>o.id===id);
+  const num=prev?.orderNum||id.slice(0,8);
+  const ok=await admConfirm("Видалити замовлення?","Замовлення "+num+" буде видалено. Цю дію неможливо скасувати.","🗑","danger","Видалити");
+  if(!ok)return;
+  try{await remove(ref(db,`orders/${id}`));if(prev)logHistory("order","Видалено",num);showToast("Замовлення видалено",num,"🗑","warn");}
+  catch(e){showToast("Помилка",e.message,"⚠","error");}
+};
+
+// Patch deleteDish
+const _origDeleteDish=window.deleteDish;
+window.deleteDish=async id=>{
+  const d=allDishes.find(x=>x.id===id);
+  const ok=await admConfirm("Видалити страву?","«"+(d?.name||id)+"» буде видалено з меню.","🍽","danger","Видалити");
+  if(!ok)return;
+  try{
+    await remove(ref(db,`menu/${id}`));
+    if(d?.photo) await deleteFromR2(d.photo);
+    logHistory("menu","Видалено: "+(d?.name||id));
+    showToast("Страву видалено","«"+(d?.name||id)+"»","🗑","warn");
+  }catch(e){showToast("Помилка",e.message,"⚠","error");}
+};
+
+window.removeCity=async idx=>{
+  const c=siteSettings.cities[idx];
+  const ok=await admConfirm("Видалити місто?","«"+c.name+"» буде видалено зі списку доставки.","🏙","danger","Видалити");
+  if(!ok)return;
+  siteSettings.cities.splice(idx,1);
+  await set(ref(db,"settings"),siteSettings);
+  renderSettings();
+  showToast("Місто видалено","«"+c.name+"»","🗑","warn");
+};
+
+window.removeCategory=async idx=>{
+  const name=siteSettings.categories[idx]||"";
+  const ok=await admConfirm("Видалити категорію?","Всі страви цієї категорії залишаться, але без розділу.","📋","warn","Видалити");
+  if(!ok)return;
+  siteSettings.categories.splice(idx,1);
+  await set(ref(db,"settings"),siteSettings);
+  renderSettings();rebuildCatSelects();
+  showToast("Категорію видалено","«"+name+"»","🗑","warn");
+};
+
+window.deleteBanner=async id=>{
+  const ok=await admConfirm("Видалити банер?","Зображення буде видалено назавжди.","◧","danger","Видалити");
+  if(!ok)return;
+  try{
+    const b=allBanners.find(x=>x.id===id);
+    await remove(ref(db,"banners/"+id));
+    if(b?.photo) await deleteFromR2(b.photo);
+    logHistory("banner","Видалено банер");
+    showToast("Банер видалено","","🗑","warn");
+  }catch(e){showToast("Помилка",e.message,"⚠","error");}
+};
+
+window.deletePromo=async code=>{
+  const ok=await admConfirm("Видалити промокод?","Промокод «"+code+"» буде видалено назавжди.","🏷","danger","Видалити");
+  if(!ok)return;
+  try{
+    await remove(ref(db,"promoCodes/"+code));
+    await logHistory("promo","Промокод "+code+" видалено");
+    showToast("Промокод видалено","«"+code+"»","🗑","warn");
+  }catch(e){showToast("Помилка",e.message,"⚠","error");}
+};
 </script>
 </body>
 </html>

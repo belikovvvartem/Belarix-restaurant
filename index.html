@@ -189,7 +189,13 @@ input,select,textarea{font-size:16px!important} /* prevents iOS zoom on focus */
 .sb-shipped{background:rgba(139,92,246,.12);color:#7C3AED}
 .sb-completed{background:rgba(42,157,92,.12);color:#2A9D5C}
 .timeline{display:flex;position:relative;margin:16px 0;justify-content:space-between}
-.timeline::before{content:'';position:absolute;top:15px;left:0;right:0;height:2px;background:var(--border)}
+.timeline::before{content:'';position:absolute;top:15px;left:30px;right:30px;height:2px;background:var(--border);z-index:0}
+.timeline::after{content:'';position:absolute;top:15px;left:30px;height:2px;background:var(--primary);z-index:1;width:calc(var(--progress,0%) * (100% - 60px) / 100);transition:width .5s ease}
+.tl-step{display:flex;flex-direction:column;align-items:center;gap:5px;z-index:1;flex:1;position:relative}
+.tl-dot{width:30px;height:30px;border-radius:50%;background:var(--bg2);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;position:relative;z-index:2}
+.tl-step.done .tl-dot{background:var(--green);border-color:var(--green);color:#fff}
+.tl-step.cur .tl-dot{background:var(--primary);border-color:var(--primary);color:#fff;animation:pulse-tl 1.8s infinite}
+@keyframes pulse-tl{0%,100%{box-shadow:0 0 0 0 rgba(201,75,31,.4)}50%{box-shadow:0 0 0 7px rgba(201,75,31,0)}}
 .tl-step{display:flex;flex-direction:column;align-items:center;gap:5px;z-index:1;flex:1}
 .tl-dot{width:30px;height:30px;border-radius:50%;background:var(--bg2);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
 .tl-step.done .tl-dot{background:var(--green);border-color:var(--green);color:#fff}
@@ -695,7 +701,7 @@ input,select,textarea{font-size:16px!important} /* prevents iOS zoom on focus */
 <!-- CHECKOUT MODAL -->
 <div class="modal-bg" id="checkoutModal" onclick="bgClose(event,'checkoutModal')">
   <div class="modal">
-    <button class="modal-x" id="checkoutCloseBtn" onclick="(async()=>{await bgClose({target:document.getElementById('checkoutModal')},'checkoutModal')})()">✕</button>
+    <button class="modal-x" id="checkoutCloseBtn" onclick="closeCheckoutModal()">✕</button>
     <h2>Оформлення</h2>
     <div class="steps">
       <div class="step on" id="s1"><div class="step-n">1</div><span>Контакти</span></div>
@@ -1601,25 +1607,40 @@ window.bgClose = async function(e, id) {
       if (!ok) return;
     }
     resetCheckoutForm();
+    closeModal(id);
+    return;
   }
   closeModal(id);
 };
 
+window.closeCheckoutModal = async function() {
+  var nm = (document.getElementById("fName")?.value || "").trim();
+  var ph = (document.getElementById("fPhone")?.value || "").replace(/[^0-9]/g,"");
+  var hasData = nm || (ph.length > 3) || appliedPromo || step > 1;
+  if (hasData) {
+    var ok = await showCfd(
+      "Скасувати оформлення?",
+      "Введені дані та промокод будуть видалені.",
+      "🚫", "Так, скасувати", "Залишитись"
+    );
+    if (!ok) return;
+  }
+  resetCheckoutForm();
+  closeModal("checkoutModal");
+};
+
 function resetCheckoutForm() {
-  // Clear all fields
   ["fName","fPhone","fStreet","fHouse","fNote"].forEach(function(id) {
     var el = document.getElementById(id); if (el) el.value = "";
   });
   var cs = document.getElementById("fCity"); if (cs) cs.value = "";
-  // Reset promo
-  if (appliedPromo) {
-    appliedPromo = null;
-    var pi = document.getElementById("promoInput"); if (pi) pi.value = "";
-    var pm = document.getElementById("promoMsg"); if (pm) pm.textContent = "";
-    var ab = document.getElementById("promoAppliedBox"); if (ab) ab.style.display = "none";
-    var ib = document.getElementById("promoInputBox"); if (ib) ib.style.display = "flex";
-    updateCart();
-  }
+  // Always reset promo unconditionally
+  appliedPromo = null;
+  var pi = document.getElementById("promoInput"); if (pi) pi.value = "";
+  var pm = document.getElementById("promoMsg"); if (pm) pm.textContent = "";
+  var ab = document.getElementById("promoAppliedBox"); if (ab) ab.style.display = "none";
+  var ib = document.getElementById("promoInputBox"); if (ib) ib.style.display = "flex";
+  updateCart();
   // Reset step
   toStep(1);
   setDlv("delivery");
@@ -1858,7 +1879,8 @@ window.autoFillPrefix = function(el) {
 
 function renderTrackCard(o, container) {
   var si = STATUSES.findIndex(function(s) { return s.k === o.status; });
-  var st = STATUSES[si] || STATUSES[0];
+  if (si < 0) si = 0;
+  var st = STATUSES[si];
   var street = o.customer ? (o.customer.street || "") : "";
   var city   = o.customer ? (o.customer.city   || "") : "";
   var addr;
@@ -1872,10 +1894,14 @@ function renderTrackCard(o, container) {
 
   var timeline = "";
   STATUSES.forEach(function(s, i) {
-    var cls = i < si ? "done" : (i === si ? "cur" : "");
+    var isDone = i < si;
+    var isCur  = i === si;
+    var cls = isDone ? "done" : (isCur ? "cur" : "");
+    var label = isDone ? "✓" : (isCur ? s.l.charAt(0) : (i + 1));
     timeline += '<div class="tl-step ' + cls + '">'
-      + '<div class="tl-dot">' + (i < si ? "✓" : (i + 1)) + '</div>'
-      + '<span class="tl-label">' + s.l + '</span></div>';
+      + '<div class="tl-dot">' + (isDone ? "✓" : "") + '</div>'
+      + '<span class="tl-label">' + s.l + '</span>'
+      + '</div>';
   });
 
   var items = "";
@@ -1894,13 +1920,15 @@ function renderTrackCard(o, container) {
       + '</div>';
   });
 
+  var progressPct = STATUSES.length > 1 ? Math.round((si / (STATUSES.length - 1)) * 100) : 0;
+
   container.innerHTML =
     '<div class="track-card">'
     + '<div class="track-card-top">'
     + '<div><div class="tr-num">' + o.orderNum + '</div>'
     + '<div class="tr-time">' + (o.customer ? o.customer.name : "") + ' · ' + (o.customer ? o.customer.phone : "") + '</div></div>'
     + '<span class="status-badge sb-' + o.status + '">' + st.l + '</span></div>'
-    + '<div class="timeline">' + timeline + '</div>'
+    + '<div class="timeline" style="--progress:' + progressPct + '%">' + timeline + '</div>'
     + '<div class="track-info">' + addr + ' · ~' + o.eta + ' хв</div>'
     + '<div class="track-items">'
     + items
