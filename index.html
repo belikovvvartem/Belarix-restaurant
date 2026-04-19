@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Panorama — Доставка їжі</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
 <style>
 :root{
   --primary:#C94B1F;--primary-d:#A33B16;--primary-l:rgba(201,75,31,.1);
@@ -18,9 +18,9 @@
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth;-webkit-tap-highlight-color:transparent}
-body{font-family:'Jost',sans-serif;background:var(--bg);color:var(--text);font-size:17px;line-height:1.6;overflow-x:hidden}
+body{font-family:'Exo 2',sans-serif;background:var(--bg);color:var(--text);font-size:17px;line-height:1.6;overflow-x:hidden}
 a{color:var(--primary);text-decoration:none}
-button{font-family:'Jost',sans-serif;cursor:pointer;touch-action:manipulation}
+button{font-family:'Exo 2',sans-serif;cursor:pointer;touch-action:manipulation}
 input,select,textarea{font-size:16px!important} /* prevents iOS zoom on focus */
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-track{background:var(--bg2)}
@@ -30,7 +30,7 @@ input,select,textarea{font-size:16px!important} /* prevents iOS zoom on focus */
 #nav{position:sticky;top:0;z-index:500;background:rgba(253,250,246,.95);backdrop-filter:blur(18px);border-bottom:1px solid var(--border)}
 .nav-inner{max-width:1180px;margin:0 auto;padding:0 20px;height:62px;display:flex;align-items:center}
 .logo{display:flex;align-items:center;gap:9px;margin-right:auto;text-decoration:none}
-.logo-name{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--primary);letter-spacing:-.3px}
+.logo-name{font-family:'DM Serif Display',serif;font-size:22px;font-weight:700;color:var(--primary);letter-spacing:-.3px}
 .logo-sub{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block}
 .nav-links{display:flex;gap:4px;margin:0 16px}
 .nav-links a{color:var(--muted);font-size:15px;font-weight:500;padding:6px 12px;border-radius:40px;transition:color var(--t),background var(--t)}
@@ -48,10 +48,15 @@ input,select,textarea{font-size:16px!important} /* prevents iOS zoom on focus */
 .cart-count.on{opacity:1;transform:scale(1)}
 .burger{display:none;flex-direction:column;gap:5px;background:none;border:none;padding:6px;margin-left:8px}
 .burger span{display:block;width:22px;height:2px;background:var(--text);border-radius:2px}
-.mob-menu{display:none;flex-direction:column;padding:10px 20px 14px;border-top:1px solid var(--border);gap:2px}
+.mob-menu{
+  display:none;flex-direction:column;padding:10px 20px 14px;
+  border-top:1px solid var(--border);gap:2px;
+  overflow:hidden;max-height:0;transition:max-height .3s cubic-bezier(.4,0,.2,1),opacity .25s ease;
+  opacity:0;
+}
+.mob-menu.open{display:flex;max-height:300px;opacity:1;animation:none}
 .mob-menu a{color:var(--text);font-weight:500;font-size:15px;padding:9px 0;border-bottom:1px solid var(--border)}
 .mob-menu .mob-call{color:var(--primary);font-weight:700;border:none;margin-top:6px}
-.mob-menu.open{display:flex}
 
 /* BANNER INFO STRIP — centered */
 .banner{background:var(--text);display:flex;align-items:center;justify-content:center;gap:0;padding:0;overflow-x:auto;scrollbar-width:none;flex-wrap:nowrap}
@@ -71,7 +76,7 @@ input,select,textarea{font-size:16px!important} /* prevents iOS zoom on focus */
 /* MENU */
 .menu-section{max-width:1180px;margin:0 auto;padding:28px 20px 60px}
 .cat-group{margin-bottom:40px}
-.cat-group-title{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;margin-bottom:22px;padding-bottom:12px;border-bottom:2px solid var(--border)}
+.cat-group-title{font-family:'DM Serif Display',serif;font-size:26px;font-weight:700;margin-bottom:22px;padding-bottom:12px;border-bottom:2px solid var(--border)}
 .dishes-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:22px}
 .dish-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:transform var(--t),box-shadow var(--t);cursor:pointer}
 .dish-card:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
@@ -83,16 +88,16 @@ input,select,textarea{font-size:16px!important} /* prevents iOS zoom on focus */
 .badge-pop{position:absolute;top:10px;left:10px;background:var(--primary);color:#fff;font-size:12px;font-weight:700;padding:5px 12px;border-radius:40px;z-index:2;pointer-events:none;letter-spacing:.4px;text-transform:uppercase;box-shadow:0 2px 8px rgba(201,75,31,.4)}
 .badge-sale{position:absolute;top:10px;right:10px;background:var(--accent);color:var(--text);font-size:12px;font-weight:700;padding:5px 12px;border-radius:40px;z-index:2;pointer-events:none;letter-spacing:.4px;text-transform:uppercase;box-shadow:0 2px 8px rgba(240,180,41,.4)}
 .dish-body{padding:16px 18px 18px}
-.dish-name{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:5px;line-height:1.3}
+.dish-name{font-family:'DM Serif Display',serif;font-size:20px;font-weight:700;margin-bottom:5px;line-height:1.3}
 .dish-meta{display:flex;gap:10px;margin-bottom:10px;font-size:13px;color:var(--light)}
 .dish-desc{font-size:14px;color:var(--muted);line-height:1.5;margin-bottom:12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .dish-footer{display:flex;align-items:center;justify-content:space-between}
 .dish-price-wrap{display:flex;flex-direction:column;align-items:flex-start;gap:1px}
-.dish-old-price{font-family:'Jost',sans-serif;font-size:12px;color:var(--light);text-decoration:line-through;line-height:1.2}
-.dish-price{font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--primary);line-height:1.1}
+.dish-old-price{font-family:'Exo 2',sans-serif;font-size:12px;color:var(--light);text-decoration:line-through;line-height:1.2}
+.dish-price{font-family:'DM Serif Display',serif;font-size:24px;font-weight:700;color:var(--primary);line-height:1.1}
 .add-btn{width:42px;height:42px;border-radius:50%;border:none;background:var(--primary);color:#fff;font-size:22px;display:flex;align-items:center;justify-content:center;transition:transform var(--t),background var(--t);flex-shrink:0}
 .add-btn:hover{background:var(--primary-d);transform:scale(1.1)}
-.select-btn{padding:8px 16px;border-radius:40px;border:none;background:var(--primary);color:#fff;font-size:12px;font-weight:700;cursor:pointer;transition:background var(--t),transform var(--t);flex-shrink:0;font-family:'Jost',sans-serif;letter-spacing:.2px}
+.select-btn{padding:8px 16px;border-radius:40px;border:none;background:var(--primary);color:#fff;font-size:12px;font-weight:700;cursor:pointer;transition:background var(--t),transform var(--t);flex-shrink:0;font-family:'Exo 2',sans-serif;letter-spacing:.2px}
 .select-btn:hover{background:var(--primary-d);transform:translateY(-1px)}
 .qty-ctrl{display:flex;align-items:center;gap:8px}
 .qty-btn{width:34px;height:34px;border-radius:50%;border:1.5px solid var(--border);background:var(--surface);font-size:18px;font-weight:700;color:var(--text);display:flex;align-items:center;justify-content:center;transition:var(--t)}
@@ -156,12 +161,12 @@ input,select,textarea{font-size:16px!important} /* prevents iOS zoom on focus */
 #contactsPage{display:none}
 #contactsSection{background:var(--bg2);border-top:1px solid var(--border);padding:60px 20px;min-height:calc(100vh - 62px)}
 .contacts-inner{max-width:1180px;margin:0 auto}
-.contacts-title{font-family:'Playfair Display',serif;font-size:32px;font-weight:700;margin-bottom:8px}
+.contacts-title{font-family:'DM Serif Display',serif;font-size:32px;font-weight:700;margin-bottom:8px}
 .contacts-sub{font-size:15px;color:var(--muted);margin-bottom:40px}
 .contacts-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:28px}
 .con-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px}
 .con-card-icon{width:44px;height:44px;background:var(--primary-l);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:14px}
-.con-card h3{font-family:'Playfair Display',serif;font-size:18px;margin-bottom:10px}
+.con-card h3{font-family:'DM Serif Display',serif;font-size:18px;margin-bottom:10px}
 .con-card p{font-size:14px;color:var(--muted);line-height:1.8}
 .hours-table{display:flex;flex-direction:column;gap:6px}
 .hours-row{display:flex;justify-content:space-between;font-size:14px;color:var(--muted)}
@@ -170,17 +175,17 @@ input,select,textarea{font-size:16px!important} /* prevents iOS zoom on focus */
 /* TRACK PAGE */
 #trackPage{display:none;min-height:calc(100vh - 62px);background:var(--bg)}
 .track-page-inner{max-width:700px;margin:0 auto;padding:48px 20px}
-.track-page-title{font-family:'Playfair Display',serif;font-size:32px;font-weight:700;margin-bottom:8px}
+.track-page-title{font-family:'DM Serif Display',serif;font-size:32px;font-weight:700;margin-bottom:8px}
 .track-page-sub{font-size:15px;color:var(--muted);margin-bottom:32px}
 .track-search-box{display:flex;gap:10px;margin-bottom:32px}
-.track-search-box input{flex:1;padding:14px 18px;border:1.5px solid var(--border);border-radius:40px;font-size:15px;font-family:'Jost',sans-serif;background:var(--surface);outline:none;color:var(--text);transition:border-color var(--t)}
+.track-search-box input{flex:1;padding:14px 18px;border:1.5px solid var(--border);border-radius:40px;font-size:15px;font-family:'Exo 2',sans-serif;background:var(--surface);outline:none;color:var(--text);transition:border-color var(--t)}
 .track-search-box input:focus{border-color:var(--primary)}
 .track-search-box button{padding:14px 28px;background:var(--primary);color:#fff;border:none;border-radius:40px;font-size:14px;font-weight:700;transition:background var(--t)}
 .track-search-box button:hover{background:var(--primary-d)}
 .track-result-wrap{margin-bottom:32px}
 .track-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow)}
 .track-card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
-.tr-num{font-family:'Playfair Display',serif;font-size:20px;color:var(--primary);font-weight:700}
+.tr-num{font-family:'DM Serif Display',serif;font-size:20px;color:var(--primary);font-weight:700}
 .tr-time{font-size:12px;color:var(--muted);margin-top:2px}
 .status-badge{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:40px;font-size:12px;font-weight:700}
 .sb-new{background:rgba(201,75,31,.12);color:#C94B1F}
@@ -209,109 +214,153 @@ input,select,textarea{font-size:16px!important} /* prevents iOS zoom on focus */
 .track-item span:last-child{font-weight:600;color:var(--primary)}
 .track-history-section{margin-top:8px}
 .track-history-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-.track-history-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:700}
+.track-history-title{font-family:'DM Serif Display',serif;font-size:18px;font-weight:700}
 .track-clear-btn{font-size:12px;color:var(--muted);background:none;border:none;text-decoration:underline;cursor:pointer}
 .track-history-item{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-s);cursor:pointer;transition:border-color var(--t);margin-bottom:8px}
 .track-history-item:hover{border-color:var(--primary)}
-.thi-num{font-family:'Playfair Display',serif;font-size:15px;color:var(--primary);font-weight:700}
+.thi-num{font-family:'DM Serif Display',serif;font-size:15px;color:var(--primary);font-weight:700}
 .thi-date{font-size:11px;color:var(--muted);margin-top:2px}
 .thi-arrow{color:var(--muted);font-size:20px;font-weight:300}
 
 /* DISH DETAIL MODAL */
-.dish-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:1200;display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;pointer-events:none;transition:opacity var(--t)}
+.dish-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1200;display:flex;align-items:center;justify-content:center;padding:0;opacity:0;pointer-events:none;transition:opacity .25s}
 .dish-modal-bg.on{opacity:1;pointer-events:all}
-.dish-modal{background:var(--surface);border-radius:20px;width:100%;max-width:820px;display:flex;flex-direction:row;max-height:90vh;overflow:hidden;position:relative;box-shadow:var(--shadow-l);transform:scale(.97);transition:transform .25s cubic-bezier(.4,0,.2,1)}
-.dish-modal-bg.on .dish-modal{transform:scale(1)}
-.dish-modal-photo{flex:0 0 50%;position:relative;background:var(--bg2);border-radius:20px 0 0 20px;overflow:hidden}
-.dish-modal-photo::before{content:'';display:block;padding-bottom:100%}
-.dish-modal-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.dish-modal-photo > span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:100px;opacity:.3}
-.dish-modal-body{flex:1;padding:28px 28px 24px;overflow-y:auto;display:flex;flex-direction:column;min-width:0}
-.dish-modal-name{font-family:'Playfair Display',serif;font-size:24px;font-weight:700;margin-bottom:6px;line-height:1.2}
-.dish-modal-desc{font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:14px;flex-shrink:0}
-.dish-modal-meta{display:flex;gap:14px;margin-bottom:14px;font-size:13px;color:var(--light);flex-shrink:0}
-.dm-sizes{display:flex;flex-direction:column;gap:7px;margin-bottom:16px;flex-shrink:0}
-.dm-size-row{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:11px 14px;border-radius:12px;
-  border:1.5px solid var(--border);background:var(--bg2);
-  transition:border-color var(--t),background var(--t);
+.dish-modal{
+  background:var(--surface);border-radius:0;width:100%;max-width:100%;height:100%;
+  display:flex;flex-direction:row;overflow:hidden;
+  position:relative;
+  transform:scale(.97) translateY(16px);
+  transition:transform .32s cubic-bezier(.34,1.15,.64,1);
 }
+.dish-modal-bg.on .dish-modal{transform:scale(1) translateY(0)}
+.dish-modal-photo{
+  flex:0 0 55%;position:relative;background:var(--bg2);
+  border-radius:0;overflow:hidden;
+}
+.dish-modal-photo::before{content:'';display:block;padding-bottom:100%}
+.dish-modal-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .6s ease}
+.dish-modal-bg.on .dish-modal-photo img{transform:scale(1.04)}
+.dish-modal-photo > span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:90px;opacity:.25}
+/* Gradient overlay bottom of photo */
+.dish-modal-photo::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:40%;
+  background:linear-gradient(to top,rgba(28,18,8,.45) 0%,transparent 100%);
+  pointer-events:none;
+}
+.dish-modal-body{
+  flex:1;padding:48px 36px 28px;overflow-y:auto;
+  display:flex;flex-direction:column;min-width:0;
+}
+.dish-modal-cat{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;
+  color:var(--primary);background:var(--primary-l);
+  padding:4px 10px;border-radius:20px;margin-bottom:10px;
+  width:fit-content;
+}
+.dish-modal-name{font-family:'DM Serif Display',serif;font-size:26px;font-weight:900;margin-bottom:8px;line-height:1.15;letter-spacing:-.3px}
+.dish-modal-desc{font-size:14px;color:var(--muted);line-height:1.65;margin-bottom:16px;flex-shrink:0}
+.dish-modal-meta{display:flex;gap:8px;margin-bottom:18px;font-size:12px;flex-shrink:0;flex-wrap:wrap}
+.dish-modal-meta-pill{
+  display:flex;align-items:center;gap:5px;
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:20px;padding:5px 11px;color:var(--muted);
+}
+.dish-modal-meta-pill svg{opacity:.6}
+/* Badge */
+.dm-badge{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;margin-bottom:12px;letter-spacing:.3px}
+.dm-badge-pop{background:var(--primary);color:#fff}
+.dm-badge-sale{background:var(--accent);color:var(--text)}
+/* Sizes */
+.dm-sizes{display:flex;flex-direction:row;flex-wrap:wrap;gap:8px;margin-bottom:20px;flex-shrink:0}
+.dm-size-chip{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:2px;padding:10px 14px;border-radius:14px;
+  border:2px solid var(--border);background:var(--bg);
+  cursor:pointer;transition:border-color var(--t),background var(--t),transform .15s;
+  min-width:76px;flex:1;max-width:130px;
+  user-select:none;
+}
+.dm-size-chip:hover{border-color:var(--primary);transform:translateY(-1px)}
+.dm-size-chip.active{border-color:var(--primary);background:var(--primary-l)}
+.dm-size-chip-label{font-size:13px;font-weight:700;color:var(--text);text-align:center;line-height:1.3}
+.dm-size-chip-sub{font-size:11px;color:var(--muted);text-align:center;line-height:1.2}
+.dm-size-row{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:9px 16px;border-radius:40px;
+  border:1.5px solid var(--border);background:var(--bg);
+  cursor:pointer;transition:border-color var(--t),background var(--t);
+  width:100%;
+}
+.dm-size-row:hover{border-color:var(--primary)}
 .dm-size-row.has-qty{border-color:var(--primary);background:var(--primary-l)}
-.dm-size-left{display:flex;flex-direction:column;gap:1px}
-.dm-size-label{font-size:14px;font-weight:600;color:var(--text)}
-.dm-size-price{font-size:13px;font-weight:700;color:var(--primary)}
-.dish-modal-footer{margin-top:auto;padding-top:14px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-shrink:0;position:sticky;bottom:0;background:var(--surface);padding-bottom:4px}
-.dish-modal-price{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:var(--primary)}
-.dm-cart-btn{padding:11px 22px;background:var(--primary);color:#fff;border:none;border-radius:40px;font-size:14px;font-weight:700;cursor:pointer;transition:background var(--t),transform var(--t);font-family:'Jost',sans-serif;flex-shrink:0}
-.dm-cart-btn:hover{background:var(--primary-d);transform:translateY(-1px)}
-.dm-cart-btn.in-cart{background:var(--green)}
-/* Smaller variant inside size rows */
-.dm-size-row .dm-cart-btn{padding:7px 14px;font-size:12px;border-radius:40px}
-.dish-modal-x{position:absolute;top:14px;right:14px;z-index:10;width:34px;height:34px;border-radius:50%;border:none;background:rgba(0,0,0,.35);color:#fff;font-size:15px;display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(4px)}
-.dish-modal-x:hover{background:rgba(0,0,0,.55)}
+.dm-size-left{display:flex;align-items:center;gap:6px}
+.dm-size-label{font-size:13px;font-weight:600;color:var(--text)}
+.dm-size-price{font-size:12px;font-weight:700;color:var(--primary)}
+/* Footer */
+.dish-modal-footer{
+  margin-top:auto;padding-top:16px;border-top:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;gap:14px;
+  flex-shrink:0;background:var(--surface);padding-bottom:4px;
+}
+.dish-modal-price-wrap{display:flex;flex-direction:column}
+.dish-modal-price-old{font-size:12px;color:var(--light);text-decoration:line-through;line-height:1.2}
+.dish-modal-price{font-family:'DM Serif Display',serif;font-size:30px;font-weight:900;color:var(--primary);line-height:1}
+.dm-cart-btn{
+  padding:13px 26px;background:var(--primary);color:#fff;border:none;
+  border-radius:40px;font-size:15px;font-weight:700;cursor:pointer;
+  transition:background var(--t),transform var(--t),box-shadow var(--t);
+  font-family:'Exo 2',sans-serif;flex-shrink:0;
+  box-shadow:0 4px 16px rgba(201,75,31,.3);
+}
+.dm-cart-btn:hover{background:var(--primary-d);transform:translateY(-2px);box-shadow:0 8px 24px rgba(201,75,31,.4)}
+.dm-cart-btn.in-cart{background:var(--green);box-shadow:0 4px 16px rgba(42,157,92,.3)}
+.dm-size-row .dm-cart-btn{padding:5px 12px;font-size:11px;border-radius:40px;box-shadow:none;margin-left:2px}
+.dish-modal-x{
+  position:fixed;top:20px;right:20px;z-index:9999;
+  width:46px;height:46px;border-radius:50%;border:none;
+  background:rgba(0,0,0,.72);
+  backdrop-filter:blur(14px) saturate(160%);
+  -webkit-backdrop-filter:blur(14px) saturate(160%);
+  color:#fff;font-size:20px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  box-shadow:0 4px 20px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.08);
+  border:1.5px solid rgba(255,255,255,.12);
+  transition:background var(--t),transform var(--t);
+  line-height:1;
+}
+.dish-modal-x:hover{background:rgba(0,0,0,.88);transform:scale(1.06)}
+.dish-modal-x:active{transform:scale(.92)}
 @media(max-width:640px){
-  .dish-modal-bg{padding:0 8px;align-items:flex-end}
+  .dish-modal-bg{padding:0;align-items:flex-end}
   .dish-modal{
-    flex-direction:column;
-    width:100%;max-width:100%;
-    /* Fixed total height - fills screen with padding */
-    height:calc(100svh - 40px);
-    max-height:calc(100svh - 40px);
-    border-radius:20px 20px 16px 16px;
-    overflow:hidden; /* No scroll on container */
-    transform:translateY(110%);
-    transition:transform .35s cubic-bezier(.4,0,.2,1);
-    margin-bottom:6px;
+    flex-direction:column;width:100%;max-width:100%;
+    height:100svh;max-height:100svh;
+    border-radius:0;overflow:hidden;
+    transform:translateY(105%);
+    transition:transform .38s cubic-bezier(.4,0,.2,1);
     display:flex;
-    flex-direction:column;
   }
   .dish-modal-bg.on .dish-modal{transform:translateY(0)}
-  /* 1:1 photo - fixed square, no stretching */
   .dish-modal-photo{
-    flex:0 0 auto;
-    border-radius:20px 20px 0 0;
-    /* Fixed height = width (square), calculated from viewport */
-    width:100%;
-    height:min(52vw, 260px);
+    flex:0 0 auto;border-radius:0;
+    width:100%;height:52vw;max-height:260px;min-height:160px;
   }
-  .dish-modal-photo::before{display:none} /* disable padding-bottom trick on mobile */
-  .dish-modal-photo img{
-    position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
-    /* Never stretch — cover keeps 1:1 crop */
-  }
-  /* Body takes remaining space, scrolls internally */
-  .dish-modal-body{
-    flex:1;
-    overflow-y:auto;
-    padding:12px 16px 0;
-    display:flex;
-    flex-direction:column;
-    min-height:0;
-  }
-  .dish-modal-name{font-size:17px;margin-bottom:3px;line-height:1.25}
-  .dish-modal-meta{margin-bottom:6px;font-size:11px}
-  .dish-modal-desc{font-size:12px;margin-bottom:8px;-webkit-line-clamp:2}
-  .dish-modal-x{top:10px;right:10px;background:rgba(0,0,0,.5);width:30px;height:30px;font-size:13px}
-  /* Sizes — compact, fixed height rows */
-  .dm-sizes{gap:5px;margin-bottom:8px;flex-shrink:0}
-  .dm-size-row{padding:8px 12px;border-radius:10px}
-  .dm-size-label{font-size:12px}
-  .dm-size-price{font-size:12px}
-  .dm-size-row .dm-cart-btn{padding:6px 12px;font-size:11px}
-  .dm-size-row .qty-ctrl .qty-btn{width:26px;height:26px;font-size:14px}
-  .dm-size-row .qty-ctrl .qty-n{font-size:13px}
-  /* Footer pinned at bottom */
-  .dish-modal-footer{
-    flex-shrink:0;
-    padding:10px 16px 14px;
-    border-top:1px solid var(--border);
-    background:var(--surface);
-    margin-top:auto;
-    position:sticky;bottom:0;
-  }
-  .dish-modal-price{font-size:20px}
-  .dm-cart-btn{padding:10px 20px;font-size:13px}
+  .dish-modal-photo::before{display:none}
+  .dish-modal-photo img{transform:none!important}
+  .dish-modal-body{flex:1;overflow-y:auto;padding:20px 20px 0;min-height:0;-webkit-overflow-scrolling:touch}
+  .dish-modal-name{font-size:20px;margin-bottom:6px}
+  .dish-modal-desc{font-size:13px;margin-bottom:10px}
+  .dish-modal-meta{margin-bottom:12px;gap:6px}
+  .dish-modal-meta-pill{padding:4px 9px;font-size:11px}
+  .dish-modal-footer{padding:12px 18px 16px;border-top:1px solid var(--border);background:var(--surface);margin-top:auto;position:sticky;bottom:0}
+  .dish-modal-price{font-size:24px}
+  .dm-cart-btn{padding:11px 22px;font-size:14px}
+  .dish-modal-x{top:16px;right:16px;width:42px;height:42px;font-size:15px}
+  .dm-sizes{gap:6px;margin-bottom:14px}
+  .dm-size-chip{padding:9px 12px;border-radius:12px;min-width:64px}
+  .dm-size-chip-label{font-size:12px}
+  .dm-size-chip-sub{font-size:10px}
 }
 
 /* CART SIDEBAR */
@@ -320,7 +369,7 @@ input,select,textarea{font-size:16px!important} /* prevents iOS zoom on focus */
 .cart-side{position:fixed;top:0;right:0;bottom:0;width:min(400px,100vw);background:var(--surface);z-index:1000;transform:translateX(100%);transition:transform .32s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;box-shadow:var(--shadow-l)}
 .cart-side.on{transform:translateX(0)}
 .cart-head{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
-.cart-head h2{font-family:'Playfair Display',serif;font-size:20px}
+.cart-head h2{font-family:'DM Serif Display',serif;font-size:20px}
 .cart-x{width:34px;height:34px;border-radius:50%;border:none;background:var(--bg2);font-size:15px;display:flex;align-items:center;justify-content:center;color:var(--text)}
 .cart-body{flex:1;overflow-y:auto;padding:14px 20px;display:flex;flex-direction:column;gap:10px}
 .cart-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--muted);padding:40px 0;text-align:center}
@@ -350,7 +399,7 @@ input,select,textarea{font-size:16px!important} /* prevents iOS zoom on focus */
 .modal-bg.on{opacity:1;pointer-events:all}
 .modal{background:var(--surface);border-radius:18px;padding:32px;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;position:relative;box-shadow:var(--shadow-l);transform:translateY(12px) scale(.98);transition:transform .28s cubic-bezier(.4,0,.2,1),opacity .28s}
 .modal-bg.on .modal{transform:translateY(0)}
-.modal h2{font-family:'Playfair Display',serif;font-size:22px;margin-bottom:22px}
+.modal h2{font-family:'DM Serif Display',serif;font-size:22px;margin-bottom:22px}
 .modal-x{position:absolute;top:14px;right:14px;width:32px;height:32px;border-radius:50%;border:none;background:var(--bg2);font-size:14px;display:flex;align-items:center;justify-content:center;color:var(--text)}
 .modal-x:hover{background:var(--border)}
 .steps{display:flex;align-items:center;margin-bottom:24px}
@@ -366,7 +415,7 @@ input,select,textarea{font-size:16px!important} /* prevents iOS zoom on focus */
 @keyframes fade-up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .fg{margin-bottom:14px}
 .fg label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:5px}
-.fg input,.fg textarea,.fg select{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:var(--radius-s);font-size:15px;font-family:'Jost',sans-serif;background:var(--bg);outline:none;color:var(--text);transition:border-color var(--t)}
+.fg input,.fg textarea,.fg select{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:var(--radius-s);font-size:15px;font-family:'Exo 2',sans-serif;background:var(--bg);outline:none;color:var(--text);transition:border-color var(--t)}
 .fg input:focus,.fg textarea:focus,.fg select:focus{border-color:var(--primary)}
 .fg textarea{resize:vertical;min-height:70px}
 .dlv-sel{display:flex;gap:10px;margin-bottom:16px}
@@ -382,17 +431,43 @@ input,select,textarea{font-size:16px!important} /* prevents iOS zoom on focus */
 .btn-ghost{background:transparent;color:var(--text);border:1.5px solid var(--border);padding:12px 22px;border-radius:40px;font-size:14px;font-weight:600;transition:var(--t)}
 .btn-ghost:hover{border-color:var(--primary);color:var(--primary)}
 .preview-box{background:var(--bg2);border-radius:var(--radius-s);padding:14px;margin-bottom:16px;font-size:13px}
-.preview-box h3{font-size:15px;margin-bottom:10px;font-family:'Playfair Display',serif}
+.preview-box h3{font-size:15px;margin-bottom:10px;font-family:'DM Serif Display',serif}
 .prev-item{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border)}
 .prev-total{display:flex;justify-content:space-between;font-weight:700;font-size:15px;margin-top:10px;padding-top:10px;border-top:2px solid var(--border)}
 .prev-info{background:#fff;border-radius:var(--radius-s);padding:10px;margin-top:10px;font-size:12px;color:var(--muted);display:flex;flex-direction:column;gap:3px}
 .success-modal{text-align:center}
 .succ-icon{font-size:50px;margin-bottom:12px}
-.order-num-big{background:var(--primary-l);border:2px dashed var(--primary);border-radius:var(--radius-s);padding:14px;font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:var(--primary);letter-spacing:2px;margin:14px 0}
+.order-num-big{background:var(--primary-l);border:2px dashed var(--primary);border-radius:var(--radius-s);padding:14px;font-family:'DM Serif Display',serif;font-size:26px;font-weight:700;color:var(--primary);letter-spacing:2px;margin:14px 0}
 .eta-box{background:var(--bg2);border-radius:var(--radius-s);padding:10px;font-size:13px;color:var(--muted);margin:10px 0 18px;display:flex;align-items:center;justify-content:center;gap:7px}
 .success-modal .btn-pri{margin-bottom:8px}
 .success-modal .btn-ghost{width:100%}
 
+/* ——— ANIMATIONS ——— */
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes scaleIn{from{opacity:0;transform:scale(.93)}to{opacity:1;transform:scale(1)}}
+@keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.dish-card{animation:fadeUp .35s ease both}
+.dishes-grid .dish-card:nth-child(1){animation-delay:.04s}
+.dishes-grid .dish-card:nth-child(2){animation-delay:.08s}
+.dishes-grid .dish-card:nth-child(3){animation-delay:.12s}
+.dishes-grid .dish-card:nth-child(4){animation-delay:.16s}
+.dishes-grid .dish-card:nth-child(5){animation-delay:.20s}
+.dishes-grid .dish-card:nth-child(6){animation-delay:.24s}
+.dishes-grid .dish-card:nth-child(n+7){animation-delay:.28s}
+.cat-btn{transition:background var(--t),border-color var(--t),color var(--t),transform .15s}
+.cat-btn:active{transform:scale(.96)}
+.cat-btn.on{animation:scaleIn .2s ease}
+#nav{animation:slideDown .3s ease}
+.cart-item{animation:fadeUp .2s ease both}
+.cart-item:nth-child(1){animation-delay:.03s}
+.cart-item:nth-child(2){animation-delay:.06s}
+.cart-item:nth-child(n+3){animation-delay:.09s}
+.track-card{animation:fadeUp .3s ease}
+.track-history-item{animation:fadeUp .2s ease both}
+.step-body:not(.hide){animation:fadeUp .22s ease}
+.add-btn:active,.dm-cart-btn:active{transform:scale(.92)!important}
+.select-btn:active{transform:scale(.95)!important}
+.qty-btn:active{transform:scale(.88)}
 /* FLOAT CALL */
 .float-call{
   position:fixed;bottom:24px;right:24px;z-index:800;
@@ -638,10 +713,11 @@ input,select,textarea{font-size:16px!important} /* prevents iOS zoom on focus */
     <h2 class="track-page-title">Відстеження</h2>
     <p class="track-page-sub">Введіть номер замовлення щоб перевірити статус</p>
     <div class="track-search-box">
-      <input id="trackInput" placeholder="PA-1234" type="text"
-        onkeydown="if(event.key==='Enter')trackOrder()"
-        onfocus="autoFillPrefix(this)"
-        oninput="autoFillPrefix(this)">
+      <input id="trackInput" placeholder="PA-" type="text" inputmode="numeric" maxlength="7"
+        autocomplete="off" autocorrect="off" spellcheck="false"
+        onfocus="initTrackPrefix(this)"
+        onkeydown="trackInputKey(event,this)"
+        oninput="trackInputFormat(this)">
       <button onclick="trackOrder()">Знайти</button>
     </div>
     <div id="trackResultWrap" class="track-result-wrap"></div>
@@ -661,13 +737,17 @@ input,select,textarea{font-size:16px!important} /* prevents iOS zoom on focus */
     <button class="dish-modal-x" onclick="closeDishModal()">✕</button>
     <div class="dish-modal-photo" id="dmImg"></div>
     <div class="dish-modal-body">
-      <div id="dmBadges" style="display:flex;gap:7px;margin-bottom:10px;flex-wrap:wrap"></div>
+      <div id="dmBadges" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px"></div>
+      <div class="dish-modal-cat" id="dmCat" style="display:none"></div>
       <div class="dish-modal-name" id="dmName"></div>
-      <div class="dish-modal-meta" id="dmMeta"></div>
+      <div class="dish-modal-meta" id="dmMeta" style="display:none"></div>
       <div class="dish-modal-desc" id="dmDesc"></div>
       <div id="dmSizes" class="dm-sizes" style="display:none"></div>
       <div class="dish-modal-footer">
-        <div class="dish-modal-price" id="dmPrice"></div>
+        <div class="dish-modal-price-wrap">
+          <div class="dish-modal-price-old" id="dmOldPrice" style="display:none"></div>
+          <div class="dish-modal-price" id="dmPrice"></div>
+        </div>
         <div id="dmCtrl"></div>
       </div>
     </div>
@@ -711,8 +791,9 @@ input,select,textarea{font-size:16px!important} /* prevents iOS zoom on focus */
       <div class="step" id="s3"><div class="step-n">3</div><span>Підтвердження</span></div>
     </div>
     <div class="step-body" id="sb1">
-      <div class="fg"><label>Ім'я *</label><input id="fName" placeholder="Ваше ім'я" type="text"></div>
-      <div class="fg"><label>Телефон *</label><input id="fPhone" placeholder="+380 (0XX) XXX-XX-XX" type="tel" maxlength="19"></div>
+      <div class="fg"><label>Ім'я *</label><input id="fName" placeholder="Ваше ім'я" type="text" maxlength="50" autocomplete="name"
+        oninput="this.value=this.value.replace(/[^a-zA-Zа-яА-ЯіІїЇєЄ'ʼ\s\-]/g,'').slice(0,50)"></div>
+      <div class="fg"><label>Телефон *</label><input id="fPhone" placeholder="+380 (0XX) XXX-XX-XX" type="tel" maxlength="19" inputmode="numeric"></div>
       <button class="btn-pri" onclick="toStep(2)">Далі →</button>
     </div>
     <div class="step-body hide" id="sb2">
@@ -725,8 +806,11 @@ input,select,textarea{font-size:16px!important} /* prevents iOS zoom on focus */
           <select id="fCity"><option value="">— Оберіть місто —</option></select>
         </div>
         <div style="display:flex;gap:10px">
-          <div class="fg" style="flex:2"><label>Вулиця *</label><input id="fStreet" placeholder="вул. Шевченка" type="text" autocomplete="street-address" autocorrect="off" autocapitalize="none" spellcheck="false"></div>
-          <div class="fg" style="flex:1"><label>Будинок *</label><input id="fHouse" placeholder="42" type="text"></div>
+          <div class="fg" style="flex:2"><label>Вулиця *</label><input id="fStreet" placeholder="вул. Шевченка" type="text" maxlength="80"
+            autocomplete="street-address" autocorrect="off" autocapitalize="none" spellcheck="false"
+            oninput="this.value=this.value.slice(0,80)"></div>
+          <div class="fg" style="flex:1"><label>Будинок *</label><input id="fHouse" placeholder="42" type="text" maxlength="10"
+            oninput="this.value=this.value.replace(/[^0-9a-zA-Zа-яА-ЯіІїЇєЄ\/\-]/g,'').slice(0,10)"></div>
         </div>
       </div>
       <div id="pFields" style="display:none">
@@ -736,7 +820,11 @@ input,select,textarea{font-size:16px!important} /* prevents iOS zoom on focus */
           <small style="color:var(--muted)">Час очікування: 20–30 хв</small>
         </div>
       </div>
-      <div class="fg"><label>Коментар</label><textarea id="fNote" placeholder="Побажання, алергії, спосіб оплати..." rows="3"></textarea></div>
+      <div class="fg">
+        <label>Коментар <span id="noteCount" style="font-size:10px;color:var(--light);font-weight:400">(0/300)</span></label>
+        <textarea id="fNote" placeholder="Побажання, алергії, спосіб оплати..." rows="3" maxlength="300"
+          oninput="document.getElementById('noteCount').textContent='('+this.value.length+'/300)'"></textarea>
+      </div>
       <div class="row-btns">
         <button class="btn-ghost" onclick="toStep(1)">← Назад</button>
         <button class="btn-pri" onclick="toStep(3)">Далі →</button>
@@ -744,9 +832,8 @@ input,select,textarea{font-size:16px!important} /* prevents iOS zoom on focus */
     </div>
     <div class="step-body hide" id="sb3">
       <div class="preview-box" id="previewBox"></div>
-      <!-- Promo code input — step 3 only -->
       <div style="margin-bottom:14px">
-        <div id="promoAppliedBox" style="display:none;padding:10px 14px;background:rgba(42,157,92,.08);border:1.5px solid rgba(42,157,92,.3);border-radius:var(--radius-s);margin-bottom:8px;display:none">
+        <div id="promoAppliedBox" style="display:none;padding:10px 14px;background:rgba(42,157,92,.08);border:1.5px solid rgba(42,157,92,.3);border-radius:var(--radius-s);margin-bottom:8px">
           <div style="display:flex;align-items:center;justify-content:space-between">
             <div>
               <span style="font-size:12px;font-weight:700;color:var(--green)" id="promoAppliedLabel">🏷 Промокод застосовано</span>
@@ -758,11 +845,12 @@ input,select,textarea{font-size:16px!important} /* prevents iOS zoom on focus */
         <div id="promoInputBox" style="display:flex;gap:6px;align-items:center">
           <div style="position:relative;flex:1">
             <span style="position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:12px;opacity:.4">🏷</span>
-            <input id="promoInput" placeholder="Промокод" type="text"
-              style="width:100%;padding:9px 12px 9px 30px;border:1.5px solid var(--border);border-radius:var(--radius-s);font-size:13px;font-family:'Jost',sans-serif;background:var(--bg);outline:none;color:var(--text);text-transform:uppercase;letter-spacing:.8px;font-weight:600;transition:border-color var(--t)"
-              onkeydown="if(event.key==='Enter')applyPromo()" oninput="this.value=this.value.toUpperCase()">
+            <input id="promoInput" placeholder="Промокод" type="text" maxlength="12"
+              style="width:100%;padding:9px 12px 9px 30px;border:1.5px solid var(--border);border-radius:var(--radius-s);font-size:13px;font-family:'Exo 2',sans-serif;background:var(--bg);outline:none;color:var(--text);text-transform:uppercase;letter-spacing:.8px;font-weight:600;transition:border-color var(--t)"
+              onkeydown="if(event.key==='Enter')applyPromo()"
+              oninput="this.value=this.value.replace(/[^A-Z0-9]/gi,'').toUpperCase().slice(0,12)">
           </div>
-          <button onclick="applyPromo()" style="padding:9px 16px;background:var(--text);color:#fff;border:none;border-radius:var(--radius-s);font-size:12px;font-weight:700;cursor:pointer;font-family:'Jost',sans-serif;white-space:nowrap;flex-shrink:0">OK</button>
+          <button onclick="applyPromo()" style="padding:9px 16px;background:var(--text);color:#fff;border:none;border-radius:var(--radius-s);font-size:12px;font-weight:700;cursor:pointer;font-family:'Exo 2',sans-serif;white-space:nowrap;flex-shrink:0">OK</button>
         </div>
         <div id="promoMsg" style="font-size:11px;min-height:14px;padding:4px 2px;line-height:1.4"></div>
       </div>
@@ -1017,7 +1105,8 @@ function populateCitySelect() {
   if (!sel) return;
   var html = '<option value="">— Оберіть місто —</option>';
   CITIES.forEach(function(c) {
-    html += '<option value="' + c.name + '" data-price="' + c.price + '">' + c.name + ' (+' + c.price + ' грн)</option>';
+    var priceLabel = c.price === 0 ? 'безкоштовно' : '+' + c.price + ' грн';
+    html += '<option value="' + c.name + '" data-price="' + c.price + '">' + c.name + ' (' + priceLabel + ')</option>';
   });
   sel.innerHTML = html;
 }
@@ -1160,7 +1249,7 @@ function makeDishCard(item) {
       + '<span class="qty-n">' + qty + '</span>'
       + '<button class="qty-btn" onclick="chQty(\'' + id + '\',1)">+</button>'
       + '</div>'
-    : '<button class="select-btn" onclick="event.stopPropagation();openDishModal(\'' + id + '\')" title="Відкрити">+</button>';
+    : '<button class="select-btn" onclick="event.stopPropagation();openDishModal(\'' + id + '\')" title="Відкрити">Вибрати</button>';
 
   return '<div class="dish-card" onclick="openDishModal(\'' + id + '\')">'
     + '<div class="dish-img">' + imgHtml
@@ -1170,7 +1259,7 @@ function makeDishCard(item) {
     + '<div class="dish-body">'
     + '<div class="dish-name">' + item.name + '</div>'
     + (item.desc ? '<div class="dish-desc">' + item.desc + '</div>' : '')
-    + '<div class="dish-meta"><span>' + (item.prep || 15) + ' хв</span><span>' + (item.cat || "") + '</span></div>'
+
     + '<div class="dish-footer">'
     + '<div class="dish-price">' + priceHtml + '</div>'
     + ctrlHtml
@@ -1182,21 +1271,28 @@ window.openDishModal = function(id) {
   var item = MENU.find(function(i) { return i.id === id; });
   if (!item) return;
 
-  // Photo
   var dmImg = document.getElementById("dmImg");
   dmImg.innerHTML = item.photo
     ? '<img src="' + item.photo + '" alt="' + item.name + '">'
     : '<span>' + (item.emoji || "🍽") + '</span>';
 
-  // Name, meta, desc
   document.getElementById("dmName").textContent = item.name;
-  document.getElementById("dmMeta").innerHTML   = "<span>" + (item.prep || 15) + " хв</span><span>" + (item.cat || "") + "</span>";
   document.getElementById("dmDesc").textContent = item.desc || "";
+
+  // Meta pills
+  var metaHtml = "";
+  if (item.prep) metaHtml += '<div class="dish-modal-meta-pill"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' + item.prep + ' хв</div>';
+  if (item.cat) metaHtml += '<div class="dish-modal-meta-pill">' + item.cat + '</div>';
+  document.getElementById("dmMeta").innerHTML = metaHtml;
+
+  // Category pill
+  var catEl = document.getElementById("dmCat");
+  if (catEl) catEl.textContent = item.cat || "";
 
   // Badges
   var badges = "";
-  if (item.pop)  badges += '<span class="badge-pop"  style="position:static;display:inline-block">Хіт</span>';
-  if (item.sale) badges += '<span class="badge-sale" style="position:static;display:inline-block">Акція</span>';
+  if (item.pop)  badges += '<span class="dm-badge dm-badge-pop">★ Хіт продажів</span>';
+  if (item.sale) badges += ' <span class="dm-badge dm-badge-sale">Акція</span>';
   document.getElementById("dmBadges").innerHTML = badges;
 
   refreshDishModalCtrl(id);
@@ -1209,72 +1305,81 @@ window.closeDishModal = function() {
   document.body.style.overflow = "";
 };
 
-window.addItemModal  = function(id) { addItem(id);   refreshDishModalCtrl(id); };
+window.addItemModal  = function(id) { addItem(id); closeDishModal(); updateCart(); bumpCartBtn(); };
 window.chQtyModal    = function(id, d) { chQty(id, d); refreshDishModalCtrl(id); };
+
+var _dmSelectedSize = {};
 
 function refreshDishModalCtrl(id) {
   var item   = MENU.find(function(i) { return i.id === id; });
   if (!item) return;
   var inCart = cart.find(function(ci) { return ci.id === id && ci.sizeIdx === undefined; });
   var qty    = inCart ? inCart.qty : 0;
-  var dmSizes = document.getElementById("dmSizes");
-  var dmPrice = document.getElementById("dmPrice");
-  var dmCtrl  = document.getElementById("dmCtrl");
+  var dmSizes   = document.getElementById("dmSizes");
+  var dmPrice   = document.getElementById("dmPrice");
+  var dmOldPr   = document.getElementById("dmOldPrice");
+  var dmCtrl    = document.getElementById("dmCtrl");
+  var dmPrWrap  = document.querySelector(".dish-modal-price-wrap");
 
   if (item.sizes && item.sizes.length) {
-    // ---- HAS SIZES ----
     dmSizes.style.display = "flex";
-    dmPrice.style.display = "none";
-    dmCtrl.innerHTML = "";
+    if (dmPrWrap) dmPrWrap.style.display = "";
 
-    var rows = "";
+    if (_dmSelectedSize[id] === undefined) _dmSelectedSize[id] = 0;
+    var selIdx = _dmSelectedSize[id];
+    var selSize = item.sizes[selIdx];
+
+    var chips = "";
     item.sizes.forEach(function(s, si) {
-      var sInCart = cart.find(function(ci){ return ci.id === id && ci.sizeIdx === si; });
-      var sQty    = sInCart ? sInCart.qty : 0;
-      var hasQty  = sQty > 0;
-      rows += '<div class="dm-size-row' + (hasQty ? " has-qty" : "") + '">'
-        + '<div class="dm-size-left">'
-        + '<div class="dm-size-label">' + s.label + '</div>'
-        + '<div class="dm-size-price">' + s.price + ' грн</div>'
+      var isActive = si === selIdx;
+      var parts = s.label.split(/[/|,]/).map(function(p){ return p.trim(); });
+      var topLine = parts[0] || s.label;
+      var botLine = parts[1] || "";
+      chips += '<div class="dm-size-chip' + (isActive ? " active" : "") + '" onclick="selectDmSize(\''+id+'\','+si+')">'
+        + '<div class="dm-size-chip-label">' + topLine + '</div>'
+        + (botLine ? '<div class="dm-size-chip-sub">' + botLine + '</div>' : '')
         + '</div>';
-      if (hasQty) {
-        rows += '<div class="qty-ctrl">'
-          + '<button class="qty-btn" onclick="chQtySize(&apos;' + id + '&apos;,' + si + ',-1)">−</button>'
-          + '<span class="qty-n">' + sQty + '</span>'
-          + '<button class="qty-btn" onclick="chQtySize(&apos;' + id + '&apos;,' + si + ',1)">+</button>'
-          + '</div>';
-      } else {
-        rows += '<button class="dm-cart-btn" onclick="addItemSize(&apos;' + id + '&apos;,' + si + ')">До кошика</button>';
-      }
-      rows += '</div>';
     });
-    dmSizes.innerHTML = rows;
+    dmSizes.innerHTML = chips;
+
+    if (dmPrice) dmPrice.textContent = selSize.price + " грн";
+    if (dmOldPr) dmOldPr.style.display = "none";
+    dmCtrl.innerHTML = '<button class="dm-cart-btn" onclick="addSizeAndClose(\''+id+'\')">До кошика</button>';
 
   } else {
-    // ---- SIMPLE PRICE ----
     dmSizes.style.display = "none";
-    dmPrice.style.display = "";
+    if (dmPrWrap) dmPrWrap.style.display = "";
 
     if (item.oldPrice) {
-      dmPrice.innerHTML = '<div class="dish-price-wrap">'
-        + '<span class="dish-old-price">' + item.oldPrice + ' грн</span>'
-        + '<span class="dish-price" style="font-size:28px">' + item.price + ' грн</span>'
-        + '</div>';
+      dmPrice.textContent = item.price + " грн";
+      if (dmOldPr) { dmOldPr.textContent = item.oldPrice + " грн"; dmOldPr.style.display = ""; }
     } else {
-      dmPrice.innerHTML = '<span class="dish-price" style="font-size:28px">' + item.price + ' грн</span>';
+      dmPrice.textContent = item.price + " грн";
+      if (dmOldPr) dmOldPr.style.display = "none";
     }
 
     if (qty > 0) {
       dmCtrl.innerHTML = '<div class="qty-ctrl">'
         + '<button class="qty-btn" onclick="chQtyModal(\'' + id + '\',-1)">−</button>'
         + '<span class="qty-n">' + qty + '</span>'
-        + '<button class="qty-btn" onclick="chQtyModal(\'' + id + '\'\,1)">+</button>'
+        + '<button class="qty-btn" onclick="chQtyModal(\'' + id + '\',1)">+</button>'
         + '</div>';
     } else {
       dmCtrl.innerHTML = '<button class="dm-cart-btn" onclick="addItemModal(\'' + id + '\')">До кошика</button>';
     }
   }
 }
+
+window.selectDmSize = function(id, si) {
+  _dmSelectedSize[id] = si;
+  refreshDishModalCtrl(id);
+};
+
+window.addSizeAndClose = function(id) {
+  var si = _dmSelectedSize[id] !== undefined ? _dmSelectedSize[id] : 0;
+  addItemSize(id, si);
+  closeDishModal();
+};
 
 window.addItem = function(id) {
   var item = MENU.find(function(i) { return i.id === id; });
@@ -1299,7 +1404,9 @@ function dlvCost(sub) {
   var sel = document.getElementById("fCity");
   if (sel && sel.value) {
     var opt = sel.options[sel.selectedIndex];
-    return parseInt(opt.getAttribute("data-price")) || DLV_COST;
+    var raw = opt.getAttribute("data-price");
+    // Use null check so price=0 (free city) is respected, not treated as falsy
+    return raw !== null && raw !== "" ? parseInt(raw) : DLV_COST;
   }
   return DLV_COST;
 }
@@ -1522,9 +1629,13 @@ function updateCart() {
   document.getElementById("sumTotal").textContent = tot2 + " грн";
 
   var fn = document.getElementById("freeNote");
-  if (dlvType !== "pickup" && sub > 0 && sub < FREE) {
+  if (dlvType === "pickup") {
+    fn.textContent = "";
+  } else if (dlv === 0) {
+    fn.textContent = sub >= FREE ? "Безкоштовна доставка!" : "Безкоштовна доставка для цього міста";
+  } else if (sub > 0 && sub < FREE) {
     fn.textContent = "Ще " + (FREE - sub) + " грн до безкоштовної доставки";
-  } else if (dlvType !== "pickup" && sub >= FREE) {
+  } else if (sub >= FREE) {
     fn.textContent = "Безкоштовна доставка!";
   } else {
     fn.textContent = "";
@@ -1571,8 +1682,22 @@ window.toggleCart = function() {
 };
 
 /* ——— BURGER ——— */
-window.toggleBurger = function() { document.getElementById("mobMenu").classList.toggle("open"); };
-window.closeBurger  = function() { document.getElementById("mobMenu").classList.remove("open"); };
+window.toggleBurger = function() {
+  var m = document.getElementById("mobMenu");
+  if (m.classList.contains("open")) {
+    m.style.maxHeight = "0";
+    m.style.opacity = "0";
+    setTimeout(function(){ m.classList.remove("open"); m.style.maxHeight=""; m.style.opacity=""; }, 280);
+  } else {
+    m.classList.add("open");
+  }
+};
+window.closeBurger = function() {
+  var m = document.getElementById("mobMenu");
+  m.style.maxHeight = "0";
+  m.style.opacity = "0";
+  setTimeout(function(){ m.classList.remove("open"); m.style.maxHeight=""; m.style.opacity=""; }, 280);
+};
 
 /* ——— MODAL UTILS ——— */
 var _cfdResolve = null;
@@ -1681,7 +1806,7 @@ window.toStep = function(n) {
   if (n > 1) {
     var nm = document.getElementById("fName").value.trim();
     var ph = document.getElementById("fPhone").value.replace(/\D/g, "");
-    if (!nm) { flashField("fName"); return; }
+    if (!nm || nm.length < 2) { flashField("fName"); return; }
     if (ph.length < 12) { flashField("fPhone"); return; }
   }
   if (n > 2 && dlvType === "delivery") {
@@ -1748,6 +1873,7 @@ function buildPreview() {
       + '</div>' : '')
     + '<div class="prev-total"><span>Разом</span><span>' + Math.max(0, tot - discount) + ' грн</span></div>'
     + '<div class="prev-info"><span>' + nm + '</span><span>' + ph + '</span><span>' + addr + '</span>'
+    + (dlv === 0 && dlvType === 'delivery' ? '<span style="color:var(--green);font-size:12px">🎁 Доставка безкоштовна</span>' : dlv > 0 ? '<span>Доставка: +' + dlv + ' грн</span>' : '')
     + (note ? '<span>' + note + '</span>' : '')
     + '<span>Орієнтовно ~' + eta + ' хв</span></div>';
 }
@@ -1821,9 +1947,10 @@ window.placeOrder = async function() {
 
 window.goTrackOrder = function() {
   var num = document.getElementById("succNum").textContent;
+  var digits = num.replace(/\D/g, "").slice(0, 4);
   closeModal("successModal");
   showPage("track");
-  document.getElementById("trackInput").value = num;
+  document.getElementById("trackInput").value = "PA-" + digits;
   trackOrder();
 };
 
@@ -1859,7 +1986,8 @@ function renderTrackHistory() {
 }
 
 window.loadFromHistory = function(num) {
-  document.getElementById("trackInput").value = num;
+  var digits = num.replace(/\D/g, "").slice(0, 4);
+  document.getElementById("trackInput").value = "PA-" + digits;
   trackOrder();
   window.scrollTo(0, 0);
 };
@@ -1870,12 +1998,44 @@ window.clearTrackHistory = function() {
 };
 
 /* ——— TRACK ORDER ——— */
-window.autoFillPrefix = function(el) {
-  var v = el.value.toUpperCase();
-  if (!v) { el.value = "PA-"; setTimeout(function() { el.setSelectionRange(3, 3); }, 0); return; }
-  if (!v.startsWith("PA-")) el.value = "PA-" + v.replace(/^PA-?/i, "");
-  else el.value = v;
+var PREFIX = "PA-";
+
+window.initTrackPrefix = function(el) {
+  if (!el.value.startsWith(PREFIX)) {
+    el.value = PREFIX;
+  }
+  setTimeout(function() {
+    var pos = el.value.length;
+    el.setSelectionRange(pos, pos);
+  }, 0);
 };
+
+window.trackInputKey = function(e, el) {
+  if (e.key === "Enter") { trackOrder(); return; }
+  var start = el.selectionStart, end = el.selectionEnd;
+  // Prevent deleting the prefix
+  if ((e.key === "Backspace" || e.key === "Delete") && start <= PREFIX.length && end <= PREFIX.length) {
+    e.preventDefault(); return;
+  }
+  // Only allow digits after prefix
+  if (e.key.length === 1 && !/[0-9]/.test(e.key)) {
+    e.preventDefault();
+  }
+};
+
+window.trackInputFormat = function(el) {
+  var val = el.value;
+  // Ensure prefix is always there
+  if (!val.startsWith(PREFIX)) {
+    val = PREFIX + val.replace(/^PA-?/i, "").replace(/\D/g, "");
+  }
+  // Extract digits after prefix, limit to 4
+  var digits = val.slice(PREFIX.length).replace(/\D/g, "").slice(0, 4);
+  el.value = PREFIX + digits;
+};
+
+window.sanitizeTrackInput = window.trackInputFormat;
+window.autoFillPrefix = function(el) { window.initTrackPrefix(el); };
 
 function renderTrackCard(o, container) {
   var si = STATUSES.findIndex(function(s) { return s.k === o.status; });
@@ -1914,9 +2074,10 @@ function renderTrackCard(o, container) {
       ? '<span style="font-size:9px;font-weight:700;padding:1px 6px;border-radius:20px;background:rgba(239,68,68,.1);color:#EF4444;margin-left:5px">видалено</span>'
       : "";
     var nameStyle = isDeleted ? "text-decoration:line-through;opacity:.5" : "";
-    items += '<div class="track-item" style="' + (isDeleted ? "opacity:.6" : "") + '">'
+    var priceStyle = isDeleted ? "text-decoration:line-through;opacity:.5" : "";
+    items += '<div class="track-item" style="' + (isDeleted ? "opacity:.55" : "") + '">'
       + '<span style="' + nameStyle + '">' + i.name + ' ×' + i.qty + addedBadge + delBadge + '</span>'
-      + '<span' + (isDeleted ? ' style="text-decoration:line-through;opacity:.5"' : '') + '>' + (i.price * i.qty) + ' грн</span>'
+      + '<span style="' + priceStyle + '"' + (isDeleted ? '' : '') + '>' + (i.price * i.qty) + ' грн</span>'
       + '</div>';
   });
 
@@ -1949,14 +2110,14 @@ function renderTrackCard(o, container) {
 }
 
 window.trackOrder = async function() {
-  var raw = document.getElementById("trackInput").value.trim().toUpperCase();
-  var val = raw.startsWith("PA-") ? raw : ("PA-" + raw);
-  document.getElementById("trackInput").value = val;
-  var res = document.getElementById("trackResultWrap");
-  if (!val || val === "PA-") {
-    res.innerHTML = '<p style="color:var(--primary);font-size:14px">Введіть номер замовлення</p>';
+  var raw = document.getElementById("trackInput").value;
+  var digits = raw.replace(/^PA-/i, "").replace(/\D/g, "").slice(0, 4);
+  if (!digits || digits.length < 1) {
+    document.getElementById("trackResultWrap").innerHTML = '<p style="color:var(--primary);font-size:14px">Введіть номер замовлення (4 цифри після PA-)</p>';
     return;
   }
+  var val = "PA-" + digits;
+  var res = document.getElementById("trackResultWrap");
   res.innerHTML = '<p style="color:var(--muted);font-size:14px;padding:20px 0">Шукаємо...</p>';
   if (trackUnsub) { trackUnsub(); trackUnsub = null; }
   try {
@@ -2047,7 +2208,7 @@ window.addItemSize = function(id, sizeIdx) {
     cart.push({id:id, name:item.name + ' ' + s.label, price:s.price, qty:1, sizeIdx:sizeIdx,
       photo:item.photo||null, emoji:item.emoji||'', prep:item.prep||15, cat:item.cat||''});
   }
-  saveCart(); refreshDishModalCtrl(id); updateCart(); bumpCartBtn();
+  saveCart(); updateCart(); bumpCartBtn();
 };
 window.chQtySize = function(id, sizeIdx, d) {
   var i = cart.findIndex(function(c) { return c.id === id && c.sizeIdx === sizeIdx; });
