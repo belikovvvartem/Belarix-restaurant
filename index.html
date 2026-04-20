@@ -224,7 +224,7 @@ input,select,textarea{font-size:16px!important} /* prevents iOS zoom on focus */
 .thi-arrow{color:var(--muted);font-size:20px;font-weight:300}
 
 /* DISH DETAIL MODAL */
-.dish-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:1200;display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;pointer-events:none;transition:opacity .25s}
+.dish-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:1200;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .25s}
 .dish-modal-bg.on{opacity:1;pointer-events:all}
 .dish-modal{
   background:var(--surface);border-radius:22px;
@@ -246,12 +246,7 @@ input,select,textarea{font-size:16px!important} /* prevents iOS zoom on focus */
 .dish-modal-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .6s ease}
 .dish-modal-bg.on .dish-modal-photo img{transform:scale(1.04)}
 .dish-modal-photo > span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:90px;opacity:.25}
-/* Gradient overlay bottom of photo */
-.dish-modal-photo::after{
-  content:'';position:absolute;bottom:0;left:0;right:0;height:40%;
-  background:linear-gradient(to top,rgba(28,18,8,.45) 0%,transparent 100%);
-  pointer-events:none;
-}
+/* No gradient shadow on photo */
 .dish-modal-body{
   flex:1;padding:36px 30px 24px;overflow-y:auto;
   display:flex;flex-direction:column;min-width:0;
@@ -651,7 +646,7 @@ input,select,textarea{font-size:16px!important} /* prevents iOS zoom on focus */
     <span class="banner-i">Мінімальне замовлення <strong id="bannerMin">200 грн</strong></span>
   </div>
   <!-- BANNER SLIDER -->
-  <div id="bannerSlider">
+  <div id="bannerSlider" style="display:none">
     <div id="bannerSliderInner">
       <div class="banner-track" id="bannerTrack"></div>
       <div id="bannerDots"></div>
@@ -968,11 +963,7 @@ window.showPage = function(page) {
 updateCart();
 checkHours();
 setInterval(checkHours, 60000);
-// Show banner area immediately (filled by Firebase listener)
-(function(){
-  var s=document.getElementById("bannerSlider");
-  if(s) s.style.display="block";
-})();
+// Banner slider hidden by default, shown by initBannerSlider when banners load
 listenFirebase();
 
 /* ——— BANNER SLIDER ——— */

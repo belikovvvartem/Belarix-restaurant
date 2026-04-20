@@ -543,12 +543,44 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
 .st-grid{display:none}
 .st-card{display:none}
 @media(max-width:768px){
-  .sett-nav{padding:6px 10px}
-  .sett-content{padding:12px}
-  .sett-amount-grid{grid-template-columns:1fr 1fr}
-  .sett-info-row{grid-template-columns:1fr 1fr 1fr}
-  .hours-day-label{width:80px}
+  .sett-nav{padding:4px 8px;gap:1px}
+  .sett-nav-item{padding:4px 9px;font-size:10px}
+  .sett-content{padding:10px}
+  .sett-header{margin-bottom:12px}
+  .sett-header h2{font-size:14px}
+  .sett-header p{font-size:11px}
+  .sett-block{margin-bottom:10px}
+  .sett-block-head{padding:10px 12px}
+  .sett-block-icon{width:26px;height:26px;font-size:13px}
+  .sett-block-title{font-size:12px}
+  .sett-block-sub{font-size:10px}
+  .sett-block-body{padding:10px 12px}
+  /* Amount/conditions */
+  .sett-amount-grid{grid-template-columns:1fr 1fr;gap:8px}
+  .sett-amount-inp{padding:8px 10px;font-size:13px}
+  .sett-amount-label{font-size:9px}
+  /* Info cards */
+  .sett-info-row{grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:12px}
+  .sett-info-card{padding:9px 10px}
+  .sett-info-val{font-size:16px}
+  .sett-info-label{font-size:9px}
+  /* Hours - compact */
+  .hours-day-row{flex-direction:column;align-items:flex-start;gap:6px;padding:10px 0}
+  .hours-day-label{width:auto;flex-shrink:1}
+  .hours-day-name{font-size:12px}
   .hours-day-sub{display:none}
+  .hours-time-pair{gap:6px;width:100%}
+  .hours-time-input{width:44px;padding:6px 4px;font-size:14px}
+  .hours-time-sep{font-size:14px}
+  .hours-time-dash{margin:0}
+  .hours-time-label{font-size:9px}
+  /* City rows */
+  .city-row{padding:6px 8px}
+  .city-name{font-size:12px}
+  .city-price-input{width:56px;font-size:11px}
+  /* Cat drag */
+  .cat-drag-item{padding:7px 8px}
+  .cat-drag-name{font-size:12px}
 }
 .city-row{display:flex;align-items:center;gap:7px;padding:8px 10px;background:var(--surf2);border-radius:var(--rs);border:1px solid var(--brd);margin-bottom:6px}
 .city-name{flex:2;font-size:13px;font-weight:500}
@@ -957,8 +989,15 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
         </div>
       </div>
       <div class="stats-grid" id="statsCards"></div>
-      <div class="chart-card"><div class="chart-title">Топ страв</div><div class="bar-chart" id="topDishes"></div></div>
-      <div class="chart-card"><div class="chart-title">По категоріях</div><div class="bar-chart" id="catChart"></div></div>
+      <!-- Revenue timeline -->
+      <div class="chart-card"><div class="chart-title">💰 Виручка за 7 днів</div><div class="bar-chart" id="revenueChart"></div></div>
+      <!-- Order status distribution -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;flex-shrink:0">
+        <div class="chart-card" style="margin:0"><div class="chart-title">📦 Статуси замовлень</div><div class="bar-chart" id="statusChart"></div></div>
+        <div class="chart-card" style="margin:0"><div class="chart-title">🏷 Промокоди</div><div class="bar-chart" id="promoChart"></div></div>
+      </div>
+      <div class="chart-card"><div class="chart-title">🍽 Топ страв</div><div class="bar-chart" id="topDishes"></div></div>
+      <div class="chart-card"><div class="chart-title">📋 По категоріях</div><div class="bar-chart" id="catChart"></div></div>
     </div>
 
     <!-- MENU -->
@@ -1841,20 +1880,21 @@ const SN={
 };
 
 /* ——— ORDERS ——— */
+let _lastOrdersHash="";
 function listenOrders(){
   unsubOrders=onValue(ref(db,"orders"),snap=>{
+    const raw=snap.exists()?snap.val():{};
+    // Debounce: skip if data hasn't changed
+    const hash=JSON.stringify(Object.keys(raw).sort());
     const newOnes=[];
     allOrders={new:[],accepted:[],in_progress:[],shipped:[],completed:[]};
-    if(snap.exists()){
-      const raw=snap.val();
-      Object.keys(raw).forEach(key=>{
-        const od=raw[key];
-        if(!od||typeof od!=="object")return;
-        od.id=key;
-        (allOrders[od.status]?allOrders[od.status]:allOrders.new).push(od);
-        if(od.status==="new"&&!seen.has(od.id))newOnes.push(od);
-      });
-    }
+    Object.keys(raw).forEach(key=>{
+      const od=raw[key];
+      if(!od||typeof od!=="object")return;
+      od.id=key;
+      (allOrders[od.status]?allOrders[od.status]:allOrders.new).push(od);
+      if(od.status==="new"&&!seen.has(od.id))newOnes.push(od);
+    });
     Object.keys(allOrders).forEach(s=>allOrders[s].sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)));
     if(newOnes.length){
       playBeep();
@@ -1977,8 +2017,7 @@ function renderStats(){
   const all=Object.values(allOrders).flat().filter(o=>o&&o.status);
   if(all.length===0&&Object.values(allOrders).every(a=>!a||!a.length)){
     document.getElementById("statsCards").innerHTML=`<div class="state-box" style="min-height:120px"><div class="spinner"></div><strong>Завантаження...</strong></div>`;
-    document.getElementById("topDishes").innerHTML="";
-    document.getElementById("catChart").innerHTML="";
+    ["topDishes","catChart","revenueChart","statusChart","promoChart"].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML="";});
     return;
   }
   const now=new Date();now.setHours(0,0,0,0);
@@ -1989,17 +2028,52 @@ function renderStats(){
   const promoCount=Object.keys(allPromos).length;
   const promoUses=Object.values(allPromos).reduce((s,p)=>s+Object.keys(p.uses||{}).length,0);
   const promoActive=Object.values(allPromos).filter(p=>p.active&&(!p.expiresAt||p.expiresAt>Date.now())).length;
+  // Conversion rate
+  const convRate=all.length?Math.round(allOrders.completed.length/all.length*100):0;
+
   document.getElementById("statsCards").innerHTML=`
     <div class="stat-card"><div class="stat-label">Сьогодні</div><div class="stat-val accent">${todayN}</div><div class="stat-sub">Всього: ${all.length}</div></div>
     <div class="stat-card"><div class="stat-label">Виручка сьогодні</div><div class="stat-val">${todayRev}<span style="font-size:14px;color:var(--sub)"> грн</span></div><div class="stat-sub">Загалом: ${totalRev} грн</div></div>
     <div class="stat-card"><div class="stat-label">Виконано</div><div class="stat-val">${allOrders.completed.length}</div><div class="stat-sub">Активних: ${all.length-allOrders.completed.length}</div></div>
     <div class="stat-card"><div class="stat-label">Середній чек</div><div class="stat-val">${avgOrder}<span style="font-size:14px;color:var(--sub)"> грн</span></div></div>
+    <div class="stat-card"><div class="stat-label">Конверсія</div><div class="stat-val">${convRate}<span style="font-size:14px;color:var(--sub)">%</span></div><div class="stat-sub">виконано від усіх</div></div>
     <div class="stat-card"><div class="stat-label">Промокодів</div><div class="stat-val">${promoActive}<span style="font-size:14px;color:var(--sub)"> акт.</span></div><div class="stat-sub">Всього: ${promoCount} · Використань: ${promoUses}</div></div>`;
+
+  // ── Revenue chart (last 7 days) ──
+  const days7=[];
+  for(let i=6;i>=0;i--){
+    const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-i);
+    const next=new Date(d);next.setDate(next.getDate()+1);
+    const rev=allOrders.completed.filter(o=>o.createdAt>=d.getTime()&&o.createdAt<next.getTime()).reduce((s,o)=>s+(o.total||0),0);
+    const label=d.toLocaleDateString("uk-UA",{day:"2-digit",month:"2-digit"});
+    days7.push({label,rev});
+  }
+  const maxRev=Math.max(...days7.map(d=>d.rev),1);
+  const rcEl=document.getElementById("revenueChart");
+  if(rcEl){rcEl.innerHTML=days7.length?days7.map(d=>`<div class="bar-row"><span class="bar-label">${d.label}</span><div class="bar-track"><div class="bar-fill" style="width:${Math.round(d.rev/maxRev*100)}%;background:var(--green)"></div></div><span class="bar-val">${d.rev} грн</span></div>`).join(""):"<p style='color:var(--sub);font-size:13px'>Немає даних</p>";}
+
+  // ── Status distribution ──
+  const statusMap={new:"Нові",accepted:"Прийняті",in_progress:"Готуються",shipped:"В дорозі",completed:"Виконані"};
+  const statusColors={new:"var(--p)",accepted:"var(--blue)",in_progress:"var(--yellow)",shipped:"#A855F7",completed:"var(--green)"};
+  const statusData=Object.entries(statusMap).map(([k,l])=>({label:l,count:(allOrders[k]||[]).length,color:statusColors[k]})).filter(s=>s.count>0);
+  const maxSt=Math.max(...statusData.map(s=>s.count),1);
+  const stEl=document.getElementById("statusChart");
+  if(stEl){stEl.innerHTML=statusData.length?statusData.map(s=>`<div class="bar-row"><span class="bar-label">${s.label}</span><div class="bar-track"><div class="bar-fill" style="width:${Math.round(s.count/maxSt*100)}%;background:${s.color}"></div></div><span class="bar-val">${s.count}</span></div>`).join(""):"<p style='color:var(--sub);font-size:13px'>Немає замовлень</p>";}
+
+  // ── Promo chart (top promos by uses) ──
+  const promoData=Object.entries(allPromos)
+    .map(([code,p])=>({code,uses:Object.keys(p.uses||{}).length,active:p.active}))
+    .filter(p=>p.uses>0)
+    .sort((a,b)=>b.uses-a.uses).slice(0,6);
+  const maxP=promoData[0]?.uses||1;
+  const pEl=document.getElementById("promoChart");
+  if(pEl){pEl.innerHTML=promoData.length?promoData.map(p=>`<div class="bar-row"><span class="bar-label" style="color:${p.active?"var(--txt)":"var(--dim)"}">${p.code}</span><div class="bar-track"><div class="bar-fill" style="width:${Math.round(p.uses/maxP*100)}%;background:var(--p)"></div></div><span class="bar-val">${p.uses}×</span></div>`).join(""):promoCount?`<p style='color:var(--sub);font-size:13px'>Промокоди є, але ще не використовувались</p>`:"<p style='color:var(--sub);font-size:13px'>Немає промокодів</p>";}
+
+  // ── Dishes ──
   const dc={},cc={};
   all.forEach(o=>(o.items||[]).forEach(i=>{
-    if(i.deleted) return; // skip deleted items
+    if(i.deleted) return;
     const k=i.name;if(!dc[k])dc[k]={qty:0,rev:0};dc[k].qty+=i.qty;dc[k].rev+=i.price*i.qty;
-    // Look up category from allDishes if not stored in order item
     const dish=allDishes.find(d=>d.id===i.id);
     const cat=i.cat||(dish?dish.cat:null)||"Інше";
     if(!cc[cat])cc[cat]=0;cc[cat]+=i.qty;
@@ -2014,7 +2088,17 @@ function renderStats(){
 
 /* ——— SETTINGS ——— */
 function listenSettings(){
-  onValue(ref(db,"settings"),snap=>{if(snap.exists())siteSettings=snap.val();renderSettings();},e=>console.warn("Settings:",e.message));
+  let _settingsListening=false;
+  onValue(ref(db,"settings"),snap=>{
+    if(snap.exists()){
+      const newVal=snap.val();
+      // Only re-render if settings actually changed
+      if(JSON.stringify(newVal)!==JSON.stringify(siteSettings)){
+        siteSettings=newVal;
+        renderSettings();
+      }
+    }
+  },e=>console.warn("Settings:",e.message));
 }
 window.saveSettings=async()=>{
   siteSettings.minOrder=parseInt(document.getElementById("sMin").value)||200;
