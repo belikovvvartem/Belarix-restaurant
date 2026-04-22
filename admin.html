@@ -495,9 +495,13 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
 .sett-block-icon{width:32px;height:32px;border-radius:8px;background:var(--pl);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
 .sett-block-title{font-size:13px;font-weight:700;color:var(--txt)}
 .sett-block-sub{font-size:11px;color:var(--sub);margin-top:1px}
-.sett-block-body{padding:14px 16px}
+.sett-block-body{padding:14px 16px;display:flex;flex-direction:column;gap:12px}
+@media(max-width:768px){
+  #sec-stats .chart-card + .chart-card ~ div[style*="grid-template-columns:1fr 1fr"]{grid-template-columns:1fr!important}
+}
 /* Inline add row */
-.sett-add-row{display:flex;gap:7px;align-items:center;margin-top:12px;padding-top:12px;border-top:1px solid var(--brd)}
+.sett-add-row{display:flex;gap:7px;align-items:center;margin-top:12px;padding-top:12px;border-top:1px solid var(--brd);flex-wrap:wrap}
+.sett-add-row .btn-pri{flex-shrink:0;white-space:nowrap}
 .sett-inp{padding:8px 11px;background:var(--bg2);border:1.5px solid var(--brd2);border-radius:var(--rs);color:var(--txt);font-size:13px;font-family:'Inter',sans-serif;transition:border-color var(--t);outline:none}
 .sett-inp:focus{border-color:var(--p)}
 .sett-inp-sm{width:72px;flex-shrink:0;text-align:center}
@@ -520,17 +524,17 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
 .sett-amount-inp:focus{border-color:var(--p);box-shadow:0 0 0 3px var(--pl)}
 .sett-amount-unit{font-size:12px;color:var(--sub);font-weight:600;flex-shrink:0}
 /* Hours redesign */
-.hours-day-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--brd)}
+.hours-day-row{display:flex;flex-direction:column;gap:10px;padding:14px 0;border-bottom:1px solid var(--brd)}
 .hours-day-row:last-of-type{border-bottom:none;padding-bottom:0}
-.hours-day-label{width:130px;flex-shrink:0}
-.hours-day-name{font-size:13px;font-weight:600;color:var(--txt)}
+.hours-day-label{width:auto}
+.hours-day-name{font-size:13px;font-weight:700;color:var(--txt)}
 .hours-day-sub{font-size:10px;color:var(--sub);margin-top:1px}
-.hours-time-pair{display:flex;align-items:center;gap:7px;flex:1}
+.hours-time-pair{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap}
 .hours-time-input{width:52px;padding:8px 6px;background:var(--bg2);border:1.5px solid var(--brd2);border-radius:var(--rs);color:var(--txt);font-size:16px;font-weight:700;text-align:center;font-family:'Inter',sans-serif;transition:border-color var(--t),box-shadow var(--t);-moz-appearance:textfield}
 .hours-time-input::-webkit-inner-spin-button,.hours-time-input::-webkit-outer-spin-button{-webkit-appearance:none}
 .hours-time-input:focus{border-color:var(--p);box-shadow:0 0 0 3px var(--pl);outline:none}
 .hours-time-sep{font-size:16px;font-weight:700;color:var(--dim);flex-shrink:0;line-height:1}
-.hours-time-dash{font-size:14px;color:var(--brd2);flex-shrink:0;margin:0 2px}
+.hours-time-dash{font-size:14px;color:var(--brd2);flex-shrink:0;margin:0 6px;align-self:flex-end;margin-bottom:10px}
 .hours-time-label{font-size:10px;font-weight:600;color:var(--dim);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
 .hours-status-badge{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;flex-shrink:0}
 .hsb-open{background:rgba(34,197,94,.12);color:var(--green)}
@@ -543,44 +547,12 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
 .st-grid{display:none}
 .st-card{display:none}
 @media(max-width:768px){
-  .sett-nav{padding:4px 8px;gap:1px}
-  .sett-nav-item{padding:4px 9px;font-size:10px}
-  .sett-content{padding:10px}
-  .sett-header{margin-bottom:12px}
-  .sett-header h2{font-size:14px}
-  .sett-header p{font-size:11px}
-  .sett-block{margin-bottom:10px}
-  .sett-block-head{padding:10px 12px}
-  .sett-block-icon{width:26px;height:26px;font-size:13px}
-  .sett-block-title{font-size:12px}
-  .sett-block-sub{font-size:10px}
-  .sett-block-body{padding:10px 12px}
-  /* Amount/conditions */
-  .sett-amount-grid{grid-template-columns:1fr 1fr;gap:8px}
-  .sett-amount-inp{padding:8px 10px;font-size:13px}
-  .sett-amount-label{font-size:9px}
-  /* Info cards */
-  .sett-info-row{grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:12px}
-  .sett-info-card{padding:9px 10px}
-  .sett-info-val{font-size:16px}
-  .sett-info-label{font-size:9px}
-  /* Hours - compact */
-  .hours-day-row{flex-direction:column;align-items:flex-start;gap:6px;padding:10px 0}
-  .hours-day-label{width:auto;flex-shrink:1}
-  .hours-day-name{font-size:12px}
+  .sett-nav{padding:6px 10px}
+  .sett-content{padding:12px}
+  .sett-amount-grid{grid-template-columns:1fr 1fr}
+  .sett-info-row{grid-template-columns:1fr 1fr 1fr}
+  .hours-day-label{width:80px}
   .hours-day-sub{display:none}
-  .hours-time-pair{gap:6px;width:100%}
-  .hours-time-input{width:44px;padding:6px 4px;font-size:14px}
-  .hours-time-sep{font-size:14px}
-  .hours-time-dash{margin:0}
-  .hours-time-label{font-size:9px}
-  /* City rows */
-  .city-row{padding:6px 8px}
-  .city-name{font-size:12px}
-  .city-price-input{width:56px;font-size:11px}
-  /* Cat drag */
-  .cat-drag-item{padding:7px 8px}
-  .cat-drag-name{font-size:12px}
 }
 .city-row{display:flex;align-items:center;gap:7px;padding:8px 10px;background:var(--surf2);border-radius:var(--rs);border:1px solid var(--brd);margin-bottom:6px}
 .city-name{flex:2;font-size:13px;font-weight:500}
@@ -869,6 +841,50 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
 .toast-warn    .toast-bar{background:var(--yellow)}
 .toast-info    .toast-bar{background:var(--blue)}
 /* Order item qty editor styles removed */
+
+/* ========== PERMISSIONS / FEATURE FLAGS ========== */
+.nb-locked{opacity:.5;cursor:not-allowed!important;position:relative}
+.nb-locked .nb-lock-icon{display:inline-block!important}
+.nb-lock-icon{display:none;font-size:11px;margin-left:2px;opacity:.7}
+/* Permission overlay */
+#permOverlay{
+  position:fixed;inset:0;z-index:8000;
+  background:rgba(0,0,0,.72);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  display:flex;align-items:center;justify-content:center;
+  padding:20px;
+  opacity:0;pointer-events:none;
+  transition:opacity .25s ease;
+}
+#permOverlay.on{opacity:1;pointer-events:all}
+.perm-box{
+  background:var(--surf);border:1px solid var(--brd2);
+  border-radius:20px;padding:32px 28px 24px;
+  max-width:340px;width:100%;text-align:center;
+  box-shadow:0 24px 64px rgba(0,0,0,.5);
+  transform:scale(.92) translateY(16px);
+  transition:transform .28s cubic-bezier(.34,1.3,.64,1);
+}
+#permOverlay.on .perm-box{transform:scale(1) translateY(0)}
+.perm-icon{font-size:44px;margin-bottom:14px;line-height:1}
+.perm-title{font-size:16px;font-weight:700;color:var(--txt);margin-bottom:8px}
+.perm-msg{font-size:13px;color:var(--sub);line-height:1.65;margin-bottom:22px}
+.perm-btns{display:flex;gap:8px}
+.perm-contact{
+  flex:1;padding:11px;background:var(--p);color:#fff;border:none;
+  border-radius:40px;font-size:13px;font-weight:700;cursor:pointer;
+  font-family:'Inter',sans-serif;text-decoration:none;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  transition:background var(--t);
+}
+.perm-contact:hover{background:var(--pd)}
+.perm-close-btn{
+  flex:0 0 auto;padding:11px 16px;background:var(--surf2);border:1px solid var(--brd2);
+  border-radius:40px;font-size:13px;font-weight:600;cursor:pointer;color:var(--sub);
+  font-family:'Inter',sans-serif;transition:var(--t);
+}
+.perm-close-btn:hover{color:var(--txt)}
 </style>
 </head>
 <body>
@@ -988,16 +1004,34 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
           <span>Від: <strong id="spFree" style="color:var(--green)">—</strong></span>
         </div>
       </div>
+      <!-- Main KPI cards -->
       <div class="stats-grid" id="statsCards"></div>
-      <!-- Revenue timeline -->
-      <div class="chart-card"><div class="chart-title">💰 Виручка за 7 днів</div><div class="bar-chart" id="revenueChart"></div></div>
-      <!-- Order status distribution -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;flex-shrink:0">
-        <div class="chart-card" style="margin:0"><div class="chart-title">📦 Статуси замовлень</div><div class="bar-chart" id="statusChart"></div></div>
-        <div class="chart-card" style="margin:0"><div class="chart-title">🏷 Промокоди</div><div class="bar-chart" id="promoChart"></div></div>
+      <!-- Revenue by day chart -->
+      <div class="chart-card" id="revenueChartCard">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <div class="chart-title" style="margin-bottom:0">Виручка за 7 днів</div>
+          <span id="revTotalLabel" style="font-size:12px;color:var(--sub)"></span>
+        </div>
+        <div id="revenueChart" style="display:flex;align-items:flex-end;gap:6px;height:90px"></div>
       </div>
-      <div class="chart-card"><div class="chart-title">🍽 Топ страв</div><div class="bar-chart" id="topDishes"></div></div>
-      <div class="chart-card"><div class="chart-title">📋 По категоріях</div><div class="bar-chart" id="catChart"></div></div>
+      <!-- Orders by status -->
+      <div class="chart-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <div class="chart-title" style="margin-bottom:0">Замовлення по статусах</div>
+        </div>
+        <div id="statusChart" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+      </div>
+      <!-- Two columns: top dishes + promo stats -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;flex-shrink:0">
+        <div class="chart-card"><div class="chart-title">Топ страв</div><div class="bar-chart" id="topDishes"></div></div>
+        <div class="chart-card"><div class="chart-title">По категоріях</div><div class="bar-chart" id="catChart"></div></div>
+      </div>
+      <!-- Promo analytics -->
+      <div class="chart-card" id="promoStatsCard">
+        <div class="chart-title">Промокоди — аналітика</div>
+        <div id="promoStatsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:14px"></div>
+        <div class="bar-chart" id="promoUsageChart"></div>
+      </div>
     </div>
 
     <!-- MENU -->
@@ -1793,6 +1827,74 @@ window.setTheme=setTheme;
 const savedTheme=localStorage.getItem("adm_theme")||"dark";
 setTheme(savedTheme);
 
+/* ——— PERMISSIONS / FEATURE FLAGS ——— */
+window.PERMS = {
+  stats:true, menu:true, banners:true,
+  history:true, promo:true, settings:true
+};
+// Sections that can be feature-flagged (orders + menu always on)
+const PERM_SECTIONS = {
+  stats:    "stats",
+  banners:  "banners",
+  history:  "history",
+  promo:    "promo",
+  settings: "settings",
+};
+
+async function loadPermissions(){
+  try{
+    const snap = await get(ref(db,"permissions"));
+    if(snap.exists()){
+      const p = snap.val();
+      Object.keys(p).forEach(k=>{ if(k in window.PERMS) window.PERMS[k]=!!p[k]; });
+    }
+  }catch(e){ console.warn("Permissions load failed:",e.message); }
+  applyPermissions();
+}
+
+function applyPermissions(){
+  Object.entries(PERM_SECTIONS).forEach(([perm, sec])=>{
+    const btn = document.getElementById("nb-"+sec);
+    if(!btn) return;
+    const allowed = window.PERMS[perm] !== false;
+    if(!allowed){
+      btn.classList.add("nb-locked");
+      // Add lock icon if not already there
+      if(!btn.querySelector(".nb-lock-icon")){
+        const lock = document.createElement("span");
+        lock.className = "nb-lock-icon";
+        lock.textContent = "🔒";
+        btn.appendChild(lock);
+      }
+      btn.onclick = (e)=>{ e.stopPropagation(); showPermOverlay(); };
+    } else {
+      btn.classList.remove("nb-locked");
+      const lock = btn.querySelector(".nb-lock-icon");
+      if(lock) lock.remove();
+      // Restore correct onclick
+      btn.onclick = ()=>setSection(sec);
+    }
+  });
+}
+
+function showPermOverlay(){
+  document.getElementById("permOverlay").classList.add("on");
+}
+window.closePermOverlay=()=>{
+  document.getElementById("permOverlay").classList.remove("on");
+};
+// Close on backdrop click
+document.addEventListener("DOMContentLoaded",()=>{
+  const ov = document.getElementById("permOverlay");
+  if(ov) ov.addEventListener("click", e=>{ if(e.target===ov) closePermOverlay(); });
+});
+
+// Guard function — call before any protected action
+function checkPerm(perm){
+  if(window.PERMS[perm]===false){ showPermOverlay(); return false; }
+  return true;
+}
+
 /* ——— STATE ——— */
 let appStarted=false, unsubOrders=null;
 let curSection="orders", curOrderTab="active";
@@ -1841,6 +1943,7 @@ window.doLogout=async()=>{
 /* ——— START ——— */
 function startApp(){
   if(appStarted)return;appStarted=true;
+  loadPermissions();
   listenSettings();listenMenu();listenBanners();listenOrders();listenR2Deletions();listenHistoryFirebase();listenPromos();
 }
 
@@ -1880,21 +1983,20 @@ const SN={
 };
 
 /* ——— ORDERS ——— */
-let _lastOrdersHash="";
 function listenOrders(){
   unsubOrders=onValue(ref(db,"orders"),snap=>{
-    const raw=snap.exists()?snap.val():{};
-    // Debounce: skip if data hasn't changed
-    const hash=JSON.stringify(Object.keys(raw).sort());
     const newOnes=[];
     allOrders={new:[],accepted:[],in_progress:[],shipped:[],completed:[]};
-    Object.keys(raw).forEach(key=>{
-      const od=raw[key];
-      if(!od||typeof od!=="object")return;
-      od.id=key;
-      (allOrders[od.status]?allOrders[od.status]:allOrders.new).push(od);
-      if(od.status==="new"&&!seen.has(od.id))newOnes.push(od);
-    });
+    if(snap.exists()){
+      const raw=snap.val();
+      Object.keys(raw).forEach(key=>{
+        const od=raw[key];
+        if(!od||typeof od!=="object")return;
+        od.id=key;
+        (allOrders[od.status]?allOrders[od.status]:allOrders.new).push(od);
+        if(od.status==="new"&&!seen.has(od.id))newOnes.push(od);
+      });
+    }
     Object.keys(allOrders).forEach(s=>allOrders[s].sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)));
     if(newOnes.length){
       playBeep();
@@ -2017,7 +2119,8 @@ function renderStats(){
   const all=Object.values(allOrders).flat().filter(o=>o&&o.status);
   if(all.length===0&&Object.values(allOrders).every(a=>!a||!a.length)){
     document.getElementById("statsCards").innerHTML=`<div class="state-box" style="min-height:120px"><div class="spinner"></div><strong>Завантаження...</strong></div>`;
-    ["topDishes","catChart","revenueChart","statusChart","promoChart"].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML="";});
+    document.getElementById("topDishes").innerHTML="";
+    document.getElementById("catChart").innerHTML="";
     return;
   }
   const now=new Date();now.setHours(0,0,0,0);
@@ -2028,48 +2131,71 @@ function renderStats(){
   const promoCount=Object.keys(allPromos).length;
   const promoUses=Object.values(allPromos).reduce((s,p)=>s+Object.keys(p.uses||{}).length,0);
   const promoActive=Object.values(allPromos).filter(p=>p.active&&(!p.expiresAt||p.expiresAt>Date.now())).length;
-  // Conversion rate
-  const convRate=all.length?Math.round(allOrders.completed.length/all.length*100):0;
+
+  // Week ago stats
+  const weekAgo=Date.now()-7*24*3600*1000;
+  const weekCompleted=allOrders.completed.filter(o=>o.createdAt>=weekAgo);
+  const weekRev=weekCompleted.reduce((s,o)=>s+(o.total||0),0);
+  const weekOrders=weekCompleted.length;
+
+  // Max order
+  const maxOrder=allOrders.completed.length?Math.max(...allOrders.completed.map(o=>o.total||0)):0;
 
   document.getElementById("statsCards").innerHTML=`
     <div class="stat-card"><div class="stat-label">Сьогодні</div><div class="stat-val accent">${todayN}</div><div class="stat-sub">Всього: ${all.length}</div></div>
     <div class="stat-card"><div class="stat-label">Виручка сьогодні</div><div class="stat-val">${todayRev}<span style="font-size:14px;color:var(--sub)"> грн</span></div><div class="stat-sub">Загалом: ${totalRev} грн</div></div>
+    <div class="stat-card"><div class="stat-label">За 7 днів</div><div class="stat-val">${weekOrders}</div><div class="stat-sub">${weekRev} грн виручки</div></div>
     <div class="stat-card"><div class="stat-label">Виконано</div><div class="stat-val">${allOrders.completed.length}</div><div class="stat-sub">Активних: ${all.length-allOrders.completed.length}</div></div>
-    <div class="stat-card"><div class="stat-label">Середній чек</div><div class="stat-val">${avgOrder}<span style="font-size:14px;color:var(--sub)"> грн</span></div></div>
-    <div class="stat-card"><div class="stat-label">Конверсія</div><div class="stat-val">${convRate}<span style="font-size:14px;color:var(--sub)">%</span></div><div class="stat-sub">виконано від усіх</div></div>
+    <div class="stat-card"><div class="stat-label">Середній чек</div><div class="stat-val">${avgOrder}<span style="font-size:14px;color:var(--sub)"> грн</span></div><div class="stat-sub">Макс: ${maxOrder} грн</div></div>
     <div class="stat-card"><div class="stat-label">Промокодів</div><div class="stat-val">${promoActive}<span style="font-size:14px;color:var(--sub)"> акт.</span></div><div class="stat-sub">Всього: ${promoCount} · Використань: ${promoUses}</div></div>`;
 
-  // ── Revenue chart (last 7 days) ──
-  const days7=[];
+  // Revenue by day (last 7 days)
+  const dayLabels=[];
+  const dayRevs=[];
+  const dayOrds=[];
   for(let i=6;i>=0;i--){
-    const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-i);
-    const next=new Date(d);next.setDate(next.getDate()+1);
-    const rev=allOrders.completed.filter(o=>o.createdAt>=d.getTime()&&o.createdAt<next.getTime()).reduce((s,o)=>s+(o.total||0),0);
-    const label=d.toLocaleDateString("uk-UA",{day:"2-digit",month:"2-digit"});
-    days7.push({label,rev});
+    const d=new Date();d.setDate(d.getDate()-i);d.setHours(0,0,0,0);
+    const dEnd=new Date(d);dEnd.setDate(dEnd.getDate()+1);
+    const dayCompl=allOrders.completed.filter(o=>o.createdAt>=d.getTime()&&o.createdAt<dEnd.getTime());
+    dayLabels.push(d.toLocaleDateString("uk-UA",{weekday:"short",day:"numeric"}));
+    dayRevs.push(dayCompl.reduce((s,o)=>s+(o.total||0),0));
+    dayOrds.push(dayCompl.length);
   }
-  const maxRev=Math.max(...days7.map(d=>d.rev),1);
-  const rcEl=document.getElementById("revenueChart");
-  if(rcEl){rcEl.innerHTML=days7.length?days7.map(d=>`<div class="bar-row"><span class="bar-label">${d.label}</span><div class="bar-track"><div class="bar-fill" style="width:${Math.round(d.rev/maxRev*100)}%;background:var(--green)"></div></div><span class="bar-val">${d.rev} грн</span></div>`).join(""):"<p style='color:var(--sub);font-size:13px'>Немає даних</p>";}
+  const maxRev=Math.max(...dayRevs,1);
+  const revChartEl=document.getElementById("revenueChart");
+  const revLabelEl=document.getElementById("revTotalLabel");
+  if(revLabelEl) revLabelEl.textContent=`${weekRev} грн за тиждень`;
+  if(revChartEl){
+    revChartEl.innerHTML=dayRevs.map((r,i)=>`
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0">
+        <div style="font-size:10px;color:var(--sub);font-weight:600;white-space:nowrap">${r>0?r+"":""}</div>
+        <div style="width:100%;background:var(--bg2);border-radius:4px;overflow:hidden;height:60px;display:flex;align-items:flex-end;position:relative">
+          <div style="width:100%;height:${Math.max(4,Math.round(r/maxRev*100))}%;background:${r>0?'linear-gradient(to top,var(--p),rgba(249,115,22,.5))':'var(--brd)'};border-radius:4px;transition:height .4s ease"></div>
+        </div>
+        <div style="font-size:9px;color:var(--dim);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%">${dayLabels[i]}</div>
+        ${dayOrds[i]>0?`<div style="font-size:9px;color:var(--p);font-weight:700">${dayOrds[i]} зам.</div>`:''}
+      </div>`).join("");
+  }
 
-  // ── Status distribution ──
-  const statusMap={new:"Нові",accepted:"Прийняті",in_progress:"Готуються",shipped:"В дорозі",completed:"Виконані"};
+  // Status breakdown
+  const statusMap={new:"Нові",accepted:"Прийнято",in_progress:"Готується",shipped:"В дорозі",completed:"Виконано"};
   const statusColors={new:"var(--p)",accepted:"var(--blue)",in_progress:"var(--yellow)",shipped:"#A855F7",completed:"var(--green)"};
-  const statusData=Object.entries(statusMap).map(([k,l])=>({label:l,count:(allOrders[k]||[]).length,color:statusColors[k]})).filter(s=>s.count>0);
-  const maxSt=Math.max(...statusData.map(s=>s.count),1);
-  const stEl=document.getElementById("statusChart");
-  if(stEl){stEl.innerHTML=statusData.length?statusData.map(s=>`<div class="bar-row"><span class="bar-label">${s.label}</span><div class="bar-track"><div class="bar-fill" style="width:${Math.round(s.count/maxSt*100)}%;background:${s.color}"></div></div><span class="bar-val">${s.count}</span></div>`).join(""):"<p style='color:var(--sub);font-size:13px'>Немає замовлень</p>";}
+  const statusChartEl=document.getElementById("statusChart");
+  if(statusChartEl){
+    statusChartEl.innerHTML=Object.entries(statusMap).map(([k,lbl])=>{
+      const cnt=(allOrders[k]||[]).length;
+      if(!cnt) return "";
+      return `<div style="display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--surf2);border-radius:var(--rs);border:1px solid var(--brd);flex:1;min-width:120px">
+        <div style="width:10px;height:10px;border-radius:50%;background:${statusColors[k]};flex-shrink:0"></div>
+        <div>
+          <div style="font-size:18px;font-weight:700;color:var(--txt);line-height:1">${cnt}</div>
+          <div style="font-size:10px;color:var(--sub)">${lbl}</div>
+        </div>
+      </div>`;
+    }).join("");
+  }
 
-  // ── Promo chart (top promos by uses) ──
-  const promoData=Object.entries(allPromos)
-    .map(([code,p])=>({code,uses:Object.keys(p.uses||{}).length,active:p.active}))
-    .filter(p=>p.uses>0)
-    .sort((a,b)=>b.uses-a.uses).slice(0,6);
-  const maxP=promoData[0]?.uses||1;
-  const pEl=document.getElementById("promoChart");
-  if(pEl){pEl.innerHTML=promoData.length?promoData.map(p=>`<div class="bar-row"><span class="bar-label" style="color:${p.active?"var(--txt)":"var(--dim)"}">${p.code}</span><div class="bar-track"><div class="bar-fill" style="width:${Math.round(p.uses/maxP*100)}%;background:var(--p)"></div></div><span class="bar-val">${p.uses}×</span></div>`).join(""):promoCount?`<p style='color:var(--sub);font-size:13px'>Промокоди є, але ще не використовувались</p>`:"<p style='color:var(--sub);font-size:13px'>Немає промокодів</p>";}
-
-  // ── Dishes ──
+  // Dish & category charts
   const dc={},cc={};
   all.forEach(o=>(o.items||[]).forEach(i=>{
     if(i.deleted) return;
@@ -2084,29 +2210,45 @@ function renderStats(){
   const tc=Object.entries(cc).sort((a,b)=>b[1]-a[1]);
   const maxC=tc[0]?.[1]||1;
   document.getElementById("catChart").innerHTML=tc.length?tc.map(([c,n])=>`<div class="bar-row"><span class="bar-label">${c}</span><div class="bar-track"><div class="bar-fill" style="width:${Math.round(n/maxC*100)}%;background:var(--blue)"></div></div><span class="bar-val">${n} шт</span></div>`).join(""):"<p style='color:var(--sub);font-size:13px'>Немає даних</p>";
+
+  // Promo analytics
+  const promoGridEl=document.getElementById("promoStatsGrid");
+  const promoChartEl=document.getElementById("promoUsageChart");
+  if(promoGridEl){
+    const promoDiscount=all.filter(o=>o.promoCode).reduce((s,o)=>s+(o.promoDiscount||0),0);
+    const promoOrders=all.filter(o=>o.promoCode).length;
+    const promoRevWithPromo=allOrders.completed.filter(o=>o.promoCode).reduce((s,o)=>s+(o.total||0),0);
+    promoGridEl.innerHTML=`
+      <div class="sett-info-card"><div class="sett-info-label">Всього кодів</div><div class="sett-info-val accent">${promoCount}</div><div class="sett-info-sub">${promoActive} активних</div></div>
+      <div class="sett-info-card"><div class="sett-info-label">Використань</div><div class="sett-info-val">${promoUses}</div><div class="sett-info-sub">у ${promoOrders} замовленнях</div></div>
+      <div class="sett-info-card"><div class="sett-info-label">Знижок видано</div><div class="sett-info-val" style="color:var(--red)">${promoDiscount}</div><div class="sett-info-sub">грн всього</div></div>
+      <div class="sett-info-card"><div class="sett-info-label">Виручка з промо</div><div class="sett-info-val green">${promoRevWithPromo}</div><div class="sett-info-sub">грн (виконані)</div></div>`;
+  }
+  if(promoChartEl){
+    const topPromos=Object.entries(allPromos)
+      .map(([code,p])=>({code,uses:Object.keys(p.uses||{}).length}))
+      .filter(p=>p.uses>0)
+      .sort((a,b)=>b.uses-a.uses).slice(0,6);
+    const maxU=topPromos[0]?.uses||1;
+    promoChartEl.innerHTML=topPromos.length
+      ?topPromos.map(p=>`<div class="bar-row"><span class="bar-label" style="font-weight:700;font-size:11px;letter-spacing:.5px">${p.code}</span><div class="bar-track"><div class="bar-fill" style="width:${Math.round(p.uses/maxU*100)}%;background:var(--yellow)"></div></div><span class="bar-val">${p.uses}×</span></div>`).join("")
+      :`<p style="color:var(--sub);font-size:12px">Промокоди ще не використовувались</p>`;
+  }
 }
 
 /* ——— SETTINGS ——— */
 function listenSettings(){
-  let _settingsListening=false;
-  onValue(ref(db,"settings"),snap=>{
-    if(snap.exists()){
-      const newVal=snap.val();
-      // Only re-render if settings actually changed
-      if(JSON.stringify(newVal)!==JSON.stringify(siteSettings)){
-        siteSettings=newVal;
-        renderSettings();
-      }
-    }
-  },e=>console.warn("Settings:",e.message));
+  onValue(ref(db,"settings"),snap=>{if(snap.exists())siteSettings=snap.val();renderSettings();},e=>console.warn("Settings:",e.message));
 }
 window.saveSettings=async()=>{
+  if(!checkPerm("settings")) return;
   siteSettings.minOrder=parseInt(document.getElementById("sMin").value)||200;
   siteSettings.freeDelivery=parseInt(document.getElementById("sFree").value)||500;
   try{await set(ref(db,"settings"),siteSettings);logHistory("settings","Мін. "+siteSettings.minOrder+" грн, безкоштовна від "+siteSettings.freeDelivery+" грн");const m=document.getElementById("settMsg");m.textContent="Збережено";setTimeout(()=>m.textContent="",2500);}
   catch(e){alert("Помилка: "+e.message);}
 };
 window.addCity=async()=>{
+  if(!checkPerm("settings")) return;
   const name=document.getElementById("newCityName").value.trim();
   const price=parseInt(document.getElementById("newCityPrice").value)||50;
   if(!name)return;
@@ -2125,6 +2267,7 @@ window.saveCityPrice=async idx=>{
   const el=document.getElementById("cpSave"+idx);if(el){el.textContent="✓";setTimeout(()=>el.textContent="Зберегти",2000);}
 };
 window.addCategory=async()=>{
+  if(!checkPerm("settings")) return;
   const name=document.getElementById("newCatName").value.trim();if(!name)return;
   if(!Array.isArray(siteSettings.categories))siteSettings.categories=[];
   if(siteSettings.categories.includes(name)){alert("Вже є!");return;}
@@ -2205,6 +2348,7 @@ function renderSettings(){
   if(spTime2) spTime2.textContent=`Пн–Пт ${fmt(wh.weekdays?.open??10,wh.weekdays?.openMin??0)}–${fmt(wh.weekdays?.close??22,wh.weekdays?.closeMin??0)}`;
 }
 window.saveWorkHours=async()=>{
+  if(!checkPerm("settings")) return;
   const wdOpen=parseInt(document.getElementById("sWdOpen").value)||0;
   const wdOpenM=parseInt(document.getElementById("sWdOpenM").value)||0;
   const wdClose=parseInt(document.getElementById("sWdClose").value)||0;
@@ -2414,6 +2558,7 @@ window.handleBannerDrop=async(e)=>{
   if(files?.length) await handleBannerFiles(files);
 };
 window.handleBannerFiles=async(files)=>{
+  if(!checkPerm("banners")){ document.getElementById("bErr").textContent=""; return; }
   const errEl=document.getElementById("bErr");
   errEl.textContent="";
   for(const file of Array.from(files)){
@@ -2566,6 +2711,9 @@ window.toggleHist=id=>{
 /* ——— SECTION ROUTING ——— */
 const SECTIONS=["orders","stats","menu","banners","history","promo","settings"];
 window.setSection=sec=>{
+  // Permission check
+  const permKey = PERM_SECTIONS[sec];
+  if(permKey && window.PERMS[permKey]===false){ showPermOverlay(); return; }
   curSection=sec;
   SECTIONS.forEach(s=>{
     const el=document.getElementById("sec-"+s);
@@ -3225,6 +3373,7 @@ window.updStatus=async(id,st)=>{
 // Patch saveSettings
 const _origSaveSettings=window.saveSettings;
 window.saveSettings=async()=>{
+  if(!checkPerm("settings")) return;
   siteSettings.minOrder=parseInt(document.getElementById("sMin").value)||200;
   siteSettings.freeDelivery=parseInt(document.getElementById("sFree").value)||500;
   try{
@@ -3238,6 +3387,7 @@ window.saveSettings=async()=>{
 // Patch saveWorkHours
 const _origSaveWorkHours=window.saveWorkHours;
 window.saveWorkHours=async()=>{
+  if(!checkPerm("settings")) return;
   const wdOpen=parseInt(document.getElementById("sWdOpen").value)||0;
   const wdOpenM=parseInt(document.getElementById("sWdOpenM").value)||0;
   const wdClose=parseInt(document.getElementById("sWdClose").value)||0;
@@ -3268,6 +3418,7 @@ window.saveWorkHours=async()=>{
 // Patch addCity
 const _origAddCity=window.addCity;
 window.addCity=async()=>{
+  if(!checkPerm("settings")) return;
   const name=document.getElementById("newCityName").value.trim();
   const price=parseInt(document.getElementById("newCityPrice").value)||50;
   if(!name){showToast("Введіть назву","Вкажіть місто або село","⚠","warn");return;}
@@ -3284,6 +3435,7 @@ window.addCity=async()=>{
 // Patch addCategory
 const _origAddCategory=window.addCategory;
 window.addCategory=async()=>{
+  if(!checkPerm("settings")) return;
   const name=document.getElementById("newCatName").value.trim();
   if(!name){showToast("Введіть назву категорії","","⚠","warn");return;}
   if(!Array.isArray(siteSettings.categories))siteSettings.categories=[];
@@ -3322,6 +3474,7 @@ window.confirmAddDish=async()=>{
 // Patch createPromo
 const _origCreatePromo=window.createPromo;
 window.createPromo=async()=>{
+  if(!checkPerm("promo")) return;
   const errEl=document.getElementById("pcErr");
   const code=(document.getElementById("pcCode").value||"").trim().toUpperCase();
   if(!code){errEl.textContent="Введіть код";return;}
@@ -3470,6 +3623,7 @@ window.removeCategory=async idx=>{
 };
 
 window.deleteBanner=async id=>{
+  if(!checkPerm("banners")) return;
   const ok=await admConfirm("Видалити банер?","Зображення буде видалено назавжди.","◧","danger","Видалити");
   if(!ok)return;
   try{
@@ -3491,5 +3645,21 @@ window.deletePromo=async code=>{
   }catch(e){showToast("Помилка",e.message,"⚠","error");}
 };
 </script>
+
+<!-- PERMISSION OVERLAY -->
+<div id="permOverlay">
+  <div class="perm-box">
+    <div class="perm-icon">🔒</div>
+    <div class="perm-title">Розділ недоступний</div>
+    <div class="perm-msg">У ваш тариф не входить доступ до цього розділу.<br>Щоб отримати доступ, зверніться до розробника.</div>
+    <div class="perm-btns">
+      <button class="perm-close-btn" onclick="closePermOverlay()">Закрити</button>
+      <a class="perm-contact" href="https://t.me/belarix_agency" target="_blank">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-2.01 9.47c-.147.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.332-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.873.75z"/></svg>
+        Зв'язатися
+      </a>
+    </div>
+  </div>
+</div>
 </body>
 </html>
