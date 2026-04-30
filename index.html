@@ -915,6 +915,7 @@ if('serviceWorker' in navigator){
 <script type="module">
 import { initializeApp }    from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getDatabase, ref, push, get, onValue, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 const fbApp = initializeApp({
   apiKey:            "AIzaSyCDHo7-eCu4umw_5A4p1Xx6Mtd7YXtvTno",
@@ -926,6 +927,9 @@ const fbApp = initializeApp({
   appId:             "1:828148222624:web:1becef58851cbf670bd7c5"
 });
 const db = getDatabase(fbApp);
+const auth = getAuth(fbApp);
+// Анонімна авторизація — дозволяє читати Firebase (правила: auth != null)
+signInAnonymously(auth).catch(function(e){ console.warn("Anon auth:", e.message); });
 
 /* ——— DATA ——— */
 let MENU    = [];
@@ -2152,7 +2156,7 @@ function renderTrackCard(o, container) {
 }
 
 window.trackOrder = async function() {
-  var raw = document.getElementById("trackInput").value;
+  var raw    = document.getElementById("trackInput").value;
   var digits = raw.replace(/^PA-/i, "").replace(/\D/g, "").slice(0, 4);
   if (!digits || digits.length < 1) {
     document.getElementById("trackResultWrap").innerHTML = '<p style="color:var(--primary);font-size:14px">Введіть номер замовлення (4 цифри після PA-)</p>';
@@ -2162,6 +2166,19 @@ window.trackOrder = async function() {
   var res = document.getElementById("trackResultWrap");
   res.innerHTML = '<p style="color:var(--muted);font-size:14px;padding:20px 0">Шукаємо...</p>';
   if (trackUnsub) { trackUnsub(); trackUnsub = null; }
+
+  // Гарантуємо авторизацію перед зверненням до бази
+  if (!auth.currentUser) {
+    try { await signInAnonymously(auth); }
+    catch(e) {
+      res.innerHTML = '<div class="track-card" style="text-align:center;padding:32px">'
+        + '<div style="font-size:36px;margin-bottom:10px;opacity:.4">🔒</div>'
+        + '<strong>Помилка авторизації</strong>'
+        + '<p style="color:var(--muted);font-size:13px;margin-top:6px">' + e.message + '</p></div>';
+      return;
+    }
+  }
+
   try {
     var snap = await get(ref(db, "orders"));
     var oKey = null;
@@ -2178,26 +2195,25 @@ window.trackOrder = async function() {
         + '<p style="color:var(--muted);font-size:13px;margin-top:6px">Перевірте номер</p></div>';
       return;
     }
-    // Real-time listener for instant status updates
+    // Realtime listener — миттєве оновлення статусу
     trackUnsub = onValue(ref(db, "orders/" + oKey), function(s2) {
       if (!s2.exists()) return;
       var od = s2.val();
       renderTrackCard(od, res);
-      // Update status in history
       var hist2 = JSON.parse(localStorage.getItem("pnr_track_hist") || "[]");
-      var hi = hist2.find(function(h){return h.orderNum===val;});
-      if(hi && hi.status !== od.status){
+      var hi = hist2.find(function(h){ return h.orderNum === val; });
+      if (hi && hi.status !== od.status) {
         hi.status = od.status;
         localStorage.setItem("pnr_track_hist", JSON.stringify(hist2));
         renderTrackHistory();
       }
     });
-    var hist = JSON.parse(localStorage.getItem("pnr_track_hist") || "[]");
     var o2 = snap.val()[oKey];
-    saveTrackHistory({orderNum:val, date:Date.now(), name: o2 && o2.customer ? o2.customer.name : "—", status: o2 ? o2.status : "new"});
+    saveTrackHistory({ orderNum: val, date: Date.now(), name: o2 && o2.customer ? o2.customer.name : "—", status: o2 ? o2.status : "new" });
     renderTrackHistory();
   } catch(e) {
-    res.innerHTML = '<div class="track-card" style="text-align:center"><strong>Помилка</strong><p style="color:var(--muted);font-size:13px;margin-top:6px">' + e.message + '</p></div>';
+    res.innerHTML = '<div class="track-card" style="text-align:center"><strong>Помилка</strong>'
+      + '<p style="color:var(--muted);font-size:13px;margin-top:6px">' + e.message + '</p></div>';
   }
 };
 
