@@ -1713,39 +1713,25 @@ const fbApp = initializeApp({
 });
 const db=getDatabase(fbApp), auth=getAuth(fbApp);
 
-/* ——— R2 UPLOAD ——— */
+/* ——— R2 UPLOAD (via server proxy — secrets stay in env vars) ——— */
 const R2_PUBLIC="https://pub-56a3b31b31254981bb29f91b352d374d.r2.dev";
-const R2_ACC="71d915a9f077d416a177b596ba394b1b";
-const R2_KEY="63e0159560af504f25c11dc79295faf1";
-const R2_SEC="029a9ea4717a554c6da9e7fda48334054c64b8f13ba38eb7d60724081ed2213e";
 
 async function uploadToR2(file,folder="dishes"){
   const ext=(file.name.split(".").pop()||"jpg").toLowerCase();
-  const key=`${folder}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-  const host=`${R2_ACC}.r2.cloudflarestorage.com`;
-  const endpoint=`https://${host}/panorama/${key}`;
-  const now=new Date();
-  const ds=now.toISOString().slice(0,10).replace(/-/g,"");
-  const amz=now.toISOString().replace(/[:\-]|\.\d{3}/g,"").slice(0,15)+"Z";
-  const ct=file.type||"image/jpeg";
   const buf=await file.arrayBuffer();
-  const ph=Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256",buf))).map(b=>b.toString(16).padStart(2,"0")).join("");
-  const sh="content-type;host;x-amz-content-sha256;x-amz-date";
-  const ch=`content-type:${ct}\nhost:${host}\nx-amz-content-sha256:${ph}\nx-amz-date:${amz}\n`;
-  const cr=`PUT\n/panorama/${key}\n\n${ch}\n${sh}\n${ph}`;
-  const scope=`${ds}/auto/s3/aws4_request`;
-  const crh=Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256",new TextEncoder().encode(cr)))).map(b=>b.toString(16).padStart(2,"0")).join("");
-  const sts=`AWS4-HMAC-SHA256\n${amz}\n${scope}\n${crh}`;
-  async function hmac(k,d){
-    const ck=await crypto.subtle.importKey("raw",k instanceof ArrayBuffer?k:new TextEncoder().encode(k),{name:"HMAC",hash:"SHA-256"},false,["sign"]);
-    return crypto.subtle.sign("HMAC",ck,new TextEncoder().encode(d));
-  }
-  const kd=await hmac("AWS4"+R2_SEC,ds),kr=await hmac(kd,"auto"),ks=await hmac(kr,"s3"),kx=await hmac(ks,"aws4_request");
-  const sig=Array.from(new Uint8Array(await hmac(kx,sts))).map(b=>b.toString(16).padStart(2,"0")).join("");
-  const authH=`AWS4-HMAC-SHA256 Credential=${R2_KEY}/${scope},SignedHeaders=${sh},Signature=${sig}`;
-  const res=await fetch(endpoint,{method:"PUT",headers:{"Content-Type":ct,"x-amz-content-sha256":ph,"x-amz-date":amz,"Authorization":authH},body:file});
-  if(!res.ok){const t=await res.text().catch(()=>"");throw new Error(`R2 ${res.status}: ${t.slice(0,100)}`);}
-  return `${R2_PUBLIC}/${key}`;
+  const bytes=new Uint8Array(buf);
+  let bin="";
+  for(let i=0;i<bytes.length;i++) bin+=String.fromCharCode(bytes[i]);
+  const b64=btoa(bin);
+  const res=await fetch("/api/r2-upload",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({file:b64,ext,folder,contentType:file.type||"image/jpeg"})
+  });
+  if(!res.ok){const t=await res.text().catch(()=>"");throw new Error(`Upload ${res.status}: ${t.slice(0,100)}`);}
+  const data=await res.json();
+  if(!data.url) throw new Error("No URL in response");
+  return data.url;
 }
 
 window.previewPhoto=(inputId,previewId)=>{
@@ -1763,54 +1749,21 @@ window.previewPhotoNew=(inputId,previewId)=>{
   if(s) s.textContent=f.name.length>18?f.name.slice(0,15)+"…":f.name;
 };
 
-/* ——— R2 DELETE ——— 
-   NOTE: R2 requires CORS policy on the bucket to allow DELETE from browser origins.
-   Go to Cloudflare Dashboard → R2 → panorama bucket → Settings → CORS Policy and add:
-   [{"AllowedOrigins":["*"],"AllowedMethods":["GET","PUT","DELETE"],"AllowedHeaders":["*"]}]
-   Until then, failed deletions are queued in Firebase under r2_deletions/ for manual cleanup.
-*/
+/* ——— R2 DELETE (via server proxy) ——— */
 async function deleteFromR2(photoUrl){
   if(!photoUrl||!photoUrl.startsWith(R2_PUBLIC))return;
-  const key=photoUrl.slice(R2_PUBLIC.length+1);
-  const host=`${R2_ACC}.r2.cloudflarestorage.com`;
-  const endpoint=`https://${host}/panorama/${key}`;
-  const now=new Date();
-  const ds=now.toISOString().slice(0,10).replace(/-/g,"");
-  const amz=now.toISOString().replace(/[:\-]|\.\d{3}/g,"").slice(0,15)+"Z";
-  const ph="e3b0c44298fc1c149afbf4c8996fb924" +
-            "27ae41e4649b934ca495991b7852b855"; // SHA256("")
-  const sh="host;x-amz-content-sha256;x-amz-date";
-  const ch=`host:${host}\nx-amz-content-sha256:${ph}\nx-amz-date:${amz}\n`;
-  const cr=`DELETE\n/panorama/${key}\n\n${ch}\n${sh}\n${ph}`;
-  const scope=`${ds}/auto/s3/aws4_request`;
-  const crh=Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256",
-    new TextEncoder().encode(cr)))).map(b=>b.toString(16).padStart(2,"0")).join("");
-  const sts=`AWS4-HMAC-SHA256\n${amz}\n${scope}\n${crh}`;
-  async function hmac(k,d){
-    const ck=await crypto.subtle.importKey("raw",
-      k instanceof ArrayBuffer?k:new TextEncoder().encode(k),
-      {name:"HMAC",hash:"SHA-256"},false,["sign"]);
-    return crypto.subtle.sign("HMAC",ck,new TextEncoder().encode(d));
-  }
-  const kd=await hmac("AWS4"+R2_SEC,ds),kr=await hmac(kd,"auto"),
-        ks=await hmac(kr,"s3"),kx=await hmac(ks,"aws4_request");
-  const sig=Array.from(new Uint8Array(await hmac(kx,sts)))
-    .map(b=>b.toString(16).padStart(2,"0")).join("");
-  const authH=`AWS4-HMAC-SHA256 Credential=${R2_KEY}/${scope},SignedHeaders=${sh},Signature=${sig}`;
   try{
-    const res=await fetch(endpoint,{
-      method:"DELETE",
-      headers:{"x-amz-content-sha256":ph,"x-amz-date":amz,"Authorization":authH}
+    const res=await fetch("/api/r2-delete",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({url:photoUrl})
     });
-    if(res.ok||res.status===204||res.status===404){
-      // Success or already gone — clean any queued deletion
-      return;
-    }
+    if(res.ok||res.status===204||res.status===404)return;
     throw new Error("HTTP "+res.status);
   }catch(e){
-    // CORS or network blocked — queue in Firebase for manual/future cleanup
-    console.warn("R2 DELETE blocked (CORS). Queuing key for cleanup:",key);
+    console.warn("R2 DELETE failed. Queuing for cleanup:",e.message);
     try{
+      const key=photoUrl.slice(R2_PUBLIC.length+1);
       await push(ref(db,"r2_deletions"),{key,url:photoUrl,queuedAt:Date.now()});
     }catch(fe){console.warn("Could not queue deletion:",fe);}
   }
