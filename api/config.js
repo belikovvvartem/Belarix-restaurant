@@ -1,5 +1,21 @@
 export default function handler(req, res) {
-    if (req.method !== "GET") return res.status(405).end();
+    // Only allow GET
+    if (req.method !== "GET") {
+      return res.status(405).json({ error: "Method not allowed" });
+    }
+  
+    // Only serve config to same-origin requests (basic check)
+    const origin = req.headers.origin || "";
+    const host   = req.headers.host   || "";
+    const referer= req.headers.referer|| "";
+  
+    // Block requests from outside your domain
+    // Replace "your-domain.vercel.app" with your real domain after deploy
+    const allowed = process.env.ALLOWED_ORIGIN || "";
+    if (allowed && origin && !origin.includes(allowed) && !referer.includes(allowed)) {
+      return res.status(403).json({ error: "Forbidden" });
+    }
+  
     res.setHeader("Cache-Control", "no-store");
     res.status(200).json({
       FIREBASE_API_KEY:            process.env.FIREBASE_API_KEY,
@@ -10,6 +26,8 @@ export default function handler(req, res) {
       FIREBASE_MESSAGING_SENDER_ID:process.env.FIREBASE_MESSAGING_SENDER_ID,
       FIREBASE_APP_ID:             process.env.FIREBASE_APP_ID,
       R2_PUBLIC:                   process.env.R2_PUBLIC,
-      // R2_SECRET_KEY intentionally NOT exposed to client
+      R2_ACCOUNT_ID:               process.env.R2_ACCOUNT_ID,
+      R2_ACCESS_KEY:               process.env.R2_ACCESS_KEY,
+      R2_SECRET_KEY:               process.env.R2_SECRET_KEY,
     });
   }
