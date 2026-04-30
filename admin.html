@@ -1012,7 +1012,7 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
           <div class="chart-title" style="margin-bottom:0">Виручка за 7 днів</div>
           <span id="revTotalLabel" style="font-size:12px;color:var(--sub)"></span>
         </div>
-        <div id="revenueChart" style="width:100%"></div>
+        <div id="revenueChart" style="display:flex;align-items:flex-end;gap:6px;height:90px"></div>
       </div>
       <!-- Orders by status -->
       <div class="chart-card">
@@ -1713,39 +1713,28 @@ const fbApp = initializeApp({
 });
 const db=getDatabase(fbApp), auth=getAuth(fbApp);
 
-/* ——— R2 UPLOAD ——— */
-const R2_PUBLIC="https://pub-56a3b31b31254981bb29f91b352d374d.r2.dev";
-const R2_ACC="71d915a9f077d416a177b596ba394b1b";
-const R2_KEY="63e0159560af504f25c11dc79295faf1";
-const R2_SEC="029a9ea4717a554c6da9e7fda48334054c64b8f13ba38eb7d60724081ed2213e";
+/* ——— R2 via Vercel Proxy (ключі лише на сервері) ——— */
+const R2_PUBLIC=_cfg.R2_PUBLIC;
 
 async function uploadToR2(file,folder="dishes"){
-  const ext=(file.name.split(".").pop()||"jpg").toLowerCase();
-  const key=`${folder}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-  const host=`${R2_ACC}.r2.cloudflarestorage.com`;
-  const endpoint=`https://${host}/panorama/${key}`;
-  const now=new Date();
-  const ds=now.toISOString().slice(0,10).replace(/-/g,"");
-  const amz=now.toISOString().replace(/[:\-]|\.\d{3}/g,"").slice(0,15)+"Z";
-  const ct=file.type||"image/jpeg";
-  const buf=await file.arrayBuffer();
-  const ph=Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256",buf))).map(b=>b.toString(16).padStart(2,"0")).join("");
-  const sh="content-type;host;x-amz-content-sha256;x-amz-date";
-  const ch=`content-type:${ct}\nhost:${host}\nx-amz-content-sha256:${ph}\nx-amz-date:${amz}\n`;
-  const cr=`PUT\n/panorama/${key}\n\n${ch}\n${sh}\n${ph}`;
-  const scope=`${ds}/auto/s3/aws4_request`;
-  const crh=Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256",new TextEncoder().encode(cr)))).map(b=>b.toString(16).padStart(2,"0")).join("");
-  const sts=`AWS4-HMAC-SHA256\n${amz}\n${scope}\n${crh}`;
-  async function hmac(k,d){
-    const ck=await crypto.subtle.importKey("raw",k instanceof ArrayBuffer?k:new TextEncoder().encode(k),{name:"HMAC",hash:"SHA-256"},false,["sign"]);
-    return crypto.subtle.sign("HMAC",ck,new TextEncoder().encode(d));
+  const fd=new FormData();
+  fd.append("file",file);
+  fd.append("folder",folder);
+  const res=await fetch("/api/upload",{method:"POST",body:fd});
+  if(!res.ok){const t=await res.text().catch(()=>"");throw new Error(`Upload ${res.status}: ${t.slice(0,120)}`);}
+  const j=await res.json();
+  return j.url;
+}
+
+async function deleteFromR2(photoUrl){
+  if(!photoUrl||!photoUrl.startsWith(R2_PUBLIC))return;
+  try{
+    const res=await fetch("/api/delete",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({url:photoUrl})});
+    if(!res.ok) throw new Error("HTTP "+res.status);
+  }catch(e){
+    console.warn("R2 delete failed, queuing:",e.message);
+    try{await push(ref(db,"r2_deletions"),{url:photoUrl,queuedAt:Date.now()});}catch(_){}
   }
-  const kd=await hmac("AWS4"+R2_SEC,ds),kr=await hmac(kd,"auto"),ks=await hmac(kr,"s3"),kx=await hmac(ks,"aws4_request");
-  const sig=Array.from(new Uint8Array(await hmac(kx,sts))).map(b=>b.toString(16).padStart(2,"0")).join("");
-  const authH=`AWS4-HMAC-SHA256 Credential=${R2_KEY}/${scope},SignedHeaders=${sh},Signature=${sig}`;
-  const res=await fetch(endpoint,{method:"PUT",headers:{"Content-Type":ct,"x-amz-content-sha256":ph,"x-amz-date":amz,"Authorization":authH},body:file});
-  if(!res.ok){const t=await res.text().catch(()=>"");throw new Error(`R2 ${res.status}: ${t.slice(0,100)}`);}
-  return `${R2_PUBLIC}/${key}`;
 }
 
 window.previewPhoto=(inputId,previewId)=>{
@@ -1762,59 +1751,6 @@ window.previewPhotoNew=(inputId,previewId)=>{
   p.src=URL.createObjectURL(f); p.style.display="block";
   if(s) s.textContent=f.name.length>18?f.name.slice(0,15)+"…":f.name;
 };
-
-/* ——— R2 DELETE ——— 
-   NOTE: R2 requires CORS policy on the bucket to allow DELETE from browser origins.
-   Go to Cloudflare Dashboard → R2 → panorama bucket → Settings → CORS Policy and add:
-   [{"AllowedOrigins":["*"],"AllowedMethods":["GET","PUT","DELETE"],"AllowedHeaders":["*"]}]
-   Until then, failed deletions are queued in Firebase under r2_deletions/ for manual cleanup.
-*/
-async function deleteFromR2(photoUrl){
-  if(!photoUrl||!photoUrl.startsWith(R2_PUBLIC))return;
-  const key=photoUrl.slice(R2_PUBLIC.length+1);
-  const host=`${R2_ACC}.r2.cloudflarestorage.com`;
-  const endpoint=`https://${host}/panorama/${key}`;
-  const now=new Date();
-  const ds=now.toISOString().slice(0,10).replace(/-/g,"");
-  const amz=now.toISOString().replace(/[:\-]|\.\d{3}/g,"").slice(0,15)+"Z";
-  const ph="e3b0c44298fc1c149afbf4c8996fb924" +
-            "27ae41e4649b934ca495991b7852b855"; // SHA256("")
-  const sh="host;x-amz-content-sha256;x-amz-date";
-  const ch=`host:${host}\nx-amz-content-sha256:${ph}\nx-amz-date:${amz}\n`;
-  const cr=`DELETE\n/panorama/${key}\n\n${ch}\n${sh}\n${ph}`;
-  const scope=`${ds}/auto/s3/aws4_request`;
-  const crh=Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256",
-    new TextEncoder().encode(cr)))).map(b=>b.toString(16).padStart(2,"0")).join("");
-  const sts=`AWS4-HMAC-SHA256\n${amz}\n${scope}\n${crh}`;
-  async function hmac(k,d){
-    const ck=await crypto.subtle.importKey("raw",
-      k instanceof ArrayBuffer?k:new TextEncoder().encode(k),
-      {name:"HMAC",hash:"SHA-256"},false,["sign"]);
-    return crypto.subtle.sign("HMAC",ck,new TextEncoder().encode(d));
-  }
-  const kd=await hmac("AWS4"+R2_SEC,ds),kr=await hmac(kd,"auto"),
-        ks=await hmac(kr,"s3"),kx=await hmac(ks,"aws4_request");
-  const sig=Array.from(new Uint8Array(await hmac(kx,sts)))
-    .map(b=>b.toString(16).padStart(2,"0")).join("");
-  const authH=`AWS4-HMAC-SHA256 Credential=${R2_KEY}/${scope},SignedHeaders=${sh},Signature=${sig}`;
-  try{
-    const res=await fetch(endpoint,{
-      method:"DELETE",
-      headers:{"x-amz-content-sha256":ph,"x-amz-date":amz,"Authorization":authH}
-    });
-    if(res.ok||res.status===204||res.status===404){
-      // Success or already gone — clean any queued deletion
-      return;
-    }
-    throw new Error("HTTP "+res.status);
-  }catch(e){
-    // CORS or network blocked — queue in Firebase for manual/future cleanup
-    console.warn("R2 DELETE blocked (CORS). Queuing key for cleanup:",key);
-    try{
-      await push(ref(db,"r2_deletions"),{key,url:photoUrl,queuedAt:Date.now()});
-    }catch(fe){console.warn("Could not queue deletion:",fe);}
-  }
-}
 
 /* ——— THEME ——— */
 function setTheme(t){
@@ -2166,30 +2102,15 @@ function renderStats(){
   const revLabelEl=document.getElementById("revTotalLabel");
   if(revLabelEl) revLabelEl.textContent=`${weekRev} грн за тиждень`;
   if(revChartEl){
-    const maxH=120;
-    revChartEl.innerHTML=`
-      <div style="display:flex;align-items:flex-end;gap:8px;width:100%;height:${maxH}px;padding-top:24px;position:relative">
-        ${dayRevs.map((r,i)=>{
-          const pct=maxH>0?Math.max(r>0?6:0,Math.round(r/maxRev*(maxH-24))):0;
-          const isToday=i===6;
-          return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:0;position:relative;height:100%;justify-content:flex-end">
-            ${r>0?`<div style="position:absolute;top:0;left:50%;transform:translateX(-50%);font-size:10px;font-weight:700;color:${isToday?'var(--p)':'var(--txt)'};white-space:nowrap;bottom:auto">${r>=1000?(r/1000).toFixed(1)+'к':r}</div>`:''}
-            <div style="width:100%;border-radius:6px 6px 0 0;height:${pct}px;background:${isToday?'var(--p)':r>0?'var(--brd2)':'transparent'};transition:height .4s ease;position:relative;overflow:hidden">
-              ${r>0&&!isToday?`<div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(249,115,22,.25),rgba(249,115,22,.08))"></div>`:''}
-            </div>
-          </div>`;
-        }).join('')}
-      </div>
-      <div style="display:flex;gap:8px;width:100%;margin-top:6px;border-top:1px solid var(--brd);padding-top:6px">
-        ${dayLabels.map((l,i)=>{
-          const isToday=i===6;
-          return `<div style="flex:1;text-align:center;font-size:9px;color:${isToday?'var(--p)':'var(--dim)'};font-weight:${isToday?700:400};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${l}</div>`;
-        }).join('')}
-      </div>
-      ${dayOrds.some(o=>o>0)?`<div style="display:flex;gap:8px;width:100%;margin-top:2px">
-        ${dayOrds.map((o,i)=>`<div style="flex:1;text-align:center;font-size:9px;color:var(--sub)">${o>0?o+'зам':''}</div>`).join('')}
-      </div>`:''}
-    `;
+    revChartEl.innerHTML=dayRevs.map((r,i)=>`
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0">
+        <div style="font-size:10px;color:var(--sub);font-weight:600;white-space:nowrap">${r>0?r+"":""}</div>
+        <div style="width:100%;background:var(--bg2);border-radius:4px;overflow:hidden;height:60px;display:flex;align-items:flex-end;position:relative">
+          <div style="width:100%;height:${Math.max(4,Math.round(r/maxRev*100))}%;background:${r>0?'linear-gradient(to top,var(--p),rgba(249,115,22,.5))':'var(--brd)'};border-radius:4px;transition:height .4s ease"></div>
+        </div>
+        <div style="font-size:9px;color:var(--dim);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%">${dayLabels[i]}</div>
+        ${dayOrds[i]>0?`<div style="font-size:9px;color:var(--p);font-weight:700">${dayOrds[i]} зам.</div>`:''}
+      </div>`).join("");
   }
 
   // Status breakdown

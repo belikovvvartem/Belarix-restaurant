@@ -1,5 +1,7 @@
 {
     "rewrites": [
-      { "source": "/api/config", "destination": "/api/config.js" }
+      { "source": "/api/config", "destination": "/api/config.js" },
+      { "source": "/api/upload", "destination": "/api/upload.js" },
+      { "source": "/api/delete", "destination": "/api/delete.js" }
     ]
   }

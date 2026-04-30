@@ -327,12 +327,11 @@ input,select,textarea{font-size:16px!important} /* prevents iOS zoom on focus */
   -webkit-backdrop-filter:blur(20px) saturate(220%);
   color:#000;font-size:17px;font-weight:900;
   display:flex;align-items:center;justify-content:center;cursor:pointer;
-  box-shadow:0 4px 24px rgba(0,0,0,.14),inset 0 1px 0 rgba(255,255,255,.7),inset 0 -1px 0 rgba(0,0,0,.06);
-  border:1.5px solid rgba(255,255,255,.7);
+  box-shadow:0 2px 12px rgba(0,0,0,.12);
   transition:background var(--t),transform var(--t),box-shadow var(--t);
   line-height:1;letter-spacing:0;
 }
-.dish-modal-x:hover{background:rgba(255,255,255,.48);transform:scale(1.07);box-shadow:0 6px 28px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.8)}
+.dish-modal-x:hover{background:rgba(255,255,255,.48);transform:scale(1.07);box-shadow:0 4px 18px rgba(0,0,0,.18)}
 .dish-modal-x:active{transform:scale(.91)}
 @media(max-width:640px){
   .dish-modal-bg{padding:0;align-items:flex-end}
@@ -900,7 +899,7 @@ input,select,textarea{font-size:16px!important} /* prevents iOS zoom on focus */
 
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script type="module">
 import { initializeApp }    from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, push, get, onValue, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getDatabase, ref, push, get, onValue, set, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 const fbApp = initializeApp({
   apiKey:            "AIzaSyCDHo7-eCu4umw_5A4p1Xx6Mtd7YXtvTno",
@@ -1161,22 +1160,19 @@ function isOpenNow() {
 function getNextOpenLabel() {
   var n = new Date(), d = n.getDay();
   var nowMin = n.getHours()*60 + n.getMinutes();
-  var isWeekend = (d === 0 || d === 6);
-  var hours = isWeekend ? WORK_HOURS.weekends : WORK_HOURS.weekdays;
+  var hours = getDayHours(d);
   var openMin = toMinutes(hours.open, hours.openMin);
   if (nowMin < openMin) {
     return "сьогодні о " + fmtHour(hours.open, hours.openMin);
   }
   var tomorrowDay = (d + 1) % 7;
-  var tomorrowWeekend = (tomorrowDay === 0 || tomorrowDay === 6);
-  var tomorrowHours = tomorrowWeekend ? WORK_HOURS.weekends : WORK_HOURS.weekdays;
+  var tomorrowHours = getDayHours(tomorrowDay);
   return "завтра о " + fmtHour(tomorrowHours.open, tomorrowHours.openMin);
 }
 function checkHours() {
   var n = new Date(), d = n.getDay();
   var nowMin = n.getHours()*60 + n.getMinutes();
-  var isWeekend = (d === 0 || d === 6);
-  var hours = isWeekend ? WORK_HOURS.weekends : WORK_HOURS.weekdays;
+  var hours = getDayHours(d);
   var openMin  = toMinutes(hours.open,  hours.openMin);
   var closeMin = toMinutes(hours.close, hours.closeMin);
   var open = nowMin >= openMin && nowMin < closeMin;
@@ -1185,10 +1181,13 @@ function checkHours() {
     : ("Зачинено (відкр. о " + fmtHour(hours.open, hours.openMin) + ")");
   document.getElementById("hoursDot").className = "hours-dot" + (open ? "" : " off");
   var wd = fmtHour(WORK_HOURS.weekdays.open, WORK_HOURS.weekdays.openMin) + " – " + fmtHour(WORK_HOURS.weekdays.close, WORK_HOURS.weekdays.closeMin);
-  var we = fmtHour(WORK_HOURS.weekends.open, WORK_HOURS.weekends.openMin) + " – " + fmtHour(WORK_HOURS.weekends.close, WORK_HOURS.weekends.closeMin);
+  var sat = WORK_HOURS.saturday && WORK_HOURS.saturday.close ? WORK_HOURS.saturday : WORK_HOURS.weekends;
+  var sun = WORK_HOURS.sunday  && WORK_HOURS.sunday.close  ? WORK_HOURS.sunday  : WORK_HOURS.weekends;
+  var wsat = fmtHour(sat.open, sat.openMin) + " – " + fmtHour(sat.close, sat.closeMin);
+  var wsun = fmtHour(sun.open, sun.openMin) + " – " + fmtHour(sun.close, sun.closeMin);
   var e1 = document.getElementById("cHrsWeekday"); if(e1) e1.textContent = wd;
-  var e2 = document.getElementById("cHrsWeekend"); if(e2) e2.textContent = we;
-  var e3 = document.getElementById("cHrsSunday");  if(e3) e3.textContent = we;
+  var e2 = document.getElementById("cHrsWeekend"); if(e2) e2.textContent = wsat;
+  var e3 = document.getElementById("cHrsSunday");  if(e3) e3.textContent = wsun;
 }
 
 /* ——— FILTERS ——— */
@@ -1920,7 +1919,7 @@ window.placeOrder = async function() {
   var note = document.getElementById("fNote").value.trim();
   var sub  = totalSub(), dlv = dlvCost(sub), discount = promoDiscount(sub), tot = Math.max(0,sub + dlv - discount);
   var eta  = Math.max.apply(null, cart.map(function(i) { return i.prep || 15; })) + (dlvType === "delivery" ? 30 : 10);
-  var orderNum = "PA-" + Math.floor(1000 + Math.random() * 9000);
+  var orderNum = "PA-" + Date.now().toString(36).toUpperCase().slice(-4);
 
   try {
     await push(ref(db, "orders"), {
@@ -2149,14 +2148,10 @@ window.trackOrder = async function() {
   res.innerHTML = '<p style="color:var(--muted);font-size:14px;padding:20px 0">Шукаємо...</p>';
   if (trackUnsub) { trackUnsub(); trackUnsub = null; }
   try {
-    var snap = await get(ref(db, "orders"));
+    var q = query(ref(db, "orders"), orderByChild("orderNum"), equalTo(val));
+    var snap = await get(q);
     var oKey = null;
-    if (snap.exists()) {
-      var raw2 = snap.val();
-      Object.keys(raw2).forEach(function(k) {
-        if (raw2[k] && raw2[k].orderNum === val) oKey = k;
-      });
-    }
+    if (snap.exists()) oKey = Object.keys(snap.val())[0];
     if (!oKey) {
       res.innerHTML = '<div class="track-card" style="text-align:center;padding:32px">'
         + '<div style="font-size:40px;margin-bottom:10px;opacity:.4">○</div>'
@@ -2164,12 +2159,10 @@ window.trackOrder = async function() {
         + '<p style="color:var(--muted);font-size:13px;margin-top:6px">Перевірте номер</p></div>';
       return;
     }
-    // Real-time listener for instant status updates
     trackUnsub = onValue(ref(db, "orders/" + oKey), function(s2) {
       if (!s2.exists()) return;
       var od = s2.val();
       renderTrackCard(od, res);
-      // Update status in history
       var hist2 = JSON.parse(localStorage.getItem("pnr_track_hist") || "[]");
       var hi = hist2.find(function(h){return h.orderNum===val;});
       if(hi && hi.status !== od.status){
@@ -2178,7 +2171,6 @@ window.trackOrder = async function() {
         renderTrackHistory();
       }
     });
-    var hist = JSON.parse(localStorage.getItem("pnr_track_hist") || "[]");
     var o2 = snap.val()[oKey];
     saveTrackHistory({orderNum:val, date:Date.now(), name: o2 && o2.customer ? o2.customer.name : "—", status: o2 ? o2.status : "new"});
     renderTrackHistory();
