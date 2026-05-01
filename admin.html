@@ -362,6 +362,11 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
 .dt-edit:hover{background:rgba(59,130,246,.2)}
 .dt-del{width:28px;height:28px;padding:0;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.18);border-radius:var(--rs);color:var(--red);font-size:13px;font-weight:700;cursor:pointer;transition:var(--t);display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif}
 .dt-del:hover{background:rgba(239,68,68,.18)}
+.dt-stop{width:28px;height:28px;padding:0;background:rgba(234,179,8,.08);border:1px solid rgba(234,179,8,.2);border-radius:var(--rs);color:var(--yellow);font-size:13px;cursor:pointer;transition:var(--t);display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif;flex-shrink:0}
+.dt-stop:hover{background:rgba(234,179,8,.18)}
+.dt-stop.stopped{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.25);color:var(--red)}
+.dt-badge-stopped{font-size:9px;background:rgba(239,68,68,.13);color:var(--red);padding:1px 6px;border-radius:3px;font-weight:700}
+.dish-trow.is-stopped{opacity:.55}
 .dish-count-row{font-size:11px;color:var(--dim);margin-bottom:8px;padding:0 2px}
 @media(max-width:900px){
   .menu-layout{grid-template-columns:1fr;grid-template-rows:auto auto}
@@ -1119,11 +1124,12 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
               <span id="spStatus2" style="font-size:14px;font-weight:700">...</span>
               <span id="spTime2" style="font-size:11px;color:var(--sub)"></span>
         </div>
-        <div style="display:flex;gap:12px;font-size:12px;color:var(--sub);flex-wrap:wrap;margin-left:auto">
+        <div style="display:flex;gap:12px;font-size:12px;color:var(--sub);flex-wrap:wrap;margin-left:auto;align-items:center">
           <span>Міст: <strong id="spCities" style="color:var(--txt)">—</strong></span>
           <span>Категорій: <strong id="spCats" style="color:var(--txt)">—</strong></span>
           <span>Мін: <strong id="spMin" style="color:var(--p)">—</strong></span>
           <span>Від: <strong id="spFree" style="color:var(--green)">—</strong></span>
+          <button onclick="exportDayReport()" style="display:flex;align-items:center;gap:5px;padding:6px 12px;background:var(--surf2);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--txt);font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:var(--t)" onmouseover="this.style.borderColor='var(--p)';this.style.color='var(--p)'" onmouseout="this.style.borderColor='var(--brd2)';this.style.color='var(--txt)'">⬇ Звіт за день</button>
         </div>
       </div>
       <!-- Main KPI cards -->
@@ -1231,6 +1237,11 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
               <option value="price_asc">Ціна ↑</option>
               <option value="price_desc">Ціна ↓</option>
               <option value="newest">Нові</option>
+            </select>
+            <select id="dishFilterStop" onchange="renderDishList()">
+              <option value="">Всі</option>
+              <option value="active">Активні</option>
+              <option value="stopped">Стоп-лист</option>
             </select>
           </div>
           <div id="dishCount" class="dish-count-row"></div>
@@ -2023,9 +2034,11 @@ function listenHistoryFirebase(){
   onValue(ref(db,"history"),snap=>{
     if(!snap.exists()) return;
     const raw=snap.val();
-    const fbEntries=Object.values(raw).sort((a,b)=>new Date(b.time)-new Date(a.time)).slice(0,500);
-    const localKeys=new Set(historyLog.map(h=>h.time+h.msg));
-    fbEntries.forEach(e=>{if(!localKeys.has(e.time+e.msg))historyLog.push(e);});
+    // Use Firebase key as unique id to avoid duplicates
+    const fbEntries=Object.entries(raw).map(([k,v])=>({...v,_fbKey:k}))
+      .sort((a,b)=>new Date(b.time)-new Date(a.time)).slice(0,500);
+    const existingKeys=new Set(historyLog.map(h=>h._fbKey).filter(Boolean));
+    fbEntries.forEach(e=>{if(!existingKeys.has(e._fbKey))historyLog.push(e);});
     historyLog.sort((a,b)=>new Date(b.time)-new Date(a.time));
     if(historyLog.length>500)historyLog.length=500;
     localStorage.setItem("adm_hist",JSON.stringify(historyLog));
@@ -2114,8 +2127,9 @@ function renderOrders(){
   el.innerHTML=list.map(o=>{
     const nxt=SN[o.status];
     const time=fmtTime(o.createdAt);
-    const street=o.customer?.street||o.customer?.address||"Самовивіз";
-    const addr=o.customer?.city?(o.customer.city+(street&&street!==o.customer.city?", "+street:"")):street;
+    const rawStreet=o.customer?.street||o.customer?.address||"";
+    const street=rawStreet?addVul(rawStreet):"Самовивіз";
+    const addr=o.customer?.city?(o.customer.city+(rawStreet?", "+addVul(rawStreet):"")):street;
     return `<div class="ocard${o.status==="new"?" is-new":""}">
       <div class="ocard-bar bar-${o.status}"></div>
       <div class="ocard-head">
@@ -2166,6 +2180,7 @@ function renderOrders(){
           ${o.status==="completed"?`<button class="oa oa-back" onclick="updStatus('${o.id}','shipped')">↩</button>`:""}
           ${o.status!=="new"&&o.status!=="completed"?`<button class="oa oa-back" onclick="updStatus('${o.id}','new')">↩</button>`:""}
           ${o.status!=="completed"?`<button class="oa oa-add" onclick="openAddDishToOrder('${o.id}')">＋</button>`:""}
+          <button class="oa oa-back" onclick="printOrderReceipt('${o.id}')" title="Друк чека" style="flex:0 0 32px;min-width:32px;padding:7px;font-size:13px">🖨</button>
           <button class="oa oa-del" onclick="delOrder('${o.id}')" title="Видалити">🗑</button>
         </div>
       </div>
@@ -2327,24 +2342,7 @@ function renderStats(){
 function listenSettings(){
   onValue(ref(db,"settings"),snap=>{if(snap.exists())siteSettings=snap.val();renderSettings();},e=>console.warn("Settings:",e.message));
 }
-window.saveSettings=async()=>{
-  if(!checkPerm("settings")) return;
-  siteSettings.minOrder=parseInt(document.getElementById("sMin").value)||200;
-  siteSettings.freeDelivery=parseInt(document.getElementById("sFree").value)||500;
-  try{await set(ref(db,"settings"),siteSettings);logHistory("settings","Мін. "+siteSettings.minOrder+" грн, безкоштовна від "+siteSettings.freeDelivery+" грн");const m=document.getElementById("settMsg");m.textContent="Збережено";setTimeout(()=>m.textContent="",2500);}
-  catch(e){alert("Помилка: "+e.message);}
-};
-window.addCity=async()=>{
-  if(!checkPerm("settings")) return;
-  const name=document.getElementById("newCityName").value.trim();
-  const price=parseInt(document.getElementById("newCityPrice").value)||50;
-  if(!name)return;
-  if(!Array.isArray(siteSettings.cities))siteSettings.cities=[];
-  if(siteSettings.cities.find(c=>c.name.toLowerCase()===name.toLowerCase())){alert("Вже є!");return;}
-  siteSettings.cities.push({name,price});
-  document.getElementById("newCityName").value="";document.getElementById("newCityPrice").value="";
-  await set(ref(db,"settings"),siteSettings);logHistory("settings","Місто: "+name+" ("+price+" грн)");renderSettings();
-};
+// saveSettings, addCity, addCategory, saveWorkHours defined once below (patched versions)
 window.removeCity=async idx=>{
   siteSettings.cities.splice(idx,1);await set(ref(db,"settings"),siteSettings);renderSettings();
 };
@@ -2353,14 +2351,7 @@ window.saveCityPrice=async idx=>{
   await set(ref(db,"settings"),siteSettings);
   const el=document.getElementById("cpSave"+idx);if(el){el.textContent="✓";setTimeout(()=>el.textContent="Зберегти",2000);}
 };
-window.addCategory=async()=>{
-  if(!checkPerm("settings")) return;
-  const name=document.getElementById("newCatName").value.trim();if(!name)return;
-  if(!Array.isArray(siteSettings.categories))siteSettings.categories=[];
-  if(siteSettings.categories.includes(name)){alert("Вже є!");return;}
-  siteSettings.categories.push(name);document.getElementById("newCatName").value="";
-  await set(ref(db,"settings"),siteSettings);renderSettings();rebuildCatSelects();
-};
+// addCategory defined once below (patched version)
 window.removeCategory=async idx=>{
   siteSettings.categories.splice(idx,1);await set(ref(db,"settings"),siteSettings);renderSettings();rebuildCatSelects();
 };
@@ -2434,39 +2425,7 @@ function renderSettings(){
   if(spStatus2) spStatus2.textContent=open?"Відкрито":"Зачинено";
   if(spTime2) spTime2.textContent=`Пн–Пт ${fmt(wh.weekdays?.open??10,wh.weekdays?.openMin??0)}–${fmt(wh.weekdays?.close??22,wh.weekdays?.closeMin??0)}`;
 }
-window.saveWorkHours=async()=>{
-  if(!checkPerm("settings")) return;
-  const wdOpen=parseInt(document.getElementById("sWdOpen").value)||0;
-  const wdOpenM=parseInt(document.getElementById("sWdOpenM").value)||0;
-  const wdClose=parseInt(document.getElementById("sWdClose").value)||0;
-  const wdCloseM=parseInt(document.getElementById("sWdCloseM").value)||0;
-  const satOpen=parseInt(document.getElementById("sSatOpen")?.value)||0;
-  const satOpenM=parseInt(document.getElementById("sSatOpenM")?.value)||0;
-  const satClose=parseInt(document.getElementById("sSatClose")?.value)||0;
-  const satCloseM=parseInt(document.getElementById("sSatCloseM")?.value)||0;
-  // Use Saturday as "weekends" fallback
-  const weOpen=satOpen, weOpenM=satOpenM, weClose=satClose, weCloseM=satCloseM;
-  const sunOpen=parseInt(document.getElementById("sSunOpen").value)||0;
-  const sunOpenM=parseInt(document.getElementById("sSunOpenM").value)||0;
-  const sunClose=parseInt(document.getElementById("sSunClose").value)||0;
-  const sunCloseM=parseInt(document.getElementById("sSunCloseM").value)||0;
-  const wdOpenTotal=wdOpen*60+wdOpenM, wdCloseTotal=wdClose*60+wdCloseM;
-  if(wdOpenTotal>=wdCloseTotal){
-    alert("Перевірте значення Пн–Пт — відкриття повинно бути раніше за закриття");return;
-  }
-  if(!siteSettings.workHours)siteSettings.workHours={};
-  siteSettings.workHours.weekdays={open:wdOpen,openMin:wdOpenM,close:wdClose,closeMin:wdCloseM};
-  siteSettings.workHours.weekends={open:satOpen,openMin:satOpenM,close:satClose,closeMin:satCloseM};
-  siteSettings.workHours.saturday={open:satOpen,openMin:satOpenM,close:satClose,closeMin:satCloseM};
-  siteSettings.workHours.sunday={open:sunOpen,openMin:sunOpenM,close:sunClose,closeMin:sunCloseM};
-  try{
-    await set(ref(db,"settings"),siteSettings);
-    const fmt=(h,m)=>h+":"+(m<10?"0":"")+m;
-    logHistory("settings","Графік: Пн-Пт "+fmt(wdOpen,wdOpenM)+"–"+fmt(wdClose,wdCloseM)+", Сб "+fmt(satOpen,satOpenM)+"–"+fmt(satClose,satCloseM)+", Нд "+fmt(sunOpen,sunOpenM)+"–"+fmt(sunClose,sunCloseM));
-    const m=document.getElementById("hoursMsg");
-    m.textContent="✓ Збережено";setTimeout(()=>m.textContent="",2500);
-  }catch(e){alert("Помилка: "+e.message);}
-};
+// saveWorkHours defined once below (patched version)
 
 /* ——— MENU ——— */
 function listenMenu(){
@@ -2483,7 +2442,7 @@ window.addDish=async()=>{
   const price=parseInt(document.getElementById("mPrice").value)||0;
   const errEl=document.getElementById("mErr");
   if(!name||!price){errEl.style.color="var(--red)";errEl.textContent="Заповніть назву та ціну!";setTimeout(()=>errEl.textContent="",3000);return;}
-  const btn=document.querySelector("#mt-add .btn-pri");
+  const btn=document.querySelector(".menu-add-col .btn-pri");
   if(btn){btn.disabled=true;btn.textContent="Зберігаємо...";}
   let photoUrl=null;
   const pf=document.getElementById("mPhoto")?.files?.[0];
@@ -2569,6 +2528,14 @@ window.deleteDish=async id=>{
     logHistory("menu","Видалено: "+(d?.name||id));
   }catch(e){alert("Помилка: "+e.message);}
 };
+window.toggleDishStop=async(id,stop)=>{
+  const d=allDishes.find(x=>x.id===id);if(!d)return;
+  try{
+    await update(ref(db,`menu/${id}`),{stopped:stop});
+    logHistory("menu",(stop?"Стоп-лист: ":"Розблоковано: ")+d.name);
+    showToast(stop?"Страву зупинено":"Страву розблоковано","«"+d.name+"»",stop?"⛔":"✅",stop?"warn":"success");
+  }catch(e){showToast("Помилка",e.message,"⚠","error");}
+};
 function renderDishList(){
   const el=document.getElementById("dishGrid");if(!el)return;
   const catSel=document.getElementById("dishFilterCat");
@@ -2580,8 +2547,11 @@ function renderDishList(){
   const q=(document.getElementById("dishSearch")?.value||"").toLowerCase();
   const filterCat=document.getElementById("dishFilterCat")?.value||"";
   const sortMode=document.getElementById("dishFilterSort")?.value||"name";
+  const filterStop=document.getElementById("dishFilterStop")?.value||"";
   let dishes=allDishes.filter(d=>{
     if(filterCat && d.cat!==filterCat) return false;
+    if(filterStop==="active" && d.stopped) return false;
+    if(filterStop==="stopped" && !d.stopped) return false;
     if(q && !d.name.toLowerCase().includes(q) && !(d.desc||"").toLowerCase().includes(q)) return false;
     return true;
   });
@@ -2601,21 +2571,23 @@ function renderDishList(){
     const sizesTag=d.sizes&&d.sizes.length?`<span class="dt-badge-sizes">${d.sizes.length} розм.</span>`:"";
     const popTag=d.pop?`<span class="dt-badge-pop">Хіт</span>`:"";
     const saleTag=d.oldPrice?`<span class="dt-badge-sale">Акція</span>`:"";
+    const stopTag=d.stopped?`<span class="dt-badge-stopped">⛔ Стоп</span>`:"";
     const priceHtml=d.oldPrice
       ?`<span class="dt-price-old">${d.oldPrice} грн</span>${d.price} грн`
       :`${d.price} грн`;
-    return `<div class="dish-trow">
+    return `<div class="dish-trow${d.stopped?' is-stopped':''}">
       <div class="dt-thumb">${d.photo?`<img src="${d.photo}" alt="${d.name}">`:"🍽"}</div>
       <div class="dt-info">
         <div class="dt-name">${d.name}</div>
         <div class="dt-meta">
           <span class="dt-cat">${d.cat||""}</span>
-          ${popTag}${saleTag}${sizesTag}
+          ${popTag}${saleTag}${sizesTag}${stopTag}
           <span style="font-size:10px;color:var(--dim)">${d.prep||15} хв</span>
         </div>
       </div>
       <div class="dt-price">${priceHtml}</div>
       <div class="dt-actions">
+        <button class="dt-stop${d.stopped?' stopped':''}" onclick="toggleDishStop('${d.id}',${!d.stopped})" title="${d.stopped?'Розблокувати':'Стоп-лист'}">⛔</button>
         <button class="dt-edit" onclick="openEditDish('${d.id}')">Редагувати</button>
         <button class="dt-del" onclick="deleteDish('${d.id}')" title="Видалити">✕</button>
       </div>
@@ -3367,6 +3339,14 @@ window.updateNthPreview=()=>{
 
 window.manualRefresh=()=>{const btn=document.getElementById("refreshBtn");btn.textContent="↻ ...";setTimeout(()=>btn.textContent="↻ Оновити",700);setUpd();};
 function setUpd(){const t=new Date().toLocaleTimeString("uk-UA",{hour:"2-digit",minute:"2-digit"});const el=document.getElementById("updTxt");if(el)el.textContent="Оновлено "+t;}
+// Додає "вул." якщо вулиця вже не містить відомого префіксу
+function addVul(s){
+  if(!s) return s;
+  var lower=s.toLowerCase().trim();
+  var pfx=["вул.","пр.","просп.","пров.","пл.","бул.","наб.","шосе","набережна","узвіз","проїзд","мкр","мікрорайон","вулиця","проспект","провулок","площа","бульвар"];
+  for(var i=0;i<pfx.length;i++){if(lower.startsWith(pfx[i]))return s;}
+  return "вул. "+s;
+}
 function fmtTime(ts){if(!ts)return"—";const d=Math.floor((Date.now()-ts)/60000);if(d<1)return"Щойно";if(d<60)return d+" хв тому";if(d<1440)return Math.floor(d/60)+" год тому";return new Date(ts).toLocaleDateString("uk-UA",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});}
 
 /* ——— AUDIO (created only after user gesture) ——— */
@@ -3439,14 +3419,7 @@ window.dismissToast=id=>{
 };
 
 /* ——— Hook toasts into key actions ——— */
-// addDish — patch success toast
-const _origAddDish=window.addDish;
-const _addDishOrig=window.addDish;
-// Patch via wrapping the btn click result — we hook logHistory instead
-const _origLogHistory=logHistory;
-
 // Patch updStatus for status change toast
-const _origUpdStatus=window.updStatus;
 window.updStatus=async(id,st)=>{
   const prev=Object.values(allOrders).flat().find(o=>o.id===id);
   try{
@@ -3458,7 +3431,6 @@ window.updStatus=async(id,st)=>{
 };
 
 // Patch saveSettings
-const _origSaveSettings=window.saveSettings;
 window.saveSettings=async()=>{
   if(!checkPerm("settings")) return;
   siteSettings.minOrder=parseInt(document.getElementById("sMin").value)||200;
@@ -3472,7 +3444,6 @@ window.saveSettings=async()=>{
 };
 
 // Patch saveWorkHours
-const _origSaveWorkHours=window.saveWorkHours;
 window.saveWorkHours=async()=>{
   if(!checkPerm("settings")) return;
   const wdOpen=parseInt(document.getElementById("sWdOpen").value)||0;
@@ -3503,7 +3474,6 @@ window.saveWorkHours=async()=>{
 };
 
 // Patch addCity
-const _origAddCity=window.addCity;
 window.addCity=async()=>{
   if(!checkPerm("settings")) return;
   const name=document.getElementById("newCityName").value.trim();
@@ -3520,7 +3490,6 @@ window.addCity=async()=>{
 };
 
 // Patch addCategory
-const _origAddCategory=window.addCategory;
 window.addCategory=async()=>{
   if(!checkPerm("settings")) return;
   const name=document.getElementById("newCatName").value.trim();
@@ -3535,7 +3504,6 @@ window.addCategory=async()=>{
 };
 
 // Patch confirmAddDish (add dish to order)
-const _origConfirmAddDish=window.confirmAddDish;
 window.confirmAddDish=async()=>{
   if(!_adOrderId||!_adPicked) return;
   let price=_adPicked.price;
@@ -3559,7 +3527,6 @@ window.confirmAddDish=async()=>{
 };
 
 // Patch createPromo
-const _origCreatePromo=window.createPromo;
 window.createPromo=async()=>{
   if(!checkPerm("promo")) return;
   const errEl=document.getElementById("pcErr");
@@ -3608,8 +3575,7 @@ window.createPromo=async()=>{
   }catch(e){errEl.textContent="Помилка: "+e.message;showToast("Помилка",e.message,"⚠","error");}
 };
 
-// Patch addDish to show toast on success
-const _baseSaveDishEdit=window.saveDishEdit;
+// Patch saveDishEdit to show toast on success
 window.saveDishEdit=async()=>{
   const id=editingDishId;if(!id)return;
   const name=document.getElementById("eName").value.trim();
@@ -3665,7 +3631,6 @@ document.getElementById("admConfirm").addEventListener("click",e=>{
 
 // ---- Replace all confirm() usages ----
 // Patch delOrder
-const _origDelOrder=window.delOrder;
 window.delOrder=async id=>{
   const prev=Object.values(allOrders).flat().find(o=>o.id===id);
   const num=prev?.orderNum||id.slice(0,8);
@@ -3676,7 +3641,6 @@ window.delOrder=async id=>{
 };
 
 // Patch deleteDish
-const _origDeleteDish=window.deleteDish;
 window.deleteDish=async id=>{
   const d=allDishes.find(x=>x.id===id);
   const ok=await admConfirm("Видалити страву?","«"+(d?.name||id)+"» буде видалено з меню.","🍽","danger","Видалити");
@@ -3731,6 +3695,160 @@ window.deletePromo=async code=>{
     showToast("Промокод видалено","«"+code+"»","🗑","warn");
   }catch(e){showToast("Помилка",e.message,"⚠","error");}
 };
+
+/* ==============================
+   ЗВІТ ЗА ДЕНЬ — CSV EXPORT
+   ============================== */
+window.exportDayReport=()=>{
+  const now=new Date();
+  now.setHours(0,0,0,0);
+  const todayStart=now.getTime();
+  const todayOrders=Object.values(allOrders).flat()
+    .filter(o=>o&&o.createdAt>=todayStart)
+    .sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
+  if(!todayOrders.length){showToast("Немає замовлень","Сьогодні ще не було замовлень","ℹ","info");return;}
+
+  const dateStr=new Date().toLocaleDateString("uk-UA",{day:"2-digit",month:"2-digit",year:"numeric"});
+  const SLoc={new:"Нове",accepted:"Прийнято",in_progress:"Готується",shipped:"В дорозі",completed:"Виконано"};
+
+  // Header row
+  const rows=[
+    ["Звіт за день: "+dateStr],
+    [],
+    ["№","Час","Номер","Клієнт","Телефон","Адреса","Страви","Сума","Доставка","Знижка","Разом","Статус","Промокод"],
+  ];
+
+  todayOrders.forEach((o,i)=>{
+    const time=new Date(o.createdAt).toLocaleTimeString("uk-UA",{hour:"2-digit",minute:"2-digit"});
+    const items=(o.items||[]).filter(it=>!it.deleted).map(it=>it.name+" ×"+it.qty).join("; ");
+    const addr=o.customer
+      ?(o.deliveryType==="pickup"?"Самовивіз":[o.customer.city,o.customer.street,o.customer.house].filter(Boolean).join(", "))
+      :"—";
+    rows.push([
+      i+1,
+      time,
+      o.orderNum||o.id.slice(0,8),
+      o.customer?.name||"—",
+      o.customer?.phone||"—",
+      addr,
+      items,
+      o.subtotal||"—",
+      o.delivery||0,
+      o.promoDiscount||0,
+      o.total||"—",
+      SLoc[o.status]||o.status,
+      o.promoCode||"",
+    ]);
+  });
+
+  // Summary rows
+  const completed=todayOrders.filter(o=>o.status==="completed");
+  const totalRev=completed.reduce((s,o)=>s+(o.total||0),0);
+  const totalDlv=completed.reduce((s,o)=>s+(o.delivery||0),0);
+  const totalDisc=todayOrders.reduce((s,o)=>s+(o.promoDiscount||0),0);
+  rows.push([]);
+  rows.push(["ПІДСУМОК"]);
+  rows.push(["Всього замовлень:",todayOrders.length]);
+  rows.push(["Виконано:",completed.length]);
+  rows.push(["Виручка (виконані):",""+totalRev+" грн"]);
+  rows.push(["Доставка (виконані):",""+totalDlv+" грн"]);
+  rows.push(["Знижок видано:",""+totalDisc+" грн"]);
+
+  // Build CSV with BOM for Excel UTF-8 support
+  const csvContent="\uFEFF"+rows.map(r=>r.map(cell=>{
+    const s=String(cell==null?"":cell);
+    // Escape cells with commas, quotes, or newlines
+    if(/[",\n\r]/.test(s)) return '"'+s.replace(/"/g,'""')+'"';
+    return s;
+  }).join(",")).join("\r\n");
+
+  const blob=new Blob([csvContent],{type:"text/csv;charset=utf-8"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;
+  const fn=dateStr.replace(/\./g,"-");
+  a.download="panorama-report-"+fn+".csv";
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast("Звіт збережено","Відкрийте у Excel або Google Sheets","⬇","success");
+};
+
+/* ==============================
+   ДРУК ЧЕКА
+   ============================== */
+window.printOrderReceipt=id=>{
+  const o=Object.values(allOrders).flat().find(x=>x.id===id);
+  if(!o){showToast("Замовлення не знайдено","","⚠","warn");return;}
+  const SLoc={new:"Нове",accepted:"Прийнято",in_progress:"Готується",shipped:"В дорозі",completed:"Виконано"};
+  const time=new Date(o.createdAt).toLocaleString("uk-UA",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"});
+  const addr=o.customer
+    ?(o.deliveryType==="pickup"?"Самовивіз":[o.customer.city,addVul(o.customer.street||""),o.customer.house].filter(Boolean).join(", "))
+    :"—";
+  const activeItems=(o.items||[]).filter(it=>!it.deleted);
+
+  const html=`<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<title>Чек ${o.orderNum||""}</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Courier New',Courier,monospace;font-size:12px;color:#000;width:280px;margin:0 auto;padding:10px 0}
+  .center{text-align:center}
+  .logo{font-size:18px;font-weight:700;letter-spacing:1px;margin-bottom:2px}
+  .sub{font-size:10px;color:#555;margin-bottom:6px}
+  .divider{border-top:1px dashed #999;margin:6px 0}
+  .row{display:flex;justify-content:space-between;margin:2px 0;font-size:11px}
+  .item-name{flex:1;padding-right:6px;word-break:break-word}
+  .item-price{white-space:nowrap;font-weight:600}
+  .total-row{display:flex;justify-content:space-between;font-weight:700;font-size:13px;margin:4px 0}
+  .status-badge{display:inline-block;padding:2px 8px;border:1px solid #000;border-radius:3px;font-size:10px;font-weight:700;margin-top:4px;letter-spacing:.5px}
+  .info-row{font-size:10px;color:#444;margin:1px 0}
+  .promo-row{font-size:10px;font-weight:600;margin:2px 0}
+  .footer{font-size:10px;color:#888;margin-top:8px;text-align:center;line-height:1.6}
+  @media print{
+    @page{margin:0;size:80mm auto}
+    body{width:100%;padding:4px}
+  }
+</style>
+</head>
+<body>
+<div class="center">
+  <div class="logo">PANORAMA</div>
+  <div class="sub">Доставка їжі</div>
+</div>
+<div class="divider"></div>
+<div class="center" style="font-size:11px;margin-bottom:4px">${time}</div>
+<div class="center"><span style="font-size:15px;font-weight:700;letter-spacing:2px">${o.orderNum||o.id.slice(0,8)}</span></div>
+<div class="center"><span class="status-badge">${SLoc[o.status]||o.status}</span></div>
+<div class="divider"></div>
+<div class="info-row">Клієнт: <strong>${o.customer?.name||"—"}</strong></div>
+<div class="info-row">Тел: ${o.customer?.phone||"—"}</div>
+<div class="info-row">Адреса: ${addr}</div>
+${o.customer?.comment?`<div class="info-row">Коментар: ${o.customer.comment}</div>`:""}
+<div class="divider"></div>
+${activeItems.map(it=>`<div class="row"><span class="item-name">${it.name} ×${it.qty}</span><span class="item-price">${it.price*it.qty} грн</span></div>`).join("")}
+<div class="divider"></div>
+<div class="row"><span>Сума:</span><span>${o.subtotal||""} грн</span></div>
+<div class="row"><span>Доставка:</span><span>${o.delivery===0?"Безкоштовно":(o.delivery||0)+" грн"}</span></div>
+${o.promoCode&&o.promoDiscount>0?`<div class="promo-row row"><span>🏷 ${o.promoCode}:</span><span>−${o.promoDiscount} грн</span></div>`:""}
+<div class="divider"></div>
+<div class="total-row"><span>РАЗОМ:</span><span>${o.total||""} грн</span></div>
+${o.eta?`<div class="row" style="margin-top:4px"><span>ETA:</span><span>~${o.eta} хв</span></div>`:""}
+<div class="divider"></div>
+<div class="footer">Дякуємо за замовлення!<br>Приємного апетиту 🍽</div>
+</body>
+</html>`;
+
+  const win=window.open("","_blank","width=360,height=640,scrollbars=yes");
+  if(!win){showToast("Заблоковано","Дозвольте відкриття вікон у браузері","⚠","warn");return;}
+  win.document.write(html);
+  win.document.close();
+  win.focus();
+  setTimeout(()=>{win.print();},400);
+};
+
+
 </script>
 
 <!-- PERMISSION OVERLAY -->

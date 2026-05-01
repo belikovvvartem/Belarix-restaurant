@@ -1228,7 +1228,7 @@ function buildMenu() {
   var sk = document.getElementById("menuSkeleton");
   if (sk) sk.style.display = "none";
 
-  var list = activeCat === "Всі" ? MENU : MENU.filter(function(i) { return i.cat === activeCat; });
+  var list = activeCat === "Всі" ? MENU.filter(function(i){return !i.stopped;}) : MENU.filter(function(i) { return i.cat === activeCat && !i.stopped; });
 
   if (!list.length && MENU.length === 0) {
     // Still loading — keep skeleton visible
@@ -1888,7 +1888,7 @@ function buildPreview() {
   var city = dlvType === "delivery" ? document.getElementById("fCity").value : "";
   var street = dlvType === "delivery" ? document.getElementById("fStreet").value.trim() : "";
   var house  = dlvType === "delivery" ? document.getElementById("fHouse").value.trim() : "";
-  var addr = dlvType === "delivery" ? (city ? city + ", " : "") + street + (house ? ", " + house : "") : "Самовивіз";
+  var addr = dlvType === "delivery" ? (city ? city + ", " : "") + addVul(street) + (house ? ", " + house : "") : "Самовивіз";
   var note = document.getElementById("fNote").value;
   var eta  = Math.max.apply(null, cart.map(function(i) { return i.prep || 15; })) + (dlvType === "delivery" ? 30 : 10);
 
@@ -2089,12 +2089,8 @@ window.trackInputKey = function(e, el) {
 
 window.trackInputFormat = function(el) {
   var val = el.value;
-  // Ensure prefix is always there
-  if (!val.startsWith(PREFIX)) {
-    val = PREFIX + val.replace(/^PA-?/i, "").replace(/\D/g, "");
-  }
-  // Extract digits after prefix, limit to 4
-  var digits = val.slice(PREFIX.length).replace(/\D/g, "").slice(0, 4);
+  // Strip any prefix variations first, then rebuild cleanly
+  var digits = val.replace(/^PA-?/i, "").replace(/\D/g, "").slice(0, 4);
   el.value = PREFIX + digits;
 };
 
@@ -2111,9 +2107,9 @@ function renderTrackCard(o, container) {
   if (o.deliveryType === "pickup") {
     addr = "Самовивіз";
   } else if (city && street) {
-    addr = city + ", " + street;
+    addr = city + ", " + addVul(street);
   } else {
-    addr = city || street || (o.customer ? o.customer.address : "") || "Самовивіз";
+    addr = city || addVul(street) || addVul(o.customer ? o.customer.address : "") || "Самовивіз";
   }
 
   var timeline = "";
@@ -2313,16 +2309,31 @@ function htmlEsc(str) {
     .replace(/"/g, "&quot;");
 }
 
+// Додає "вул." якщо вулиця вже не містить відомого префіксу
+function addVul(s) {
+  if (!s) return s;
+  var lower = s.toLowerCase().trim();
+  var prefixes = ["вул.","пр.","просп.","пров.","пл.","бул.","наб.","шосе","набережна","узвіз","проїзд","мкр","мікрорайон","вулиця","проспект","провулок","площа","бульвар"];
+  for (var i = 0; i < prefixes.length; i++) {
+    if (lower.startsWith(prefixes[i])) return s;
+  }
+  return "вул. " + s;
+}
+
 async function sendTelegramNotification(order) {
   if (!TG_TOKEN || !TG_CHAT) return;
   var API = "https://api.telegram.org/bot" + TG_TOKEN;
+
+  // TG_CHAT може містити кілька ID через кому: "288282, 8282828, 82828"
+  var chatIds = String(TG_CHAT).split(",").map(function(s) { return s.trim(); }).filter(Boolean);
+  if (!chatIds.length) return;
 
   var dlvIcon = order.deliveryType === "pickup" ? "\uD83C\uDFEA" : "\uD83D\uDE9A";
   var addr = order.deliveryType === "pickup"
     ? "Самовивіз"
     : (order.customer.city
-        ? order.customer.city + ", " + (order.customer.street || "")
-        : order.customer.address || "\u2014");
+        ? order.customer.city + ", " + addVul(order.customer.street || "")
+        : addVul(order.customer.address || "\u2014"));
 
   var itemLines = (order.items || []).map(function(i) {
     return "\u2022 " + htmlEsc(i.name) + " \xD7" + i.qty + " \u2014 " + (i.price * i.qty) + " \u0433\u0440\u043D";
@@ -2359,47 +2370,52 @@ async function sendTelegramNotification(order) {
     "\u23F1 ETA: ~" + order.eta + " \u0445\u0432"
   ].filter(function(l) { return l !== ""; }).join("\n");
 
-  // Текстове повідомлення
-  try {
-    await fetch(API + "/sendMessage", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chat_id:    TG_CHAT,
-        text:       lines,
-        parse_mode: "HTML",
-        reply_markup: {
-          inline_keyboard: [[{
-            text: "\uD83D\uDD0D \u0410\u0434\u043C\u0456\u043D-\u043F\u0430\u043D\u0435\u043B\u044C",
-            url:  "https://" + location.host + "/admin.html"
-          }]]
-        }
-      })
-    });
-  } catch (e) { console.warn("TG sendMessage:", e.message); }
-
-  // Фото страв (медіа-група, до 10)
+  // Фото страв (медіа-група, до 10) — будуємо один раз
   var photos = [];
   (order.items || []).forEach(function(i) {
     if (i.photo && photos.length < 10) {
       photos.push({
-        type:  "photo",
-        media: i.photo,
-        caption: photos.length === 0
-          ? ("\uD83D\uDCF8 " + htmlEsc(order.orderNum) + " \u2014 " + htmlEsc(i.name))
-          : undefined
+        type:    "photo",
+        media:   i.photo,
+        caption: (photos.length === 0
+          ? ("\uD83D\uDCF8 " + htmlEsc(order.orderNum) + "\n")
+          : "") + htmlEsc(i.name) + " \xD7" + i.qty + " \u2014 " + (i.price * i.qty) + " \u0433\u0440\u043D"
       });
     }
   });
-  if (photos.length > 0) {
+
+  // Відправляємо кожному отримувачу паралельно
+  await Promise.allSettled(chatIds.map(async function(chatId) {
+    // Текстове повідомлення
     try {
-      await fetch(API + "/sendMediaGroup", {
+      await fetch(API + "/sendMessage", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ chat_id: TG_CHAT, media: photos })
+        body: JSON.stringify({
+          chat_id:    chatId,
+          text:       lines,
+          parse_mode: "HTML",
+          reply_markup: {
+            inline_keyboard: [[{
+              text: "\uD83D\uDD0D \u0410\u0434\u043C\u0456\u043D-\u043F\u0430\u043D\u0435\u043B\u044C",
+              url:  "https://" + location.host + "/admin.html"
+            }]]
+          }
+        })
       });
-    } catch (e) { console.warn("TG sendMediaGroup:", e.message); }
-  }
+    } catch (e) { console.warn("TG sendMessage (" + chatId + "):", e.message); }
+
+    // Медіа-група з фото
+    if (photos.length > 0) {
+      try {
+        await fetch(API + "/sendMediaGroup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ chat_id: chatId, media: photos })
+        });
+      } catch (e) { console.warn("TG sendMediaGroup (" + chatId + "):", e.message); }
+    }
+  }));
 }
 
 </script>
