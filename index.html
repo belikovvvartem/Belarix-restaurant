@@ -957,6 +957,8 @@ let activeCat  = "Всі";
 let dlvType    = "delivery";
 let step       = 1;
 let trackUnsub = null;
+let TG_TOKEN   = null;   // завантажується з /api/config
+let TG_CHAT    = null;
 
 /* ——— PAGES ——— */
 window.showPage = function(page) {
@@ -988,6 +990,7 @@ updateCart();
 checkHours();
 setInterval(checkHours, 60000);
 loadPermsAndData();
+loadTelegramConfig();
 
 async function loadPermsAndData() {
   // Load permissions first (tiny single read)
@@ -1955,6 +1958,21 @@ window.placeOrder = async function() {
       status:       "new",
       createdAt:    Date.now(),
     });
+    // Telegram notification — fire and don't block UI
+    sendTelegramNotification({
+      orderNum:      orderNum,
+      promoCode:     appliedPromo ? appliedPromo.code : null,
+      promoDiscount: discount || 0,
+      items:         cart.map(function(i) {
+        return { id:i.id, name:i.name, qty:i.qty, price:i.price, photo:i.photo||null };
+      }),
+      customer:      { name:nm, phone:ph, city:city, street:streetAddr, address:addr, comment:note },
+      deliveryType:  dlvType,
+      subtotal:      sub,
+      delivery:      dlv,
+      total:         tot,
+      eta:           eta,
+    }).catch(function(){});
     closeModal("checkoutModal");
     saveTrackHistory({orderNum:orderNum, date:Date.now(), name:nm});
     // Mark promo as used
@@ -2275,6 +2293,115 @@ window.chQtySize = function(id, sizeIdx, d) {
   if (cart[i].qty <= 0) cart.splice(i, 1);
   saveCart(); refreshDishModalCtrl(id); updateCart();
 };
+
+/* ——— TELEGRAM NOTIFICATIONS ——— */
+async function loadTelegramConfig() {
+  try {
+    var res = await fetch("/api/config");
+    if (!res.ok) return;
+    var cfg = await res.json();
+    TG_TOKEN = cfg.TG_BOT_TOKEN  || null;
+    TG_CHAT  = cfg.TG_CHAT_ID    || null;
+  } catch (e) { console.warn("TG config:", e.message); }
+}
+
+function htmlEsc(str) {
+  return String(str || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+async function sendTelegramNotification(order) {
+  if (!TG_TOKEN || !TG_CHAT) return;
+  var API = "https://api.telegram.org/bot" + TG_TOKEN;
+
+  var dlvIcon = order.deliveryType === "pickup" ? "\uD83C\uDFEA" : "\uD83D\uDE9A";
+  var addr = order.deliveryType === "pickup"
+    ? "Самовивіз"
+    : (order.customer.city
+        ? order.customer.city + ", " + (order.customer.street || "")
+        : order.customer.address || "\u2014");
+
+  var itemLines = (order.items || []).map(function(i) {
+    return "\u2022 " + htmlEsc(i.name) + " \xD7" + i.qty + " \u2014 " + (i.price * i.qty) + " \u0433\u0440\u043D";
+  }).join("\n");
+
+  var promoLine = (order.promoCode && order.promoDiscount > 0)
+    ? "\n\uD83C\uDFF7 \u041F\u0440\u043E\u043C\u043E\u043A\u043E\u0434 <b>" + htmlEsc(order.promoCode) + "</b>: \u2212" + order.promoDiscount + " \u0433\u0440\u043D"
+    : "";
+
+  var dlvLine = order.delivery === 0
+    ? "\u0411\u0435\u0437\u043A\u043E\u0448\u0442\u043E\u0432\u043D\u043E \u2713"
+    : order.delivery + " \u0433\u0440\u043D";
+
+  var commentLine = order.customer.comment
+    ? "\n\uD83D\uDCAC <i>" + htmlEsc(order.customer.comment) + "</i>"
+    : "";
+
+  var lines = [
+    "\uD83C\uDD95 <b>\u041D\u043E\u0432\u0435 \u0437\u0430\u043C\u043E\u0432\u043B\u0435\u043D\u043D\u044F!</b>",
+    "\uD83D\uDCCB <code>" + htmlEsc(order.orderNum) + "</code>",
+    "",
+    "\uD83D\uDC64 <b>" + htmlEsc(order.customer.name) + "</b>",
+    "\uD83D\uDCDE " + htmlEsc(order.customer.phone),
+    dlvIcon + " " + htmlEsc(addr),
+    commentLine,
+    "",
+    "<b>\u0421\u043A\u043B\u0430\u0434 \u0437\u0430\u043C\u043E\u0432\u043B\u0435\u043D\u043D\u044F:</b>",
+    itemLines,
+    "",
+    "\uD83D\uDCB0 \u0421\u0443\u043C\u0430: " + order.subtotal + " \u0433\u0440\u043D",
+    "\uD83D\uDE9A \u0414\u043E\u0441\u0442\u0430\u0432\u043A\u0430: " + dlvLine,
+    promoLine,
+    "<b>\uD83D\uDCB5 \u0414\u043E \u0441\u043F\u043B\u0430\u0442\u0438: " + order.total + " \u0433\u0440\u043D</b>",
+    "\u23F1 ETA: ~" + order.eta + " \u0445\u0432"
+  ].filter(function(l) { return l !== ""; }).join("\n");
+
+  // Текстове повідомлення
+  try {
+    await fetch(API + "/sendMessage", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id:    TG_CHAT,
+        text:       lines,
+        parse_mode: "HTML",
+        reply_markup: {
+          inline_keyboard: [[{
+            text: "\uD83D\uDD0D \u0410\u0434\u043C\u0456\u043D-\u043F\u0430\u043D\u0435\u043B\u044C",
+            url:  "https://" + location.host + "/admin.html"
+          }]]
+        }
+      })
+    });
+  } catch (e) { console.warn("TG sendMessage:", e.message); }
+
+  // Фото страв (медіа-група, до 10)
+  var photos = [];
+  (order.items || []).forEach(function(i) {
+    if (i.photo && photos.length < 10) {
+      photos.push({
+        type:  "photo",
+        media: i.photo,
+        caption: photos.length === 0
+          ? ("\uD83D\uDCF8 " + htmlEsc(order.orderNum) + " \u2014 " + htmlEsc(i.name))
+          : undefined
+      });
+    }
+  });
+  if (photos.length > 0) {
+    try {
+      await fetch(API + "/sendMediaGroup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chat_id: TG_CHAT, media: photos })
+      });
+    } catch (e) { console.warn("TG sendMediaGroup:", e.message); }
+  }
+}
+
 </script>
 
 <!-- STYLED CONFIRM DIALOG -->
