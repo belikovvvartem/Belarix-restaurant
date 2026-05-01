@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#C94B1F">
+<title>404 — Сторінку не знайдено | Panorama</title>
+<link rel="shortcut icon" href="/favicon.png" type="image/x-icon">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600;700;800&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --primary:#C94B1F;--primary-d:#A33B16;--primary-l:rgba(201,75,31,.1);
+    --bg:#FDFAF6;--bg2:#F7F1E8;--surface:#fff;
+    --border:#EAE0D0;--text:#1C1208;--muted:#7A6A55;
+    --radius:14px;--t:.22s cubic-bezier(.4,0,.2,1);
+  }
+  html,body{height:100%;font-family:'Exo 2',sans-serif;background:var(--bg);color:var(--text)}
+
+  /* NAV */
+  nav{
+    position:sticky;top:0;z-index:10;
+    background:rgba(253,250,246,.95);backdrop-filter:blur(18px);
+    border-bottom:1px solid var(--border);
+    height:62px;display:flex;align-items:center;padding:0 24px;
+  }
+  .logo{font-family:'DM Serif Display',serif;font-size:22px;color:var(--primary);font-weight:700;text-decoration:none}
+
+  /* PAGE */
+  .page{
+    min-height:calc(100vh - 62px);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:40px 20px;text-align:center;
+  }
+
+  /* PLATE ILLUSTRATION */
+  .plate{
+    position:relative;width:180px;height:180px;margin:0 auto 36px;
+  }
+  .plate-circle{
+    width:180px;height:180px;border-radius:50%;
+    background:var(--bg2);border:3px solid var(--border);
+    display:flex;align-items:center;justify-content:center;
+    font-size:80px;
+    animation:wobble 3s ease-in-out infinite;
+  }
+  .plate-num{
+    position:absolute;bottom:-6px;right:-6px;
+    background:var(--primary);color:#fff;
+    font-family:'DM Serif Display',serif;font-size:28px;font-weight:700;
+    width:64px;height:64px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    border:3px solid var(--bg);
+    box-shadow:0 4px 16px rgba(201,75,31,.35);
+  }
+
+  h1{
+    font-family:'DM Serif Display',serif;font-size:clamp(32px,8vw,56px);
+    font-weight:700;color:var(--text);line-height:1.1;margin-bottom:12px;
+  }
+  h1 em{color:var(--primary);font-style:italic}
+
+  .sub{font-size:16px;color:var(--muted);line-height:1.6;max-width:420px;margin:0 auto 36px}
+
+  .actions{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+
+  .btn-pri{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:14px 28px;border-radius:40px;border:none;
+    background:var(--primary);color:#fff;
+    font-family:'Exo 2',sans-serif;font-size:15px;font-weight:700;
+    cursor:pointer;text-decoration:none;
+    transition:background var(--t),transform var(--t);
+    box-shadow:0 4px 20px rgba(201,75,31,.3);
+  }
+  .btn-pri:hover{background:var(--primary-d);transform:translateY(-2px)}
+
+  .btn-sec{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:14px 28px;border-radius:40px;
+    border:1.5px solid var(--border);background:var(--surface);
+    color:var(--text);font-family:'Exo 2',sans-serif;font-size:15px;font-weight:600;
+    cursor:pointer;text-decoration:none;
+    transition:border-color var(--t),color var(--t),transform var(--t);
+  }
+  .btn-sec:hover{border-color:var(--primary);color:var(--primary);transform:translateY(-2px)}
+
+  /* breadcrumb trail */
+  .trail{
+    margin-top:48px;display:flex;align-items:center;gap:8px;
+    font-size:12px;color:var(--muted);
+  }
+  .trail a{color:var(--muted);text-decoration:none;transition:color var(--t)}
+  .trail a:hover{color:var(--primary)}
+  .trail span{opacity:.5}
+
+  @keyframes wobble{
+    0%,100%{transform:rotate(-3deg) scale(1)}
+    50%{transform:rotate(3deg) scale(1.04)}
+  }
+
+  @media(max-width:480px){
+    .btn-pri,.btn-sec{width:100%;justify-content:center}
+    .actions{flex-direction:column;align-items:stretch;max-width:280px;margin:0 auto}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="logo">Panorama</a>
+</nav>
+
+<div class="page">
+  <div class="plate">
+    <div class="plate-circle">🍽️</div>
+    <div class="plate-num">404</div>
+  </div>
+
+  <h1>Страву <em>не знайдено</em></h1>
+  <p class="sub">
+    Схоже, ця сторінка зникла з нашого меню.<br>
+    Можливо, вона ніколи тут і не була — або переїхала.
+  </p>
+
+  <div class="actions">
+    <a href="/" class="btn-pri">🏠 На головну</a>
+    <a href="javascript:history.back()" class="btn-sec">← Назад</a>
+  </div>
+
+  <div class="trail">
+    <a href="/">Panorama</a>
+    <span>›</span>
+    <span>404 — Сторінку не знайдено</span>
+  </div>
+</div>
+
+</body>
+</html>
