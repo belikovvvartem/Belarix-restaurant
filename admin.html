@@ -1843,7 +1843,77 @@ const fbApp = initializeApp({
 });
 const db=getDatabase(fbApp), auth=getAuth(fbApp);
 
-/* ——— R2 UPLOAD (via server proxy — secrets stay in env vars) ——— */
+/* ——— GLOBAL FIREBASE ERROR HANDLER ——— */
+window.addEventListener("unhandledrejection", e=>{
+  const msg=(e.reason?.message||e.reason||"").toString();
+  if(msg.includes("PERMISSION_DENIED")||msg.includes("permission_denied")){
+    e.preventDefault();
+    showDbPermError();
+  }
+});
+
+// Auto-refresh Firebase token every 55 minutes (tokens expire in 60 min)
+setInterval(async()=>{
+  if(auth.currentUser){
+    try{ await auth.currentUser.getIdToken(true); }
+    catch(e){ console.warn("Token auto-refresh:",e.message); }
+  }
+}, 55*60*1000);
+
+/* ——— SAFE WRITE: refreshes token + catches PERMISSION_DENIED ——— */
+async function safeWrite(fn){
+  try{
+    if(auth.currentUser){
+      try{ await auth.currentUser.getIdToken(true); }
+      catch(te){ console.warn("Token refresh:",te.message); }
+    }
+    return await fn();
+  }catch(e){
+    const msg=(e.message||"").toString();
+    if(msg.includes("PERMISSION_DENIED")||msg.includes("permission_denied")){
+      showDbPermError();
+    } else {
+      showToast("Помилка запису",e.message||"Невідома помилка","⚠","error");
+    }
+    throw e;
+  }
+}
+
+function showDbPermError(){
+  const existing=document.getElementById("dbPermOverlay");
+  if(existing){ existing.style.display="flex"; return; }
+  const ov=document.createElement("div");
+  ov.id="dbPermOverlay";
+  ov.style.cssText="position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:20px";
+  ov.innerHTML=`
+    <div style="background:var(--surf);border:1px solid var(--brd2);border-radius:20px;padding:28px 24px 22px;max-width:420px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.5);text-align:center">
+      <div style="font-size:42px;margin-bottom:12px">🔐</div>
+      <div style="font-size:16px;font-weight:700;color:var(--txt);margin-bottom:8px">Firebase: Permission Denied</div>
+      <div style="font-size:13px;color:var(--sub);line-height:1.7;margin-bottom:14px">
+        База даних блокує запис.<br>
+        Відкрийте <strong style="color:var(--txt)">Firebase Console → Realtime Database → Rules</strong> і встановіть такі правила:
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--brd2);border-radius:var(--rs);padding:12px 14px;font-family:monospace;font-size:12px;text-align:left;margin-bottom:18px;white-space:pre;color:var(--txt);overflow-x:auto">{
+  "rules": {
+    ".read": "auth != null",
+    ".write": "auth != null"
+  }
+}</div>
+      <div style="font-size:11px;color:var(--dim);margin-bottom:16px">Збережіть правила та оновіть сторінку</div>
+      <div style="display:flex;gap:8px">
+        <button onclick="document.getElementById('dbPermOverlay').style.display='none'" style="flex:1;padding:10px;background:var(--surf2);border:1.5px solid var(--brd2);border-radius:40px;font-size:13px;font-weight:600;color:var(--txt);cursor:pointer;font-family:'Inter',sans-serif">Закрити</button>
+        <a href="https://console.firebase.google.com/project/rate-me-bot/database/rate-me-bot-default-rtdb/rules" target="_blank" style="flex:2;padding:10px;background:var(--p);color:#fff;border:none;border-radius:40px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:6px">🔗 Відкрити Firebase Rules</a>
+      </div>
+    </div>`;
+  document.body.appendChild(ov);
+}
+
+// Shorthand wrappers — replace bare Firebase write calls
+const dbSet    = (r,v) => safeWrite(()=>set(r,v));
+const dbUpdate = (r,v) => safeWrite(()=>update(r,v));
+const dbRemove = (r)   => safeWrite(()=>remove(r));
+const dbPush   = (r,v) => safeWrite(()=>push(r,v));
+
 const R2_PUBLIC="https://pub-56a3b31b31254981bb29f91b352d374d.r2.dev";
 
 async function uploadToR2(file,folder="dishes"){
@@ -1894,7 +1964,7 @@ async function deleteFromR2(photoUrl){
     console.warn("R2 DELETE failed. Queuing for cleanup:",e.message);
     try{
       const key=photoUrl.slice(R2_PUBLIC.length+1);
-      await push(ref(db,"r2_deletions"),{key,url:photoUrl,queuedAt:Date.now()});
+      await dbPush(ref(db,"r2_deletions"),{key,url:photoUrl,queuedAt:Date.now()});
     }catch(fe){console.warn("Could not queue deletion:",fe);}
   }
 }
@@ -2191,13 +2261,13 @@ function renderOrders(){
 window.updStatus=async(id,st)=>{
   const prev=Object.values(allOrders).flat().find(o=>o.id===id);
   try{
-    await update(ref(db,`orders/${id}`),{status:st,updatedAt:Date.now()});
+    await safeWrite(()=>update(ref(db,`orders/${id}`),{status:st,updatedAt:Date.now()}));
     if(prev)logHistory("order","Статус: "+(SL[prev.status]||prev.status)+" → "+(SL[st]||st),prev.orderNum||id.slice(0,8));
   }catch(e){console.error(e);}
 };
 window.delOrder=async id=>{
   const prev=Object.values(allOrders).flat().find(o=>o.id===id);
-  try{await remove(ref(db,`orders/${id}`));if(prev)logHistory("order","Видалено",prev.orderNum||id.slice(0,8));}
+  try{await safeWrite(()=>remove(ref(db,`orders/${id}`)));if(prev)logHistory("order","Видалено",prev.orderNum||id.slice(0,8));}
   catch(e){console.error(e);}
 };
 
@@ -2344,16 +2414,16 @@ function listenSettings(){
 }
 // saveSettings, addCity, addCategory, saveWorkHours defined once below (patched versions)
 window.removeCity=async idx=>{
-  siteSettings.cities.splice(idx,1);await set(ref(db,"settings"),siteSettings);renderSettings();
+  siteSettings.cities.splice(idx,1);await dbSet(ref(db,"settings"),siteSettings);renderSettings();
 };
 window.updateCityPrice=(idx,val)=>siteSettings.cities[idx].price=parseInt(val)||0;
 window.saveCityPrice=async idx=>{
-  await set(ref(db,"settings"),siteSettings);
+  await dbSet(ref(db,"settings"),siteSettings);
   const el=document.getElementById("cpSave"+idx);if(el){el.textContent="✓";setTimeout(()=>el.textContent="Зберегти",2000);}
 };
 // addCategory defined once below (patched version)
 window.removeCategory=async idx=>{
-  siteSettings.categories.splice(idx,1);await set(ref(db,"settings"),siteSettings);renderSettings();rebuildCatSelects();
+  siteSettings.categories.splice(idx,1);await dbSet(ref(db,"settings"),siteSettings);renderSettings();rebuildCatSelects();
 };
 function rebuildCatSelects(){
   const cats=Array.isArray(siteSettings.categories)?siteSettings.categories:["Перші страви","Другі страви","Салати","Напої","Випічка"];
@@ -2453,7 +2523,7 @@ window.addDish=async()=>{
   if(!finalPrice){errEl.style.color="var(--red)";errEl.textContent="Заповніть ціну або додайте розмір!";setTimeout(()=>errEl.textContent="",3000);if(btn){btn.disabled=false;btn.textContent="Додати страву";}return;}
   const dish={name,price:finalPrice,cat:document.getElementById("mCat").value,prep:parseInt(document.getElementById("mPrep").value)||15,desc:document.getElementById("mDesc").value.trim(),pop:document.getElementById("mPop").checked,oldPrice:null,sizes:sizes&&sizes.length?sizes:null,photo:photoUrl,createdAt:Date.now()};
   try{
-    await push(ref(db,"menu"),dish);
+    await dbPush(ref(db,"menu"),dish);
     logHistory("menu","Додано: "+name+" — "+price+" грн");
     ["mName","mPrice","mPrep","mDesc"].forEach(id=>document.getElementById(id).value="");
     document.getElementById("mHasSizes").checked=false;document.getElementById("mSizesBlock").style.display="none";document.getElementById("mSizesList").innerHTML="";
@@ -2516,14 +2586,14 @@ window.saveDishEdit=async()=>{
   const eHasSizes=document.getElementById("eHasSizes").checked;
   const eSizes=eHasSizes?getSizesFromList("eSizesList"):null;
   const data={name,price:finalPrice,cat:document.getElementById("eCat").value,prep:parseInt(document.getElementById("ePrep").value)||15,desc:document.getElementById("eDesc").value.trim(),pop:document.getElementById("ePop").checked,oldPrice:finalOldPrice,sizes:eSizes&&eSizes.length?eSizes:null,photo:photoUrl};
-  try{await update(ref(db,`menu/${id}`),data);logHistory("menu","Відредаговано: "+name);closeEditModal();}
+  try{await dbUpdate(ref(db,`menu/${id}`),data);logHistory("menu","Відредаговано: "+name);closeEditModal();}
   catch(e){alert("Помилка: "+e.message);}
   if(saveBtn){saveBtn.disabled=false;saveBtn.textContent="Зберегти";}
 };
 window.deleteDish=async id=>{
   const d=allDishes.find(x=>x.id===id);
   try{
-    await remove(ref(db,`menu/${id}`));
+    await dbRemove(ref(db,`menu/${id}`));
     if(d?.photo) await deleteFromR2(d.photo);
     logHistory("menu","Видалено: "+(d?.name||id));
   }catch(e){alert("Помилка: "+e.message);}
@@ -2531,7 +2601,7 @@ window.deleteDish=async id=>{
 window.toggleDishStop=async(id,stop)=>{
   const d=allDishes.find(x=>x.id===id);if(!d)return;
   try{
-    await update(ref(db,`menu/${id}`),{stopped:stop});
+    await dbUpdate(ref(db,`menu/${id}`),{stopped:stop});
     logHistory("menu",(stop?"Стоп-лист: ":"Розблоковано: ")+d.name);
     showToast(stop?"Страву зупинено":"Страву розблоковано","«"+d.name+"»",stop?"⛔":"✅",stop?"warn":"success");
   }catch(e){showToast("Помилка",e.message,"⚠","error");}
@@ -2626,7 +2696,7 @@ window.handleBannerFiles=async(files)=>{
     try{
       const photoUrl=await uploadToR2(file,"banners");
       const banner={photo:photoUrl,active:true,order:Date.now(),createdAt:Date.now()};
-      await push(ref(db,"banners"),banner);
+      await dbPush(ref(db,"banners"),banner);
       logHistory("banner","Додано банер");
       errEl.style.color="var(--green)";errEl.textContent="Додано!";
       setTimeout(()=>errEl.textContent="",2500);
@@ -2688,18 +2758,18 @@ window.onBannerDrop=async(e,targetId)=>{
   // Save new order to Firebase
   const updates={};
   allBanners.forEach((b,i)=>{updates[`banners/${b.id}/order`]=i;});
-  try{await update(ref(db),updates);}catch(e){console.warn(e);}
+  try{await dbUpdate(ref(db),updates);}catch(e){console.warn(e);}
   renderBannerList();
 };
 window.onBannerDragEnd=()=>{
   dragBannerId=null;
   document.querySelectorAll(".banner-card").forEach(c=>{c.classList.remove("dragging","drag-target");});
 };
-window.toggleBanner=async(id,active)=>{try{await update(ref(db,"banners/"+id),{active});}catch(e){alert("Помилка");}};
+window.toggleBanner=async(id,active)=>{try{await dbUpdate(ref(db,"banners/"+id),{active});}catch(e){alert("Помилка");}};
 window.deleteBanner=async id=>{
   try{
     const b=allBanners.find(x=>x.id===id);
-    await remove(ref(db,"banners/"+id));
+    await dbRemove(ref(db,"banners/"+id));
     if(b?.photo) await deleteFromR2(b.photo);
     logHistory("banner","Видалено банер");
   }catch(e){alert("Помилка: "+e.message);}
@@ -2714,7 +2784,7 @@ async function logHistory(type,msg,orderNum){
   if(curSection==="history")renderHistory();
   // Also save to Firebase
   try{
-    await push(ref(db,"history"),entry);
+    await dbPush(ref(db,"history"),entry);
   }catch(e){console.warn("History save:",e.message);}
 }
 window.renderHistory=()=>{
@@ -2826,7 +2896,7 @@ window.catDrop=async(idx)=>{
   const moved=cats.splice(dragCatIdx,1)[0];
   cats.splice(idx,0,moved);
   dragCatIdx=null;
-  await set(ref(db,"settings"),siteSettings);
+  await dbSet(ref(db,"settings"),siteSettings);
   renderSettings();rebuildCatSelects();
 };
 
@@ -3021,7 +3091,7 @@ window.removeItemFromOrder=async(orderId,itemIdx)=>{
   items[itemIdx]={...removed,deleted:true,deletedAt:Date.now()};
   const newTotal=Math.max(0,(order.total||0)-removed.price*removed.qty);
   try{
-    await update(ref(db,`orders/${orderId}`),{items,total:newTotal,updatedAt:Date.now()});
+    await dbUpdate(ref(db,`orders/${orderId}`),{items,total:newTotal,updatedAt:Date.now()});
     logHistory("order",`Видалено: ${removed.name} ×${removed.qty} (−${removed.price*removed.qty} грн)`,order.orderNum||orderId.slice(0,8));
     showToast("Позицію видалено","«"+removed.name+"» прибрано із замовлення","🗑","warn");
   }catch(e){showToast("Помилка",e.message,"⚠","error");}
@@ -3042,7 +3112,7 @@ window.confirmAddDish=async()=>{
   const items=[...(order.items||[]),newItem];
   const newTotal=(order.total||0)+price*_adQty;
   try{
-    await update(ref(db,`orders/${_adOrderId}`),{items,total:newTotal,updatedAt:Date.now()});
+    await dbUpdate(ref(db,`orders/${_adOrderId}`),{items,total:newTotal,updatedAt:Date.now()});
     logHistory("order",`Додано: ${_adPicked.name} ×${_adQty}`,order.orderNum||_adOrderId.slice(0,8));
     document.getElementById("addDishModal").classList.remove("on");
   }catch(e){alert("Помилка: "+e.message);}
@@ -3207,7 +3277,7 @@ window.createPromo=async()=>{
   const promo={type,value,dishId:dishId||null,catId:catId||null,buyX,getY,minOrderVal,nthN,nthDiscount,nthTarget,nthDishId,singleUse,expiresAt,active:true,createdAt:Date.now(),uses:{}};
 
   try{
-    await set(ref(db,"promoCodes/"+code),promo);
+    await dbSet(ref(db,"promoCodes/"+code),promo);
     await logHistory("promo","Промокод "+code+": "+promoDescription(promo));
     errEl.style.color="var(--green)";errEl.textContent="✓ Промокод створено!";
     // Reset form
@@ -3241,13 +3311,13 @@ function promoTypeName(t){
 
 // Toggle promo active/inactive
 window.togglePromoActive=async(code,active)=>{
-  try{await update(ref(db,"promoCodes/"+code),{active});}catch(e){alert("Помилка");}
+  try{await dbUpdate(ref(db,"promoCodes/"+code),{active});}catch(e){alert("Помилка");}
 };
 
 // Delete promo
 window.deletePromo=async code=>{
   try{
-    await remove(ref(db,"promoCodes/"+code));
+    await dbRemove(ref(db,"promoCodes/"+code));
     await logHistory("promo","Промокод "+code+" видалено");
   }catch(e){alert("Помилка: "+e.message);}
 };
@@ -3423,7 +3493,7 @@ window.dismissToast=id=>{
 window.updStatus=async(id,st)=>{
   const prev=Object.values(allOrders).flat().find(o=>o.id===id);
   try{
-    await update(ref(db,`orders/${id}`),{status:st,updatedAt:Date.now()});
+    await dbUpdate(ref(db,`orders/${id}`),{status:st,updatedAt:Date.now()});
     if(prev) logHistory("order","Статус: "+(SL[prev.status]||prev.status)+" → "+(SL[st]||st),prev.orderNum||id.slice(0,8));
     const labels={new:"Нове",accepted:"Прийнято",in_progress:"Готується",shipped:"В дорозі",completed:"Виконано"};
     showToast("Статус оновлено", labels[st]||st, st==="completed"?"✓":st==="shipped"?"🚚":"⏳", st==="completed"?"success":"info");
@@ -3436,7 +3506,7 @@ window.saveSettings=async()=>{
   siteSettings.minOrder=parseInt(document.getElementById("sMin").value)||200;
   siteSettings.freeDelivery=parseInt(document.getElementById("sFree").value)||500;
   try{
-    await set(ref(db,"settings"),siteSettings);
+    await dbSet(ref(db,"settings"),siteSettings);
     logHistory("settings","Мін. "+siteSettings.minOrder+" грн, безкоштовна від "+siteSettings.freeDelivery+" грн");
     showToast("Збережено","Умови замовлення оновлено","✓","success");
     const m=document.getElementById("settMsg");if(m){m.textContent="✓ Збережено";setTimeout(()=>m.textContent="",2500);}
@@ -3465,7 +3535,7 @@ window.saveWorkHours=async()=>{
   siteSettings.workHours.saturday={open:satOpen,openMin:satOpenM,close:satClose,closeMin:satCloseM};
   siteSettings.workHours.sunday={open:sunOpen,openMin:sunOpenM,close:sunClose,closeMin:sunCloseM};
   try{
-    await set(ref(db,"settings"),siteSettings);
+    await dbSet(ref(db,"settings"),siteSettings);
     const fmt=(h,m)=>h+":"+(m<10?"0":"")+m;
     logHistory("settings","Графік: Пн-Пт "+fmt(wdOpen,wdOpenM)+"–"+fmt(wdClose,wdCloseM)+", Сб "+fmt(satOpen,satOpenM)+"–"+fmt(satClose,satCloseM)+", Нд "+fmt(sunOpen,sunOpenM)+"–"+fmt(sunClose,sunCloseM));
     showToast("Графік збережено","Зміни набудуть чинності одразу","⏰","success");
@@ -3483,7 +3553,7 @@ window.addCity=async()=>{
   if(siteSettings.cities.find(c=>c.name.toLowerCase()===name.toLowerCase())){showToast("Вже існує","Це місто вже в списку","ℹ","info");return;}
   siteSettings.cities.push({name,price});
   document.getElementById("newCityName").value="";document.getElementById("newCityPrice").value="";
-  await set(ref(db,"settings"),siteSettings);
+  await dbSet(ref(db,"settings"),siteSettings);
   logHistory("settings","Місто: "+name+" ("+price+" грн)");
   renderSettings();
   showToast("Місто додано","«"+name+"» — "+price+" грн доставка","🏙","success");
@@ -3498,7 +3568,7 @@ window.addCategory=async()=>{
   if(siteSettings.categories.includes(name)){showToast("Вже існує","Ця категорія вже є в списку","ℹ","info");return;}
   siteSettings.categories.push(name);
   document.getElementById("newCatName").value="";
-  await set(ref(db,"settings"),siteSettings);
+  await dbSet(ref(db,"settings"),siteSettings);
   renderSettings();rebuildCatSelects();
   showToast("Категорію додано","«"+name+"»","📋","success");
 };
@@ -3519,7 +3589,7 @@ window.confirmAddDish=async()=>{
   const items=[...(order.items||[]),newItem];
   const newTotal=(order.total||0)+price*_adQty;
   try{
-    await update(ref(db,`orders/${_adOrderId}`),{items,total:newTotal,updatedAt:Date.now()});
+    await dbUpdate(ref(db,`orders/${_adOrderId}`),{items,total:newTotal,updatedAt:Date.now()});
     logHistory("order",`Додано: ${_adPicked.name} ×${_adQty}`,order.orderNum||_adOrderId.slice(0,8));
     document.getElementById("addDishModal").classList.remove("on");
     showToast("Додано до замовлення","«"+name+"» ×"+_adQty,"✓","success");
@@ -3561,7 +3631,7 @@ window.createPromo=async()=>{
   if(type==="nth_free"&&(!nthBuy||!nthFreeCount)){errEl.textContent="Вкажіть кількість";return;}
   const promo={type,value,dishId:dishId||null,catId:catId||null,buyX:null,getY:null,minOrderVal:null,nthN,nthDiscount,nthTarget,nthDishId,singleUse,expiresAt,active:true,createdAt:Date.now(),uses:{}};
   try{
-    await set(ref(db,"promoCodes/"+code),promo);
+    await dbSet(ref(db,"promoCodes/"+code),promo);
     await logHistory("promo","Промокод "+code);
     errEl.style.color="var(--green)";errEl.textContent="✓ Промокод створено!";
     document.getElementById("pcCode").value="";
@@ -3594,7 +3664,7 @@ window.saveDishEdit=async()=>{
   const eSizes=eHasSizes?getSizesFromList("eSizesList"):null;
   const data={name,price:finalPrice,cat:document.getElementById("eCat").value,prep:parseInt(document.getElementById("ePrep").value)||15,desc:document.getElementById("eDesc").value.trim(),pop:document.getElementById("ePop").checked,oldPrice:finalOldPrice,sizes:eSizes&&eSizes.length?eSizes:null,photo:photoUrl};
   try{
-    await update(ref(db,`menu/${id}`),data);
+    await dbUpdate(ref(db,`menu/${id}`),data);
     logHistory("menu","Відредаговано: "+name);
     closeEditModal();
     showToast("Страву збережено","«"+name+"» оновлено","✓","success");
@@ -3636,7 +3706,7 @@ window.delOrder=async id=>{
   const num=prev?.orderNum||id.slice(0,8);
   const ok=await admConfirm("Видалити замовлення?","Замовлення "+num+" буде видалено. Цю дію неможливо скасувати.","🗑","danger","Видалити");
   if(!ok)return;
-  try{await remove(ref(db,`orders/${id}`));if(prev)logHistory("order","Видалено",num);showToast("Замовлення видалено",num,"🗑","warn");}
+  try{await dbRemove(ref(db,`orders/${id}`));if(prev)logHistory("order","Видалено",num);showToast("Замовлення видалено",num,"🗑","warn");}
   catch(e){showToast("Помилка",e.message,"⚠","error");}
 };
 
@@ -3646,7 +3716,7 @@ window.deleteDish=async id=>{
   const ok=await admConfirm("Видалити страву?","«"+(d?.name||id)+"» буде видалено з меню.","🍽","danger","Видалити");
   if(!ok)return;
   try{
-    await remove(ref(db,`menu/${id}`));
+    await dbRemove(ref(db,`menu/${id}`));
     if(d?.photo) await deleteFromR2(d.photo);
     logHistory("menu","Видалено: "+(d?.name||id));
     showToast("Страву видалено","«"+(d?.name||id)+"»","🗑","warn");
@@ -3658,7 +3728,7 @@ window.removeCity=async idx=>{
   const ok=await admConfirm("Видалити місто?","«"+c.name+"» буде видалено зі списку доставки.","🏙","danger","Видалити");
   if(!ok)return;
   siteSettings.cities.splice(idx,1);
-  await set(ref(db,"settings"),siteSettings);
+  await dbSet(ref(db,"settings"),siteSettings);
   renderSettings();
   showToast("Місто видалено","«"+c.name+"»","🗑","warn");
 };
@@ -3668,7 +3738,7 @@ window.removeCategory=async idx=>{
   const ok=await admConfirm("Видалити категорію?","Всі страви цієї категорії залишаться, але без розділу.","📋","warn","Видалити");
   if(!ok)return;
   siteSettings.categories.splice(idx,1);
-  await set(ref(db,"settings"),siteSettings);
+  await dbSet(ref(db,"settings"),siteSettings);
   renderSettings();rebuildCatSelects();
   showToast("Категорію видалено","«"+name+"»","🗑","warn");
 };
@@ -3679,7 +3749,7 @@ window.deleteBanner=async id=>{
   if(!ok)return;
   try{
     const b=allBanners.find(x=>x.id===id);
-    await remove(ref(db,"banners/"+id));
+    await dbRemove(ref(db,"banners/"+id));
     if(b?.photo) await deleteFromR2(b.photo);
     logHistory("banner","Видалено банер");
     showToast("Банер видалено","","🗑","warn");
@@ -3690,7 +3760,7 @@ window.deletePromo=async code=>{
   const ok=await admConfirm("Видалити промокод?","Промокод «"+code+"» буде видалено назавжди.","🏷","danger","Видалити");
   if(!ok)return;
   try{
-    await remove(ref(db,"promoCodes/"+code));
+    await dbRemove(ref(db,"promoCodes/"+code));
     await logHistory("promo","Промокод "+code+" видалено");
     showToast("Промокод видалено","«"+code+"»","🗑","warn");
   }catch(e){showToast("Помилка",e.message,"⚠","error");}
@@ -3700,77 +3770,98 @@ window.deletePromo=async code=>{
    ЗВІТ ЗА ДЕНЬ — CSV EXPORT
    ============================== */
 window.exportDayReport=()=>{
-  const now=new Date();
-  now.setHours(0,0,0,0);
-  const todayStart=now.getTime();
+  const now=new Date(); now.setHours(0,0,0,0);
   const todayOrders=Object.values(allOrders).flat()
-    .filter(o=>o&&o.createdAt>=todayStart)
+    .filter(o=>o&&o.createdAt>=now.getTime())
     .sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
   if(!todayOrders.length){showToast("Немає замовлень","Сьогодні ще не було замовлень","ℹ","info");return;}
 
   const dateStr=new Date().toLocaleDateString("uk-UA",{day:"2-digit",month:"2-digit",year:"numeric"});
   const SLoc={new:"Нове",accepted:"Прийнято",in_progress:"Готується",shipped:"В дорозі",completed:"Виконано"};
+  const SCol={new:"#f97316",accepted:"#3b82f6",in_progress:"#eab308",shipped:"#a855f7",completed:"#22c55e"};
+  const esc=s=>String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 
-  // Header row
-  const rows=[
-    ["Звіт за день: "+dateStr],
-    [],
-    ["№","Час","Номер","Клієнт","Телефон","Адреса","Страви","Сума","Доставка","Знижка","Разом","Статус","Промокод"],
-  ];
-
-  todayOrders.forEach((o,i)=>{
-    const time=new Date(o.createdAt).toLocaleTimeString("uk-UA",{hour:"2-digit",minute:"2-digit"});
-    const items=(o.items||[]).filter(it=>!it.deleted).map(it=>it.name+" ×"+it.qty).join("; ");
-    const addr=o.customer
-      ?(o.deliveryType==="pickup"?"Самовивіз":[o.customer.city,o.customer.street,o.customer.house].filter(Boolean).join(", "))
-      :"—";
-    rows.push([
-      i+1,
-      time,
-      o.orderNum||o.id.slice(0,8),
-      o.customer?.name||"—",
-      o.customer?.phone||"—",
-      addr,
-      items,
-      o.subtotal||"—",
-      o.delivery||0,
-      o.promoDiscount||0,
-      o.total||"—",
-      SLoc[o.status]||o.status,
-      o.promoCode||"",
-    ]);
-  });
-
-  // Summary rows
   const completed=todayOrders.filter(o=>o.status==="completed");
   const totalRev=completed.reduce((s,o)=>s+(o.total||0),0);
   const totalDlv=completed.reduce((s,o)=>s+(o.delivery||0),0);
   const totalDisc=todayOrders.reduce((s,o)=>s+(o.promoDiscount||0),0);
-  rows.push([]);
-  rows.push(["ПІДСУМОК"]);
-  rows.push(["Всього замовлень:",todayOrders.length]);
-  rows.push(["Виконано:",completed.length]);
-  rows.push(["Виручка (виконані):",""+totalRev+" грн"]);
-  rows.push(["Доставка (виконані):",""+totalDlv+" грн"]);
-  rows.push(["Знижок видано:",""+totalDisc+" грн"]);
+  const avgCheck=completed.length?Math.round(totalRev/completed.length):0;
 
-  // Build CSV with BOM for Excel UTF-8 support
-  const csvContent="\uFEFF"+rows.map(r=>r.map(cell=>{
-    const s=String(cell==null?"":cell);
-    // Escape cells with commas, quotes, or newlines
-    if(/[",\n\r]/.test(s)) return '"'+s.replace(/"/g,'""')+'"';
-    return s;
-  }).join(",")).join("\r\n");
+  const rows=todayOrders.map((o,i)=>{
+    const time=new Date(o.createdAt).toLocaleTimeString("uk-UA",{hour:"2-digit",minute:"2-digit"});
+    const items=(o.items||[]).filter(it=>!it.deleted).map(it=>`${esc(it.name)} ×${it.qty}`).join("<br>");
+    const addr=o.deliveryType==="pickup"
+      ?`<em>Самовивіз</em>`
+      :esc([o.customer?.city,o.customer?.street].filter(Boolean).join(", ")||"—");
+    const sc=SCol[o.status]||"#888";
+    const promoCell=o.promoCode
+      ?`<span style="color:#22c55e;font-weight:700">🏷 ${esc(o.promoCode)}</span>${o.promoDiscount>0?`<br><small style="color:#ef4444">−${o.promoDiscount} грн</small>`:""}`
+      :"—";
+    const dlvCell=o.delivery===0?`<span style="color:#22c55e">Безкоштовно</span>`:`${o.delivery||0} грн`;
+    const subVal=(o.subtotal!=null?o.subtotal:(o.total||0));
+    return `<tr>
+      <td style="color:#9ca3af;font-size:11px">${i+1}</td>
+      <td style="font-weight:700;letter-spacing:.5px;color:#f97316">${esc(o.orderNum||o.id.slice(0,8))}</td>
+      <td style="color:#6b7280;white-space:nowrap">${time}</td>
+      <td><strong>${esc(o.customer?.name||"—")}</strong><br><span style="color:#9ca3af;font-size:11px">${esc(o.customer?.phone||"")}</span></td>
+      <td style="font-size:12px">${addr}</td>
+      <td style="font-size:12px;line-height:1.7">${items}</td>
+      <td style="text-align:right;white-space:nowrap">${subVal} грн</td>
+      <td style="text-align:right;white-space:nowrap">${dlvCell}</td>
+      <td style="text-align:center">${promoCell}</td>
+      <td style="text-align:right;font-weight:800;font-size:15px;color:#f97316;white-space:nowrap">${o.total||"—"} грн</td>
+      <td style="text-align:center;white-space:nowrap"><span style="padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:${sc}22;color:${sc}">${SLoc[o.status]||o.status}</span></td>
+    </tr>`;
+  }).join("");
 
-  const blob=new Blob([csvContent],{type:"text/csv;charset=utf-8"});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement("a");
-  a.href=url;
-  const fn=dateStr.replace(/\./g,"-");
-  a.download="panorama-report-"+fn+".csv";
-  a.click();
-  URL.revokeObjectURL(url);
-  showToast("Звіт збережено","Відкрийте у Excel або Google Sheets","⬇","success");
+  const html=`<!DOCTYPE html>
+<html lang="uk"><head><meta charset="UTF-8">
+<title>Звіт Panorama — ${dateStr}</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Arial,sans-serif;background:#f8f9fa;color:#1a1a1a;padding:20px;font-size:13px}
+.hd{background:#fff;border-radius:12px;padding:18px 22px;margin-bottom:16px;border:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.logo{font-size:20px;font-weight:800;color:#f97316}.sub{font-size:12px;color:#9ca3af;margin-top:1px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:16px}
+.kpi{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px 14px}
+.kl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#9ca3af;margin-bottom:5px}
+.kv{font-size:21px;font-weight:800;line-height:1}.ks{font-size:10px;color:#9ca3af;margin-top:3px}
+.tw{background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:auto;margin-bottom:16px}
+.th2{padding:12px 18px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between}
+.th2 h2{font-size:14px;font-weight:700}
+table{width:100%;border-collapse:collapse;min-width:900px}
+thead th{background:#f9fafb;padding:9px 10px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:#6b7280;border-bottom:1px solid #e5e7eb;white-space:nowrap}
+tbody td{padding:9px 10px;border-bottom:1px solid #f3f4f6;vertical-align:top}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover{background:#fffbf7}
+.pbtn{position:fixed;bottom:20px;right:20px;padding:11px 20px;background:#f97316;color:#fff;border:none;border-radius:40px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(249,115,22,.4);font-family:inherit}
+@media print{body{padding:4px;background:#fff}.pbtn{display:none}@page{margin:8mm;size:A4 landscape}}
+</style></head><body>
+<div class="hd"><div><div class="logo">Panorama</div><div class="sub">Звіт за день</div></div><strong>📅 ${dateStr}</strong></div>
+<div class="kpis">
+  <div class="kpi"><div class="kl">Замовлень</div><div class="kv" style="color:#f97316">${todayOrders.length}</div><div class="ks">Активних: ${todayOrders.length-completed.length}</div></div>
+  <div class="kpi"><div class="kl">Виконано</div><div class="kv" style="color:#22c55e">${completed.length}</div><div class="ks">${completed.length?Math.round(completed.length/todayOrders.length*100):0}%</div></div>
+  <div class="kpi"><div class="kl">Виручка</div><div class="kv" style="color:#22c55e">${totalRev}</div><div class="ks">грн (виконані)</div></div>
+  <div class="kpi"><div class="kl">Доставка</div><div class="kv">${totalDlv}</div><div class="ks">грн зібрано</div></div>
+  <div class="kpi"><div class="kl">Знижки</div><div class="kv" style="color:#ef4444">${totalDisc}</div><div class="ks">грн промокоди</div></div>
+  <div class="kpi"><div class="kl">Середній чек</div><div class="kv" style="color:#f97316">${avgCheck}</div><div class="ks">грн</div></div>
+</div>
+<div class="tw">
+  <div class="th2"><h2>Замовлення — ${dateStr}</h2><span style="font-size:11px;color:#9ca3af">${todayOrders.length} записів</span></div>
+  <table><thead><tr>
+    <th>#</th><th>Номер</th><th>Час</th><th>Клієнт</th><th>Адреса</th><th>Страви</th>
+    <th style="text-align:right">Сума</th><th style="text-align:right">Доставка</th>
+    <th style="text-align:center">Промокод</th><th style="text-align:right">Разом</th><th style="text-align:center">Статус</th>
+  </tr></thead><tbody>${rows}</tbody></table>
+</div>
+<button class="pbtn" onclick="window.print()">🖨 Друк / Зберегти PDF</button>
+</body></html>`;
+
+  const win=window.open("","_blank","width=1200,height=800,scrollbars=yes");
+  if(!win){showToast("Заблоковано","Дозвольте відкриття вікон у браузері","⚠","warn");return;}
+  win.document.write(html);
+  win.document.close();
+  showToast("Звіт відкрито","Натисніть 🖨 для збереження PDF","⬇","success");
 };
 
 /* ==============================
