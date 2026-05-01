@@ -93,9 +93,6 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
 .nb-badge.on{opacity:1;transform:scale(1)}
 .side-foot{padding:10px 8px;border-top:1px solid var(--brd);display:flex;flex-direction:column;gap:6px;flex-shrink:0}
 .theme-row{display:flex;gap:5px}
-.report-menu-item{display:block;width:100%;padding:9px 14px;background:none;border:none;color:var(--txt);font-size:12px;font-weight:500;font-family:'Inter',sans-serif;text-align:left;cursor:pointer;transition:background var(--t)}
-.report-menu-item:hover{background:var(--surf2);color:var(--p)}
-.tb-theme-btn{display:none}
 .theme-btn{flex:1;padding:7px;background:var(--surf2);border:1px solid var(--brd);border-radius:var(--rs);color:var(--sub);font-size:13px;transition:var(--t)}
 .theme-btn.on,.theme-btn:hover{background:var(--p);border-color:var(--p);color:#fff}
 /* ========== ANIMATIONS ========== */
@@ -288,6 +285,7 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
 .stat-val.accent{color:var(--p)}
 .stat-sub{font-size:12px;color:var(--sub);margin-top:3px}
 .chart-card{background:var(--surf);border:1px solid var(--brd);border-radius:var(--r);padding:16px 18px;margin-bottom:12px;flex-shrink:0}
+.charts-two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;flex-shrink:0}
 .chart-title{font-size:14px;font-weight:600;margin-bottom:12px}
 .bar-chart{display:flex;flex-direction:column;gap:7px}
 .bar-row{display:flex;align-items:center;gap:10px;font-size:12px}
@@ -673,7 +671,7 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
   .sett-nav-item{padding:10px 11px;font-size:11px;gap:5px}
   .sett-content{padding:14px}
   .sett-info-row{grid-template-columns:1fr 1fr;gap:7px}
-  .sett-block-head{padding:10px 12px;gap:8px}
+  .sett-block-head{padding:10px 12px;gap:8px;flex-wrap:wrap}
   .sett-block-body{padding:12px}
   .sett-amount-grid{grid-template-columns:1fr}
   .hours-day-row{grid-template-columns:80px 1fr;gap:8px}
@@ -874,8 +872,9 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
   .lbox{border-radius:16px;padding:26px 18px}
 
   /* Topbar right */
-  .topbar-right .upd-txt,.topbar-right #sortSel{display:none}
-  .tb-theme-btn{display:flex!important}
+  .topbar-right .upd-txt{display:none}
+  .charts-two-col{grid-template-columns:1fr}
+  .bar-label{width:90px;font-size:11px}
 }
 @media(min-width:600px){
   .modal-bg{align-items:center;padding:20px}
@@ -1100,7 +1099,6 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
           <option value="high">Сума ↓</option>
           <option value="low">Сума ↑</option>
         </select>
-        <button class="tb-btn tb-theme-btn" id="topThemeBtn" onclick="toggleTheme()" title="Змінити тему">◐</button>
         <button class="tb-btn" id="refreshBtn" onclick="manualRefresh()">↻ Оновити</button>
       </div>
     </div>
@@ -1134,17 +1132,7 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
           <span>Категорій: <strong id="spCats" style="color:var(--txt)">—</strong></span>
           <span>Мін: <strong id="spMin" style="color:var(--p)">—</strong></span>
           <span>Від: <strong id="spFree" style="color:var(--green)">—</strong></span>
-          <div style="position:relative">
-            <button onclick="toggleReportMenu(event)" id="reportMenuBtn" style="display:flex;align-items:center;gap:5px;padding:6px 12px;background:var(--surf2);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--txt);font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:var(--t)" onmouseover="this.style.borderColor='var(--p)';this.style.color='var(--p)'" onmouseout="this.style.borderColor='var(--brd2)';this.style.color='var(--txt)'">⬇ Завантажити звіт &#9662;</button>
-            <div id="reportMenu" style="display:none;position:absolute;right:0;top:calc(100% + 6px);background:var(--surf);border:1px solid var(--brd2);border-radius:var(--rs);box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:500;min-width:170px;overflow:hidden">
-              <div style="padding:6px 10px;font-size:9px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--brd)">Оберіть період</div>
-              <button onclick="exportReport(0)"  class="report-menu-item">&#128197; Сьогодні</button>
-              <button onclick="exportReport(1)"  class="report-menu-item">&#9664; Вчора</button>
-              <button onclick="exportReport(3)"  class="report-menu-item">&#8617; Останні 3 дні</button>
-              <button onclick="exportReport(7)"  class="report-menu-item">&#128202; Останні 7 днів</button>
-              <button onclick="exportReport(30)" class="report-menu-item">&#128198; Останні 30 днів</button>
-            </div>
-          </div>
+          <button onclick="exportDayReport()" style="display:flex;align-items:center;gap:5px;padding:6px 12px;background:var(--surf2);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--txt);font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:var(--t)" onmouseover="this.style.borderColor='var(--p)';this.style.color='var(--p)'" onmouseout="this.style.borderColor='var(--brd2)';this.style.color='var(--txt)'">⬇ Звіт за день</button>
         </div>
       </div>
       <!-- Main KPI cards -->
@@ -1165,7 +1153,7 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
         <div id="statusChart" style="display:flex;gap:8px;flex-wrap:wrap"></div>
       </div>
       <!-- Two columns: top dishes + promo stats -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;flex-shrink:0">
+      <div class="charts-two-col">
         <div class="chart-card"><div class="chart-title">Топ страв</div><div class="bar-chart" id="topDishes"></div></div>
         <div class="chart-card"><div class="chart-title">По категоріях</div><div class="bar-chart" id="catChart"></div></div>
       </div>
@@ -1988,29 +1976,12 @@ async function deleteFromR2(photoUrl){
 function setTheme(t){
   document.documentElement.setAttribute("data-theme",t);
   localStorage.setItem("adm_theme",t);
-  document.getElementById("btnDark")?.classList.toggle("on",t==="dark");
-  document.getElementById("btnLight")?.classList.toggle("on",t==="light");
-  const tb=document.getElementById("topThemeBtn");
-  if(tb) tb.textContent=t==="dark"?"○ Тема":"● Тема";
+  document.getElementById("btnDark").classList.toggle("on",t==="dark");
+  document.getElementById("btnLight").classList.toggle("on",t==="light");
 }
 window.setTheme=setTheme;
-window.toggleTheme=()=>setTheme(
-  (document.documentElement.getAttribute("data-theme")||"dark")==="dark"?"light":"dark"
-);
 const savedTheme=localStorage.getItem("adm_theme")||"dark";
 setTheme(savedTheme);
-
-/* ——— REPORT DROPDOWN ——— */
-window.toggleReportMenu=e=>{
-  e.stopPropagation();
-  const m=document.getElementById("reportMenu");
-  if(!m) return;
-  m.style.display=m.style.display==="none"?"block":"none";
-};
-document.addEventListener("click",()=>{
-  const m=document.getElementById("reportMenu");
-  if(m) m.style.display="none";
-});
 
 /* ——— PERMISSIONS / FEATURE FLAGS ——— */
 window.PERMS = {
@@ -2072,25 +2043,6 @@ window.closePermOverlay=()=>{
 document.addEventListener("DOMContentLoaded",()=>{
   const ov = document.getElementById("permOverlay");
   if(ov) ov.addEventListener("click", e=>{ if(e.target===ov) closePermOverlay(); });
-
-  // Live validation for work-hours inputs
-  function attachHoursValidation(){
-    const hourIds=["sWdOpen","sWdClose","sSatOpen","sSatClose","sSunOpen","sSunClose"];
-    const minIds =["sWdOpenM","sWdCloseM","sSatOpenM","sSatCloseM","sSunOpenM","sSunCloseM"];
-    hourIds.forEach(id=>{
-      const el=document.getElementById(id);
-      if(!el) return;
-      el.addEventListener("input",()=>{let v=parseInt(el.value);if(!isNaN(v)&&v>23){el.value=23;}if(!isNaN(v)&&v<0){el.value=0;}});
-      el.addEventListener("blur", ()=>{let v=parseInt(el.value);if(isNaN(v)||v<0)el.value=0;else if(v>23)el.value=23;});
-    });
-    minIds.forEach(id=>{
-      const el=document.getElementById(id);
-      if(!el) return;
-      el.addEventListener("input",()=>{let v=parseInt(el.value);if(!isNaN(v)&&v>59){el.value=59;}if(!isNaN(v)&&v<0){el.value=0;}});
-      el.addEventListener("blur", ()=>{let v=parseInt(el.value);if(isNaN(v)||v<0)el.value=0;else if(v>59)el.value=59;});
-    });
-  }
-  attachHoursValidation();
 });
 
 // Guard function — call before any protected action
@@ -3567,14 +3519,18 @@ window.saveSettings=async()=>{
 // Patch saveWorkHours
 window.saveWorkHours=async()=>{
   if(!checkPerm("settings")) return;
-  const clampH=id=>{const el=document.getElementById(id);if(!el)return 0;let v=parseInt(el.value);if(isNaN(v)||v<0)v=0;if(v>23)v=23;el.value=v;return v;};
-  const clampM=id=>{const el=document.getElementById(id);if(!el)return 0;let v=parseInt(el.value);if(isNaN(v)||v<0)v=0;if(v>59)v=59;el.value=v;return v;};
-  const wdOpen=clampH("sWdOpen"),   wdOpenM=clampM("sWdOpenM");
-  const wdClose=clampH("sWdClose"),  wdCloseM=clampM("sWdCloseM");
-  const satOpen=clampH("sSatOpen"),  satOpenM=clampM("sSatOpenM");
-  const satClose=clampH("sSatClose"), satCloseM=clampM("sSatCloseM");
-  const sunOpen=clampH("sSunOpen"),  sunOpenM=clampM("sSunOpenM");
-  const sunClose=clampH("sSunClose"), sunCloseM=clampM("sSunCloseM");
+  const wdOpen=parseInt(document.getElementById("sWdOpen").value)||0;
+  const wdOpenM=parseInt(document.getElementById("sWdOpenM").value)||0;
+  const wdClose=parseInt(document.getElementById("sWdClose").value)||0;
+  const wdCloseM=parseInt(document.getElementById("sWdCloseM").value)||0;
+  const satOpen=parseInt(document.getElementById("sSatOpen")?.value)||0;
+  const satOpenM=parseInt(document.getElementById("sSatOpenM")?.value)||0;
+  const satClose=parseInt(document.getElementById("sSatClose")?.value)||0;
+  const satCloseM=parseInt(document.getElementById("sSatCloseM")?.value)||0;
+  const sunOpen=parseInt(document.getElementById("sSunOpen").value)||0;
+  const sunOpenM=parseInt(document.getElementById("sSunOpenM").value)||0;
+  const sunClose=parseInt(document.getElementById("sSunClose").value)||0;
+  const sunCloseM=parseInt(document.getElementById("sSunCloseM").value)||0;
   if(wdOpen*60+wdOpenM>=wdClose*60+wdCloseM){showToast("Невірний графік","Відкриття Пн–Пт має бути раніше за закриття","⚠","warn");return;}
   if(!siteSettings.workHours)siteSettings.workHours={};
   siteSettings.workHours.weekdays={open:wdOpen,openMin:wdOpenM,close:wdClose,closeMin:wdCloseM};
@@ -3816,39 +3772,18 @@ window.deletePromo=async code=>{
 /* ==============================
    ЗВІТ ЗА ДЕНЬ — CSV EXPORT
    ============================== */
-window.exportReport=window.exportDayReport=(days=0)=>{
-  document.getElementById("reportMenu").style.display="none";
-  const periodLabels={0:"Сьогодні",1:"Вчора",3:"Останні 3 дні",7:"Останні 7 днів",30:"Останні 30 днів"};
-  const periodLabel=periodLabels[days]||`${days} днів`;
-
-  const now=new Date();
-  let fromDate, toDate;
-  if(days===0){
-    // Today only
-    fromDate=new Date(now); fromDate.setHours(0,0,0,0);
-    toDate=new Date(now); toDate.setHours(23,59,59,999);
-  } else if(days===1){
-    // Yesterday only
-    fromDate=new Date(now); fromDate.setDate(fromDate.getDate()-1); fromDate.setHours(0,0,0,0);
-    toDate=new Date(fromDate); toDate.setHours(23,59,59,999);
-  } else {
-    // Last N days (including today)
-    fromDate=new Date(now); fromDate.setDate(fromDate.getDate()-(days-1)); fromDate.setHours(0,0,0,0);
-    toDate=new Date(now); toDate.setHours(23,59,59,999);
-  }
-
-  const filteredOrders=Object.values(allOrders).flat()
-    .filter(o=>o&&o.createdAt>=fromDate.getTime()&&o.createdAt<=toDate.getTime())
+window.exportDayReport=()=>{
+  const now=new Date(); now.setHours(0,0,0,0);
+  const todayOrders=Object.values(allOrders).flat()
+    .filter(o=>o&&o.createdAt>=now.getTime())
     .sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
-  if(!filteredOrders.length){showToast("Немає замовлень",`За «${periodLabel}» замовлень не знайдено`,"ℹ","info");return;}
+  if(!todayOrders.length){showToast("Немає замовлень","Сьогодні ще не було замовлень","ℹ","info");return;}
 
-  const fmtDate=d=>d.toLocaleDateString("uk-UA",{day:"2-digit",month:"2-digit",year:"numeric"});
-  const dateStr=days<=1?fmtDate(fromDate):`${fmtDate(fromDate)} — ${fmtDate(toDate)}`;
+  const dateStr=new Date().toLocaleDateString("uk-UA",{day:"2-digit",month:"2-digit",year:"numeric"});
   const SLoc={new:"Нове",accepted:"Прийнято",in_progress:"Готується",shipped:"В дорозі",completed:"Виконано"};
   const SCol={new:"#f97316",accepted:"#3b82f6",in_progress:"#eab308",shipped:"#a855f7",completed:"#22c55e"};
   const esc=s=>String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 
-  const todayOrders=filteredOrders; // alias kept for rows below
   const completed=todayOrders.filter(o=>o.status==="completed");
   const totalRev=completed.reduce((s,o)=>s+(o.total||0),0);
   const totalDlv=completed.reduce((s,o)=>s+(o.delivery||0),0);
@@ -3884,7 +3819,7 @@ window.exportReport=window.exportDayReport=(days=0)=>{
 
   const html=`<!DOCTYPE html>
 <html lang="uk"><head><meta charset="UTF-8">
-<title>Звіт Panorama — ${periodLabel} — ${dateStr}</title>
+<title>Звіт Panorama — ${dateStr}</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:Arial,sans-serif;background:#f8f9fa;color:#1a1a1a;padding:20px;font-size:13px}
@@ -3905,7 +3840,7 @@ tbody tr:hover{background:#fffbf7}
 .pbtn{position:fixed;bottom:20px;right:20px;padding:11px 20px;background:#f97316;color:#fff;border:none;border-radius:40px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(249,115,22,.4);font-family:inherit}
 @media print{body{padding:4px;background:#fff}.pbtn{display:none}@page{margin:8mm;size:A4 landscape}}
 </style></head><body>
-<div class="hd"><div><div class="logo">Panorama</div><div class="sub">Звіт: ${periodLabel}</div></div><strong>📅 ${dateStr}</strong></div>
+<div class="hd"><div><div class="logo">Panorama</div><div class="sub">Звіт за день</div></div><strong>📅 ${dateStr}</strong></div>
 <div class="kpis">
   <div class="kpi"><div class="kl">Замовлень</div><div class="kv" style="color:#f97316">${todayOrders.length}</div><div class="ks">Активних: ${todayOrders.length-completed.length}</div></div>
   <div class="kpi"><div class="kl">Виконано</div><div class="kv" style="color:#22c55e">${completed.length}</div><div class="ks">${completed.length?Math.round(completed.length/todayOrders.length*100):0}%</div></div>
@@ -3938,7 +3873,6 @@ tbody tr:hover{background:#fffbf7}
 window.printOrderReceipt=id=>{
   const o=Object.values(allOrders).flat().find(x=>x.id===id);
   if(!o){showToast("Замовлення не знайдено","","⚠","warn");return;}
-  const SLoc={new:"Нове",accepted:"Прийнято",in_progress:"Готується",shipped:"В дорозі",completed:"Виконано"};
   const time=new Date(o.createdAt).toLocaleString("uk-UA",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"});
   const addr=o.customer
     ?(o.deliveryType==="pickup"?"Самовивіз":[o.customer.city,addVul(o.customer.street||""),o.customer.house].filter(Boolean).join(", "))
@@ -3979,7 +3913,6 @@ window.printOrderReceipt=id=>{
 <div class="divider"></div>
 <div class="center" style="font-size:11px;margin-bottom:4px">${time}</div>
 <div class="center"><span style="font-size:15px;font-weight:700;letter-spacing:2px">${o.orderNum||o.id.slice(0,8)}</span></div>
-<div class="center"><span class="status-badge">${SLoc[o.status]||o.status}</span></div>
 <div class="divider"></div>
 <div class="info-row">Клієнт: <strong>${o.customer?.name||"—"}</strong></div>
 <div class="info-row">Тел: ${o.customer?.phone||"—"}</div>
