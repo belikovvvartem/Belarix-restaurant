@@ -307,19 +307,17 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
 .fg textarea{resize:vertical;min-height:64px}
 .photo-label{display:inline-flex;align-items:center;gap:7px;padding:8px 14px;background:var(--bg2);border:1.5px dashed var(--brd2);border-radius:var(--rs);cursor:pointer;font-size:12px;color:var(--sub);transition:border-color var(--t)}
 .photo-label:hover{border-color:var(--p);color:var(--p)}
-.photo-preview{width:52px;height:52px;object-fit:cover;border-radius:var(--rs);border:1px solid var(--brd2);display:none;background:#fff}
+.photo-preview{width:52px;height:52px;object-fit:cover;border-radius:var(--rs);border:1px solid var(--brd2);display:none}
 .btn-pri{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;background:var(--p);color:#fff;border:none;border-radius:var(--rs);font-size:13px;font-weight:600;transition:background var(--t);cursor:pointer}
 .btn-pri:hover:not(:disabled){background:var(--pd)}
 .btn-pri:disabled{opacity:.5;cursor:not-allowed}
 
 /* ========== DISH LIST — REDESIGN ========== */
-.menu-layout{display:grid;grid-template-columns:360px 1fr;gap:0;min-height:0;flex:1}
-.menu-add-col{border-right:1px solid var(--brd);overflow-y:auto;padding:0;background:var(--bg2)}
+.menu-layout{display:grid;grid-template-columns:340px 1fr;gap:0;min-height:0;flex:1}
+.menu-add-col{border-right:1px solid var(--brd);overflow-y:auto;padding:16px}
 .menu-list-col{overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:0}
-.menu-add-title{font-size:13px;font-weight:700;color:var(--txt);display:flex;align-items:center;gap:7px;padding:14px 16px;border-bottom:1px solid var(--brd);background:var(--surf);position:sticky;top:0;z-index:2}
+.menu-add-title{font-size:13px;font-weight:700;color:var(--txt);margin-bottom:14px;display:flex;align-items:center;gap:7px}
 .menu-add-title span{flex:1}
-.mf-section{background:var(--surf);border-bottom:1px solid var(--brd);padding:14px 16px}
-.mf-section-label{font-size:9px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px}
 .mf-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
 .mf-row.single{grid-template-columns:1fr}
 .mf{display:flex;flex-direction:column;gap:3px}
@@ -327,25 +325,18 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
 .mf input,.mf select,.mf textarea{width:100%;padding:8px 10px;background:var(--bg2);border:1.5px solid var(--brd2);border-radius:var(--rs);color:var(--txt);font-size:13px;transition:border-color var(--t),box-shadow var(--t);font-family:'Inter',sans-serif}
 .mf input:focus,.mf select:focus,.mf textarea:focus{border-color:var(--p);box-shadow:0 0 0 3px var(--pl);outline:none}
 .mf textarea{resize:vertical;min-height:54px}
-/* Photo upload — big zone */
-.mf-photo-zone{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:20px 10px;background:var(--bg2);border:1.5px dashed var(--brd2);border-radius:var(--rs);cursor:pointer;transition:border-color var(--t),background var(--t);position:relative;overflow:hidden;text-align:center}
+.mf-photo-zone{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg2);border:1.5px dashed var(--brd2);border-radius:var(--rs);cursor:pointer;transition:border-color var(--t),background var(--t);position:relative;overflow:hidden}
 .mf-photo-zone:hover{border-color:var(--p);background:var(--pl)}
 .mf-photo-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
-.mf-photo-zone.has-photo{padding:6px;border-style:solid;border-color:var(--p)}
-.mf-photo-thumb{width:100%;max-height:160px;border-radius:6px;object-fit:contain;display:none;background:var(--bg2)}
-.mf-photo-thumb.show{display:block}
-.mf-photo-icon{font-size:28px;line-height:1;margin-bottom:2px}
-.mf-photo-txt{font-size:11px;color:var(--sub);flex:1}
-.mf-photo-hint{font-size:10px;color:var(--dim)}
-/* Toggles */
-.mf-toggles-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-.mf-toggle-row{display:flex;align-items:center;justify-content:space-between;padding:9px 11px;background:var(--bg2);border:1px solid var(--brd);border-radius:var(--rs)}
+.mf-photo-thumb{width:34px;height:34px;border-radius:5px;object-fit:cover;border:1px solid var(--brd2);display:none;flex-shrink:0}
+.mf-photo-txt{font-size:12px;color:var(--sub);flex:1}
+.mf-toggle-row{display:flex;align-items:center;justify-content:space-between;padding:9px 11px;background:var(--surf2);border-radius:var(--rs);margin-bottom:6px}
 .mf-toggle-label{font-size:12px;font-weight:600;color:var(--txt)}
 .mf-toggle-sub{font-size:10px;color:var(--sub);margin-top:1px}
-.mf-sizes-block{background:var(--bg2);border:1px solid var(--brd);border-radius:var(--rs);padding:10px;margin-top:8px}
+.mf-sizes-block{background:var(--bg2);border:1px solid var(--brd);border-radius:var(--rs);padding:10px;margin-bottom:8px}
 .mf-sizes-header{display:flex;justify-content:space-between;font-size:10px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px;padding:0 2px}
-.mf-err{font-size:12px;min-height:14px;color:var(--red)}
-.mf-footer{padding:12px 16px;background:var(--surf);border-top:2px solid var(--brd);position:sticky;bottom:0;z-index:2;display:flex;flex-direction:column;gap:8px}
+.mf-err{font-size:12px;min-height:14px;margin-bottom:8px;color:var(--red)}
+/* Dish table list */
 .dish-table{width:100%;border-collapse:collapse}
 .dish-table-filters{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
 .dish-table-filters input,.dish-table-filters select{padding:7px 10px;background:var(--surf);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--txt);font-size:12px;font-family:'Inter',sans-serif;outline:none;transition:border-color var(--t)}
@@ -355,8 +346,8 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
 .dish-trow:first-child{border-top:1px solid var(--brd);border-radius:var(--rs) var(--rs) 0 0}
 .dish-trow:last-child{border-radius:0 0 var(--rs) var(--rs)}
 .dish-trow:hover{background:var(--surf2)}
-.dt-thumb{width:44px;height:44px;border-radius:6px;background:#fff;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:18px;margin:8px 10px 8px 8px}
-.dt-thumb img{width:100%;height:100%;object-fit:cover;background:#fff}
+.dt-thumb{width:44px;height:44px;border-radius:6px;background:var(--surf2);overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:18px;margin:8px 10px 8px 8px}
+.dt-thumb img{width:100%;height:100%;object-fit:cover}
 .dt-info{flex:1;min-width:0;padding:8px 0}
 .dt-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
 .dt-meta{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
@@ -573,13 +564,14 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
 .city-price-label{font-size:11px;color:var(--dim);flex-shrink:0}
 .city-save{
   padding:5px 10px;
-  background:transparent;border:1px solid rgba(34,197,94,.3);
+  background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.4);
   border-radius:var(--rs);color:var(--green);
   font-size:11px;font-weight:600;cursor:pointer;
   font-family:'Inter',sans-serif;transition:var(--t);white-space:nowrap;
-  flex-shrink:0;
+  flex-shrink:0;opacity:0;pointer-events:none;
 }
-.city-save:hover{background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.5)}
+.city-save.dirty{opacity:1;pointer-events:auto}
+.city-save:hover{background:rgba(34,197,94,.2);border-color:rgba(34,197,94,.6)}
 .city-del{
   width:26px;height:26px;flex-shrink:0;
   display:flex;align-items:center;justify-content:center;
@@ -880,8 +872,7 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
   .lbox{border-radius:16px;padding:26px 18px}
 
   /* Topbar right */
-  .topbar-right .upd-txt{display:none}
-  #sortSel{font-size:11px;padding:5px 6px}
+  .topbar-right .upd-txt,.topbar-right #sortSel{display:none}
 }
 @media(min-width:600px){
   .modal-bg{align-items:center;padding:20px}
@@ -1100,12 +1091,6 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
       </div>
       <div class="topbar-right">
         <span class="upd-txt" id="updTxt"></span>
-        <select class="tb-sel" id="sortSel" onchange="renderOrders()">
-          <option value="newest">Нові спочатку</option>
-          <option value="oldest">Старі спочатку</option>
-          <option value="high">Сума ↓</option>
-          <option value="low">Сума ↑</option>
-        </select>
         <button class="tb-btn" id="refreshBtn" onclick="manualRefresh()">↻ Оновити</button>
       </div>
     </div>
@@ -1119,6 +1104,13 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
         <button class="otab" id="otab-completed" onclick="setOrderTab('completed')">
           Завершені <span class="otab-badge" id="otab-completed-badge">0</span>
         </button>
+        <div style="flex:1"></div>
+        <select class="tb-sel" id="sortSel" onchange="renderOrders()" style="margin:0 12px 0 0;align-self:center;font-size:12px">
+          <option value="newest">Нові спочатку</option>
+          <option value="oldest">Старі спочатку</option>
+          <option value="high">Сума ↓</option>
+          <option value="low">Сума ↑</option>
+        </select>
       </div>
       <div class="orders-grid" id="ordersGrid">
         <div class="state-box"><div class="spinner"></div><strong>Завантаження...</strong></div>
@@ -1178,73 +1170,61 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
         <!-- LEFT: Add dish form -->
         <div class="menu-add-col">
           <div class="menu-add-title">
-            <span>➕ Нова страва</span>
-            <span style="font-size:9px;color:var(--dim);font-weight:400">* — обов'язкові</span>
+            <span>Нова страва</span>
+            <span style="font-size:10px;color:var(--dim);font-weight:400">* — обов'язкові</span>
           </div>
-
-          <!-- Section 1: Основне -->
-          <div class="mf-section">
-            <div class="mf-section-label">Основне</div>
-            <div class="mf" style="margin-bottom:8px"><label>Назва *</label><input id="mName" placeholder="Назва страви"></div>
-            <div class="mf-row">
-              <div class="mf"><label>Категорія *</label><select id="mCat"></select></div>
-              <div class="mf"><label>Час приготування (хв)</label><input id="mPrep" type="number" min="1" placeholder="15"></div>
-            </div>
-            <div class="mf"><label>Опис</label><textarea id="mDesc" placeholder="Короткий опис страви..." rows="2"></textarea></div>
+          <!-- Name + Category -->
+          <div class="mf-row">
+            <div class="mf" style="grid-column:1/-1"><label>Назва *</label><input id="mName" placeholder="Назва страви"></div>
           </div>
-
-          <!-- Section 2: Ціна -->
-          <div class="mf-section">
-            <div class="mf-section-label">Ціна</div>
-            <div class="mf-toggles-grid" style="margin-bottom:8px">
-              <div class="mf-toggle-row">
-                <div>
-                  <div class="mf-toggle-label">Хіт продажів</div>
-                  <div class="mf-toggle-sub">бейдж «Хіт»</div>
-                </div>
-                <label class="ios-toggle"><input type="checkbox" id="mPop"><span class="ios-toggle-slider"></span></label>
-              </div>
-              <div class="mf-toggle-row">
-                <div>
-                  <div class="mf-toggle-label">Кілька розмірів</div>
-                  <div class="mf-toggle-sub">варіанти / ціни</div>
-                </div>
-                <label class="ios-toggle"><input type="checkbox" id="mHasSizes" onchange="toggleAddSizes()"><span class="ios-toggle-slider"></span></label>
-              </div>
-            </div>
+          <div class="mf-row">
+            <div class="mf"><label>Категорія *</label><select id="mCat"></select></div>
             <div class="mf" id="mPriceRow"><label>Ціна (грн) *</label><input id="mPrice" type="number" min="1" placeholder="150"></div>
-            <div id="mSizesBlock" style="display:none">
-              <div class="mf-sizes-block">
-                <div class="mf-sizes-header">
-                  <span>Назва варіанту</span>
-                  <span style="width:76px;text-align:center">Ціна</span>
-                </div>
-                <div id="mSizesList" style="display:flex;flex-direction:column;gap:5px"></div>
-                <button onclick="addSizeRow('mSizesList')" type="button" style="margin-top:7px;padding:6px 12px;background:transparent;border:1px dashed var(--brd2);border-radius:var(--rs);color:var(--sub);font-size:11px;font-weight:600;cursor:pointer;width:100%;transition:border-color var(--t);font-family:'Inter',sans-serif" onmouseover="this.style.borderColor='var(--p)'" onmouseout="this.style.borderColor='var(--brd2)'">+ Варіант</button>
-              </div>
+          </div>
+          <div class="mf-row">
+            <div class="mf"><label>Час (хв)</label><input id="mPrep" type="number" min="1" placeholder="15"></div>
+            <div class="mf">
+              <label>Фото</label>
+              <label class="mf-photo-zone">
+                <input type="file" id="mPhoto" accept="image/*" onchange="previewPhotoNew('mPhoto','mPhotoPreview')">
+                <img id="mPhotoPreview" class="mf-photo-thumb">
+                <span class="mf-photo-txt" id="mPhotoStatus">Вибрати файл</span>
+              </label>
             </div>
           </div>
-
-          <!-- Section 3: Фото -->
-          <div class="mf-section">
-            <div class="mf-section-label">Фото страви</div>
-            <label class="mf-photo-zone" id="mPhotoZone">
-              <input type="file" id="mPhoto" accept="image/*" onchange="previewPhotoNew('mPhoto','mPhotoPreview')">
-              <img id="mPhotoPreview" class="mf-photo-thumb">
-              <div id="mPhotoPlaceholder">
-                <div class="mf-photo-icon">📷</div>
-                <div class="mf-photo-txt">Натисніть щоб обрати фото</div>
-                <div class="mf-photo-hint">JPG, PNG, WEBP · до 5 МБ</div>
+          <div class="mf mf-row single" style="margin-bottom:8px">
+            <label>Опис</label><textarea id="mDesc" placeholder="Короткий опис страви..." rows="2"></textarea>
+          </div>
+          <!-- Toggles compact -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px">
+            <div class="mf-toggle-row">
+              <div>
+                <div class="mf-toggle-label">Хіт</div>
+                <div class="mf-toggle-sub">бейдж «Хіт»</div>
               </div>
-            </label>
-            <span class="mf-photo-txt" id="mPhotoStatus" style="margin-top:4px;font-size:11px"></span>
+              <label class="ios-toggle"><input type="checkbox" id="mPop"><span class="ios-toggle-slider"></span></label>
+            </div>
+            <div class="mf-toggle-row">
+              <div>
+                <div class="mf-toggle-label">Розміри</div>
+                <div class="mf-toggle-sub">варіанти цін</div>
+              </div>
+              <label class="ios-toggle"><input type="checkbox" id="mHasSizes" onchange="toggleAddSizes()"><span class="ios-toggle-slider"></span></label>
+            </div>
           </div>
-
-          <!-- Footer: помилка + кнопка -->
-          <div class="mf-footer">
-            <div id="mErr" class="mf-err"></div>
-            <button class="btn-pri" onclick="addDish()" style="width:100%;justify-content:center;padding:11px">Додати страву →</button>
+          <!-- Sizes editor -->
+          <div id="mSizesBlock" style="display:none;margin-bottom:8px">
+            <div class="mf-sizes-block">
+              <div class="mf-sizes-header">
+                <span>Назва варіанту</span>
+                <span style="width:76px;text-align:center">Ціна</span>
+              </div>
+              <div id="mSizesList" style="display:flex;flex-direction:column;gap:5px"></div>
+              <button onclick="addSizeRow('mSizesList')" type="button" style="margin-top:7px;padding:6px 12px;background:transparent;border:1px dashed var(--brd2);border-radius:var(--rs);color:var(--sub);font-size:11px;font-weight:600;cursor:pointer;width:100%;transition:border-color var(--t);font-family:'Inter',sans-serif" onmouseover="this.style.borderColor='var(--p)'" onmouseout="this.style.borderColor='var(--brd2)'">+ Варіант</button>
+            </div>
           </div>
+          <div id="mErr" class="mf-err"></div>
+          <button class="btn-pri" onclick="addDish()" style="width:100%;justify-content:center">Додати страву</button>
         </div>
 
         <!-- RIGHT: Dish list -->
@@ -1552,14 +1532,6 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
                   <div class="sett-block-title">Години роботи</div>
                   <div class="sett-block-sub">Відкриття та закриття по днях тижня</div>
                 </div>
-                <!-- Live status badge -->
-                <div style="display:flex;align-items:center;gap:7px;flex-shrink:0;padding:5px 11px;border-radius:20px;background:var(--surf);border:1px solid var(--brd)">
-                  <div id="spDot" style="width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0;box-shadow:0 0 0 2px rgba(34,197,94,.2)"></div>
-                  <div>
-                    <div id="spStatus" style="font-size:11px;font-weight:700;color:var(--txt);line-height:1">...</div>
-                    <div id="spTime" style="font-size:9px;color:var(--sub);margin-top:2px;line-height:1"></div>
-                  </div>
-                </div>
               </div>
               <div class="sett-block-body">
                 <!-- Weekdays -->
@@ -1572,18 +1544,18 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
                     <div class="hours-time-block">
                       <div class="hours-time-label">Відкриття</div>
                       <div class="hours-time-inputs">
-                        <input id="sWdOpen" type="number" min="0" max="23" oninput="var v=parseInt(this.value);if(v>23)this.value=23;if(v<0)this.value=0" placeholder="10" class="hours-time-input">
+                        <input id="sWdOpen" type="number" min="0" max="23" placeholder="10" class="hours-time-input">
                         <span class="hours-time-sep">:</span>
-                        <input id="sWdOpenM" type="number" min="0" max="59" oninput="var v=parseInt(this.value);if(v>59)this.value=59;if(v<0)this.value=0" placeholder="00" class="hours-time-input">
+                        <input id="sWdOpenM" type="number" min="0" max="59" placeholder="00" class="hours-time-input">
                       </div>
                     </div>
                     <span class="hours-time-dash">—</span>
                     <div class="hours-time-block">
                       <div class="hours-time-label">Закриття</div>
                       <div class="hours-time-inputs">
-                        <input id="sWdClose" type="number" min="0" max="23" oninput="var v=parseInt(this.value);if(v>23)this.value=23;if(v<0)this.value=0" placeholder="22" class="hours-time-input">
+                        <input id="sWdClose" type="number" min="0" max="23" placeholder="22" class="hours-time-input">
                         <span class="hours-time-sep">:</span>
-                        <input id="sWdCloseM" type="number" min="0" max="59" oninput="var v=parseInt(this.value);if(v>59)this.value=59;if(v<0)this.value=0" placeholder="00" class="hours-time-input">
+                        <input id="sWdCloseM" type="number" min="0" max="59" placeholder="00" class="hours-time-input">
                       </div>
                     </div>
                   </div>
@@ -1598,18 +1570,18 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
                     <div class="hours-time-block">
                       <div class="hours-time-label">Відкриття</div>
                       <div class="hours-time-inputs">
-                        <input id="sSatOpen" type="number" min="0" max="23" oninput="var v=parseInt(this.value);if(v>23)this.value=23;if(v<0)this.value=0" placeholder="11" class="hours-time-input">
+                        <input id="sSatOpen" type="number" min="0" max="23" placeholder="11" class="hours-time-input">
                         <span class="hours-time-sep">:</span>
-                        <input id="sSatOpenM" type="number" min="0" max="59" oninput="var v=parseInt(this.value);if(v>59)this.value=59;if(v<0)this.value=0" placeholder="00" class="hours-time-input">
+                        <input id="sSatOpenM" type="number" min="0" max="59" placeholder="00" class="hours-time-input">
                       </div>
                     </div>
                     <span class="hours-time-dash">—</span>
                     <div class="hours-time-block">
                       <div class="hours-time-label">Закриття</div>
                       <div class="hours-time-inputs">
-                        <input id="sSatClose" type="number" min="0" max="23" oninput="var v=parseInt(this.value);if(v>23)this.value=23;if(v<0)this.value=0" placeholder="23" class="hours-time-input">
+                        <input id="sSatClose" type="number" min="0" max="23" placeholder="23" class="hours-time-input">
                         <span class="hours-time-sep">:</span>
-                        <input id="sSatCloseM" type="number" min="0" max="59" oninput="var v=parseInt(this.value);if(v>59)this.value=59;if(v<0)this.value=0" placeholder="00" class="hours-time-input">
+                        <input id="sSatCloseM" type="number" min="0" max="59" placeholder="00" class="hours-time-input">
                       </div>
                     </div>
                   </div>
@@ -1624,18 +1596,18 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
                     <div class="hours-time-block">
                       <div class="hours-time-label">Відкриття</div>
                       <div class="hours-time-inputs">
-                        <input id="sSunOpen" type="number" min="0" max="23" oninput="var v=parseInt(this.value);if(v>23)this.value=23;if(v<0)this.value=0" placeholder="11" class="hours-time-input">
+                        <input id="sSunOpen" type="number" min="0" max="23" placeholder="11" class="hours-time-input">
                         <span class="hours-time-sep">:</span>
-                        <input id="sSunOpenM" type="number" min="0" max="59" oninput="var v=parseInt(this.value);if(v>59)this.value=59;if(v<0)this.value=0" placeholder="00" class="hours-time-input">
+                        <input id="sSunOpenM" type="number" min="0" max="59" placeholder="00" class="hours-time-input">
                       </div>
                     </div>
                     <span class="hours-time-dash">—</span>
                     <div class="hours-time-block">
                       <div class="hours-time-label">Закриття</div>
                       <div class="hours-time-inputs">
-                        <input id="sSunClose" type="number" min="0" max="23" oninput="var v=parseInt(this.value);if(v>23)this.value=23;if(v<0)this.value=0" placeholder="23" class="hours-time-input">
+                        <input id="sSunClose" type="number" min="0" max="23" placeholder="23" class="hours-time-input">
                         <span class="hours-time-sep">:</span>
-                        <input id="sSunCloseM" type="number" min="0" max="59" oninput="var v=parseInt(this.value);if(v>59)this.value=59;if(v<0)this.value=0" placeholder="00" class="hours-time-input">
+                        <input id="sSunCloseM" type="number" min="0" max="59" placeholder="00" class="hours-time-input">
                       </div>
                     </div>
                   </div>
@@ -1966,14 +1938,9 @@ window.previewPhotoNew=(inputId,previewId)=>{
   const f=document.getElementById(inputId)?.files?.[0];
   const p=document.getElementById(previewId);
   const s=document.getElementById("mPhotoStatus");
-  const zone=document.getElementById("mPhotoZone");
-  const placeholder=document.getElementById("mPhotoPlaceholder");
   if(!f||!p) return;
-  p.src=URL.createObjectURL(f);
-  p.classList.add("show");
-  if(zone) zone.classList.add("has-photo");
-  if(placeholder) placeholder.style.display="none";
-  if(s) s.textContent=f.name.length>22?f.name.slice(0,19)+"…":f.name;
+  p.src=URL.createObjectURL(f); p.style.display="block";
+  if(s) s.textContent=f.name.length>18?f.name.slice(0,15)+"…":f.name;
 };
 
 /* ——— R2 DELETE (via server proxy) ——— */
@@ -2443,7 +2410,11 @@ function listenSettings(){
 window.removeCity=async idx=>{
   siteSettings.cities.splice(idx,1);await dbSet(ref(db,"settings"),siteSettings);renderSettings();
 };
-window.updateCityPrice=(idx,val)=>siteSettings.cities[idx].price=parseInt(val)||0;
+window.updateCityPrice=(idx,val)=>{
+  siteSettings.cities[idx].price=parseInt(val)||0;
+  const btn=document.getElementById("cpSave"+idx);
+  if(btn) btn.classList.add("dirty");
+};
 window.saveCityPrice=async idx=>{
   await dbSet(ref(db,"settings"),siteSettings);
   const el=document.getElementById("cpSave"+idx);if(el){el.textContent="✓";setTimeout(()=>el.textContent="Зберегти",2000);}
@@ -2536,18 +2507,18 @@ function listenMenu(){
 }
 window.addDish=async()=>{
   const name=document.getElementById("mName").value.trim();
-  const hasSizes=document.getElementById("mHasSizes").checked;
-  const sizes=hasSizes?getSizesFromList("mSizesList"):null;
   const price=parseInt(document.getElementById("mPrice").value)||0;
   const errEl=document.getElementById("mErr");
-  const finalPrice=hasSizes&&sizes&&sizes.length?sizes[0].price:price;
-  if(!name){errEl.style.color="var(--red)";errEl.textContent="Введіть назву страви!";setTimeout(()=>errEl.textContent="",3000);return;}
-  if(!finalPrice){errEl.style.color="var(--red)";errEl.textContent=hasSizes?"Додайте хоча б один варіант з ціною!":"Вкажіть ціну!";setTimeout(()=>errEl.textContent="",3000);return;}
+  if(!name||!price){errEl.style.color="var(--red)";errEl.textContent="Заповніть назву та ціну!";setTimeout(()=>errEl.textContent="",3000);return;}
   const btn=document.querySelector(".menu-add-col .btn-pri");
   if(btn){btn.disabled=true;btn.textContent="Зберігаємо...";}
   let photoUrl=null;
   const pf=document.getElementById("mPhoto")?.files?.[0];
   if(pf){try{errEl.style.color="var(--sub)";errEl.textContent="Завантаження фото...";photoUrl=await uploadToR2(pf);errEl.textContent="";}catch(e){errEl.style.color="var(--yellow)";errEl.textContent="Фото не завантажено: "+e.message;}}
+  const hasSizes=document.getElementById("mHasSizes").checked;
+  const sizes=hasSizes?getSizesFromList("mSizesList"):null;
+  const finalPrice=hasSizes&&sizes&&sizes.length?sizes[0].price:price;
+  if(!finalPrice){errEl.style.color="var(--red)";errEl.textContent="Заповніть ціну або додайте розмір!";setTimeout(()=>errEl.textContent="",3000);if(btn){btn.disabled=false;btn.textContent="Додати страву";}return;}
   const dish={name,price:finalPrice,cat:document.getElementById("mCat").value,prep:parseInt(document.getElementById("mPrep").value)||15,desc:document.getElementById("mDesc").value.trim(),pop:document.getElementById("mPop").checked,oldPrice:null,sizes:sizes&&sizes.length?sizes:null,photo:photoUrl,createdAt:Date.now()};
   try{
     await dbPush(ref(db,"menu"),dish);
@@ -2880,7 +2851,6 @@ window.setSection=sec=>{
   const subs={orders:"Управління замовленнями",stats:"Аналітика продажів",menu:"Страви та категорії",banners:"Слайдер на сайті",history:"Журнал подій",promo:"Управління промокодами",settings:"Налаштування сайту"};
   document.getElementById("topTitle").textContent=titles[sec];
   document.getElementById("topSub").textContent=subs[sec];
-  document.getElementById("sortSel").style.display=sec==="orders"?"block":"none";
   document.getElementById("refreshBtn").style.display=sec==="orders"?"flex":"none";
   if(sec==="orders")renderOrders();
   if(sec==="stats")renderStats();
@@ -3543,14 +3513,18 @@ window.saveSettings=async()=>{
 // Patch saveWorkHours
 window.saveWorkHours=async()=>{
   if(!checkPerm("settings")) return;
-  const clampH=id=>{const el=document.getElementById(id);if(!el)return 0;let v=parseInt(el.value);if(isNaN(v)||v<0)v=0;if(v>23)v=23;el.value=v;return v;};
-  const clampM=id=>{const el=document.getElementById(id);if(!el)return 0;let v=parseInt(el.value);if(isNaN(v)||v<0)v=0;if(v>59)v=59;el.value=v;return v;};
-  const wdOpen=clampH("sWdOpen"),   wdOpenM=clampM("sWdOpenM");
-  const wdClose=clampH("sWdClose"),  wdCloseM=clampM("sWdCloseM");
-  const satOpen=clampH("sSatOpen"),  satOpenM=clampM("sSatOpenM");
-  const satClose=clampH("sSatClose"), satCloseM=clampM("sSatCloseM");
-  const sunOpen=clampH("sSunOpen"),  sunOpenM=clampM("sSunOpenM");
-  const sunClose=clampH("sSunClose"), sunCloseM=clampM("sSunCloseM");
+  const wdOpen=parseInt(document.getElementById("sWdOpen").value)||0;
+  const wdOpenM=parseInt(document.getElementById("sWdOpenM").value)||0;
+  const wdClose=parseInt(document.getElementById("sWdClose").value)||0;
+  const wdCloseM=parseInt(document.getElementById("sWdCloseM").value)||0;
+  const satOpen=parseInt(document.getElementById("sSatOpen")?.value)||0;
+  const satOpenM=parseInt(document.getElementById("sSatOpenM")?.value)||0;
+  const satClose=parseInt(document.getElementById("sSatClose")?.value)||0;
+  const satCloseM=parseInt(document.getElementById("sSatCloseM")?.value)||0;
+  const sunOpen=parseInt(document.getElementById("sSunOpen").value)||0;
+  const sunOpenM=parseInt(document.getElementById("sSunOpenM").value)||0;
+  const sunClose=parseInt(document.getElementById("sSunClose").value)||0;
+  const sunCloseM=parseInt(document.getElementById("sSunCloseM").value)||0;
   if(wdOpen*60+wdOpenM>=wdClose*60+wdCloseM){showToast("Невірний графік","Відкриття Пн–Пт має бути раніше за закриття","⚠","warn");return;}
   if(!siteSettings.workHours)siteSettings.workHours={};
   siteSettings.workHours.weekdays={open:wdOpen,openMin:wdOpenM,close:wdClose,closeMin:wdCloseM};

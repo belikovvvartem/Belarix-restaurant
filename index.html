@@ -1083,6 +1083,7 @@ function listenFirebase() {
       if (s.cities && Array.isArray(s.cities) && s.cities.length) CITIES = s.cities;
       if (s.categories && Array.isArray(s.categories) && s.categories.length) {
         CATS = ["Всі"].concat(s.categories);
+        buildFilters(); // оновити фільтри одразу як прийшли категорії з settings
       }
       // Fix 3: Work hours from Firebase
       if (s.workHours) {
@@ -1214,6 +1215,12 @@ function checkHours() {
 
 /* ——— FILTERS ——— */
 function buildFilters() {
+  // Show all categories from settings (even empty ones) — filter buttons
+  var activeCats = CATS.filter(function(c) {
+    if (c === "Всі") return true;
+    return MENU.some(function(d) { return d.cat === c && !d.stopped; });
+  });
+  // Also include "Всі" always, and all CATS (so empty cats from settings show too)
   var html = "";
   CATS.forEach(function(c) {
     html += '<button class="cat-btn' + (c === activeCat ? " on" : "") + '" onclick="setCat(\'' + c + '\')">' + c + '</button>';
