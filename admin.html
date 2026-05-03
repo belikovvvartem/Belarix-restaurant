@@ -1194,54 +1194,87 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
     <!-- MENU -->
     <div id="sec-menu" class="panel" style="padding:0;overflow:hidden">
       <div class="menu-layout">
-        <!-- LEFT: Add dish form -->
+        <!-- LEFT: Add dish form — REDESIGN -->
         <div class="menu-add-col">
-          <div class="menu-add-title">
-            <span>Нова страва</span>
-            <span style="font-size:10px;color:var(--dim);font-weight:400">* — обов'язкові</span>
-          </div>
-          <!-- Name + Category -->
-          <div class="mf-row">
-            <div class="mf" style="grid-column:1/-1"><label>Назва *</label><input id="mName" placeholder="Назва страви"></div>
-          </div>
-          <div class="mf-row">
-            <div class="mf"><label>Категорія *</label><select id="mCat"></select></div>
-            <div class="mf" id="mPriceRow"><label>Ціна (грн) *</label><input id="mPrice" type="number" min="1" placeholder="150"></div>
-          </div>
-          <div class="mf-row">
-            <div class="mf"><label>Час (хв)</label><input id="mPrep" type="number" min="1" placeholder="15"></div>
-            <div class="mf">
-              <label>Фото</label>
-              <label class="mf-photo-zone">
-                <input type="file" id="mPhoto" accept="image/*" onchange="previewPhotoNew('mPhoto','mPhotoPreview')">
-                <img id="mPhotoPreview" class="mf-photo-thumb">
-                <span class="mf-photo-txt" id="mPhotoStatus">Вибрати файл</span>
-              </label>
+          <!-- Header -->
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--brd)">
+            <div style="width:34px;height:34px;border-radius:9px;background:var(--pl);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">🍽</div>
+            <div>
+              <div style="font-size:14px;font-weight:700;color:var(--txt)">Нова страва</div>
+              <div style="font-size:11px;color:var(--sub);margin-top:1px">Заповніть поля та натисніть «Додати»</div>
             </div>
           </div>
-          <div class="mf mf-row single" style="margin-bottom:8px">
-            <label>Опис</label><textarea id="mDesc" placeholder="Короткий опис страви..." rows="2"></textarea>
+
+          <!-- Photo upload — prominent at top -->
+          <div style="margin-bottom:14px">
+            <div style="font-size:10px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Фото страви</div>
+            <label class="mf-photo-zone" style="flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:16px 12px;text-align:center;border-radius:10px;min-height:80px">
+              <input type="file" id="mPhoto" accept="image/*" onchange="previewPhotoNew('mPhoto','mPhotoPreview')">
+              <img id="mPhotoPreview" class="mf-photo-thumb" style="width:56px;height:56px;border-radius:8px">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+                <span style="font-size:12px;font-weight:600;color:var(--sub)">📷 <span id="mPhotoStatus">Вибрати фото</span></span>
+                <span style="font-size:10px;color:var(--dim)">JPG, PNG, WEBP</span>
+              </div>
+            </label>
           </div>
-          <!-- Toggles compact -->
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px">
-            <div class="mf-toggle-row">
+
+          <!-- Name -->
+          <div class="mf" style="margin-bottom:10px">
+            <label>Назва *</label>
+            <input id="mName" placeholder="напр. Піца Маргарита" style="font-size:14px;font-weight:500">
+          </div>
+
+          <!-- Category + Price row -->
+          <div class="mf-row" style="margin-bottom:10px">
+            <div class="mf"><label>Категорія *</label><select id="mCat"></select></div>
+            <div class="mf" id="mPriceRow">
+              <label>Ціна (грн) *</label>
+              <div style="position:relative">
+                <input id="mPrice" type="number" min="1" placeholder="0" style="padding-right:36px">
+                <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:12px;font-weight:700;color:var(--sub);pointer-events:none">грн</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Prep time -->
+          <div class="mf" style="margin-bottom:10px">
+            <label>Час приготування (хв)</label>
+            <div style="position:relative">
+              <input id="mPrep" type="number" min="1" placeholder="15" style="padding-right:36px">
+              <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:12px;font-weight:700;color:var(--sub);pointer-events:none">хв</span>
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div class="mf" style="margin-bottom:12px">
+            <label>Опис</label>
+            <textarea id="mDesc" placeholder="Короткий опис — склад, особливості..." rows="2" style="resize:none"></textarea>
+          </div>
+
+          <!-- Divider -->
+          <div style="border-top:1px solid var(--brd);margin-bottom:12px"></div>
+
+          <!-- Toggles -->
+          <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px">
+            <div class="mf-toggle-row" style="margin-bottom:0">
               <div>
-                <div class="mf-toggle-label">Хіт</div>
-                <div class="mf-toggle-sub">бейдж «Хіт»</div>
+                <div class="mf-toggle-label">🔥 Хіт продажів</div>
+                <div class="mf-toggle-sub">Виводить бейдж «Хіт» на сайті</div>
               </div>
               <label class="ios-toggle"><input type="checkbox" id="mPop"><span class="ios-toggle-slider"></span></label>
             </div>
-            <div class="mf-toggle-row">
+            <div class="mf-toggle-row" style="margin-bottom:0">
               <div>
-                <div class="mf-toggle-label">Розміри</div>
-                <div class="mf-toggle-sub">варіанти цін</div>
+                <div class="mf-toggle-label">📐 Розміри / варіанти</div>
+                <div class="mf-toggle-sub">Кілька цін для одної страви</div>
               </div>
               <label class="ios-toggle"><input type="checkbox" id="mHasSizes" onchange="toggleAddSizes()"><span class="ios-toggle-slider"></span></label>
             </div>
           </div>
+
           <!-- Sizes editor -->
-          <div id="mSizesBlock" style="display:none;margin-bottom:8px">
-            <div class="mf-sizes-block">
+          <div id="mSizesBlock" style="display:none;margin-bottom:12px">
+            <div class="mf-sizes-block" style="border-radius:8px">
               <div class="mf-sizes-header">
                 <span>Назва варіанту</span>
                 <span style="width:76px;text-align:center">Ціна</span>
@@ -1251,7 +1284,9 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
             </div>
           </div>
           <div id="mErr" class="mf-err"></div>
-          <button class="btn-pri" onclick="addDish()" style="width:100%;justify-content:center">Додати страву</button>
+          <button class="btn-pri" onclick="addDish()" style="width:100%;justify-content:center;padding:12px;font-size:14px;border-radius:10px;gap:7px">
+            <span style="font-size:16px">+</span> Додати страву
+          </button>
         </div>
 
         <!-- RIGHT: Dish list -->
@@ -1342,7 +1377,6 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
               <button class="ptc" onclick="pcSetType('fixed')" id="ptc-fixed">грн Сума</button>
               <button class="ptc" onclick="pcSetType('dish')" id="ptc-dish">🍽 На страву</button>
               <button class="ptc" onclick="pcSetType('category')" id="ptc-category">📋 Категорія</button>
-              <button class="ptc" onclick="pcSetType('nth_free')" id="ptc-nth_free" style="grid-column:1/-1">🎁 N-й безкоштовно</button>
               <button class="ptc" onclick="pcSetType('buy_x_get_y')" id="ptc-buy_x_get_y" style="grid-column:1/-1">🛍 Купи X — отримай Y</button>
             </div>
             <!-- hidden select for JS compatibility -->
@@ -1351,7 +1385,6 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
               <option value="fixed">fixed</option>
               <option value="dish">dish</option>
               <option value="category">category</option>
-              <option value="nth_free">nth_free</option>
               <option value="buy_x_get_y">buy_x_get_y</option>
             </select>
           </div>
@@ -1485,7 +1518,6 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
               <option value="fixed">Фіксована</option>
               <option value="dish">На страву</option>
               <option value="category">Категорія</option>
-              <option value="nth_free">N-й</option>
               <option value="buy_x_get_y">Купи X+Y</option>
             </select>
           </div>
@@ -2642,6 +2674,7 @@ function listenMenu(){
   onValue(ref(db,"menu"),snap=>{
     allDishes=[];
     if(snap.exists()){const raw=snap.val();Object.keys(raw).forEach(k=>{const d=raw[k];if(d&&typeof d==="object"){d.id=k;allDishes.push(d);}});}
+    populateDishCatFilter();
     rebuildCatSelects();
     if(curSection==="menu")renderDishList();
     if(curSection==="stats")renderStats();
@@ -2746,14 +2779,15 @@ window.toggleDishStop=async(id,stop)=>{
     showToast(stop?"Страву зупинено":"Страву розблоковано","«"+d.name+"»",stop?"⛔":"✅",stop?"warn":"success");
   }catch(e){showToast("Помилка",e.message,"⚠","error");}
 };
+function populateDishCatFilter(){
+  const catSel=document.getElementById("dishFilterCat");
+  if(!catSel)return;
+  const cats=[...new Set(allDishes.map(d=>d.cat).filter(Boolean))].sort();
+  const cur=catSel.value;
+  catSel.innerHTML='<option value="">Всі категорії</option>'+cats.map(c=>`<option value="${c}"${c===cur?' selected':''}>${c}</option>`).join("");
+}
 function renderDishList(){
   const el=document.getElementById("dishGrid");if(!el)return;
-  const catSel=document.getElementById("dishFilterCat");
-  if(catSel){
-    const cats=[...new Set(allDishes.map(d=>d.cat).filter(Boolean))];
-    const cur=catSel.value;
-    catSel.innerHTML='<option value="">Всі категорії</option>'+cats.map(c=>`<option value="${c}"${c===cur?' selected':''}>${c}</option>`).join("");
-  }
   const q=(document.getElementById("dishSearch")?.value||"").toLowerCase();
   const filterCat=document.getElementById("dishFilterCat")?.value||"";
   const sortMode=document.getElementById("dishFilterSort")?.value||"name";
@@ -3290,7 +3324,7 @@ window.pcSetType=type=>{
   const sel=document.getElementById("pcTypeSelect");
   if(sel&&sel.value!==type) sel.value=type;
   // Sync chip buttons
-  ["percent","fixed","dish","category","nth_free","buy_x_get_y"].forEach(t=>{
+  ["percent","fixed","dish","category","buy_x_get_y"].forEach(t=>{
     const btn=document.getElementById("ptc-"+t);
     if(btn) btn.classList.toggle("on",t===type);
   });
