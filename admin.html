@@ -1105,8 +1105,8 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
         <button class="otab" id="otab-completed" onclick="setOrderTab('completed')">
           Завершені <span class="otab-badge" id="otab-completed-badge">0</span>
         </button>
-        <button class="otab" id="otab-preorder" onclick="setOrderTab('preorder')" style="display:none">
-          Передзам. <span class="otab-badge" id="otab-preorder-badge">0</span>
+        <button class="otab" id="otab-preorder" onclick="setOrderTab('preorder')">
+          ⏰ Передзам. <span class="otab-badge" id="otab-preorder-badge">0</span>
         </button>
         <div style="flex:1"></div>
         <!-- Status filter (only for active tab) -->
@@ -2273,10 +2273,8 @@ function updateBadges(){
   ab.textContent=allActive;ab.classList.toggle("on",allActive>0);
   const cb=document.getElementById("otab-completed-badge");
   cb.textContent=comp;cb.classList.toggle("on",comp>0);
-  // Preorder tab
-  const ptab=document.getElementById("otab-preorder");
+  // Preorder tab — always visible
   const pb=document.getElementById("otab-preorder-badge");
-  if(ptab){ptab.style.display=preord>0?"flex":"none";}
   if(pb){pb.textContent=preord;pb.classList.toggle("on",preord>0);}
 }
 
@@ -2300,6 +2298,100 @@ function renderOrders(){
     list=[...allOrders.completed];
   } else if(curOrderTab==="preorder"){
     list=[...allOrders.preorder];
+    // Sort by scheduled time ascending (soonest first)
+    list.sort((a,b)=>{
+      const ta=a.preorderAt?new Date(a.preorderAt).getTime():Infinity;
+      const tb=b.preorderAt?new Date(b.preorderAt).getTime():Infinity;
+      return ta-tb;
+    });
+    const el=document.getElementById("ordersGrid");
+    if(!list.length){
+      el.innerHTML=`<div class="state-box"><div class="state-icon" style="font-size:28px;opacity:.35">⏰</div><strong>Передзамовлень немає</strong><p style="font-size:13px;color:var(--sub);margin-top:4px">Клієнти ще не створювали передзамовлень</p></div>`;
+      return;
+    }
+    const nowTs=Date.now();
+    // Group by date
+    const groups={};
+    list.forEach(o=>{
+      const dt=o.preorderAt?new Date(o.preorderAt).toLocaleDateString("uk-UA",{day:"2-digit",month:"long",year:"numeric"}):"Без часу";
+      if(!groups[dt])groups[dt]=[];
+      groups[dt].push(o);
+    });
+    let html="";
+    Object.entries(groups).forEach(([dateLabel,orders])=>{
+      html+=`<div style="grid-column:1/-1;font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.6px;padding:4px 0 8px;border-bottom:1px solid var(--brd);margin-bottom:4px">📅 ${dateLabel}</div>`;
+      orders.forEach(o=>{
+        const preorderTs=o.preorderAt?new Date(o.preorderAt).getTime():null;
+        const diffMs=preorderTs?preorderTs-nowTs:null;
+        const diffMin=diffMs!==null?Math.round(diffMs/60000):null;
+        const isOverdue=diffMin!==null&&diffMin<0;
+        const isSoon=diffMin!==null&&diffMin>=0&&diffMin<=60;
+        const timeStr=o.preorderAt?new Date(o.preorderAt).toLocaleString("uk-UA",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}):"—";
+        let countdownStr="";
+        if(diffMin!==null){
+          if(isOverdue){
+            const ago=Math.abs(diffMin);
+            countdownStr=`<span style="color:var(--red);font-weight:700">⚠ Час минув ${ago<60?ago+" хв":Math.floor(ago/60)+" год"} тому</span>`;
+          } else if(diffMin===0){
+            countdownStr=`<span style="color:var(--red);font-weight:700;animation:pcrd 1s infinite">🔴 Зараз!</span>`;
+          } else if(isSoon){
+            countdownStr=`<span style="color:var(--yellow);font-weight:700">⚡ Через ${diffMin} хв</span>`;
+          } else if(diffMin<1440){
+            const h=Math.floor(diffMin/60),m=diffMin%60;
+            countdownStr=`<span style="color:var(--sub)">⏳ Через ${h>0?h+" год ":""}${m>0?m+" хв":""}</span>`;
+          } else {
+            const d=Math.floor(diffMin/1440);
+            countdownStr=`<span style="color:var(--sub)">📅 Через ${d} дн.</span>`;
+          }
+        }
+        const urgencyBorder=isOverdue?"rgba(239,68,68,.5)":isSoon?"rgba(234,179,8,.5)":"var(--brd)";
+        const urgencyBg=isOverdue?"rgba(239,68,68,.04)":isSoon?"rgba(234,179,8,.04)":"";
+        const rawStreet=o.customer?.street||o.customer?.address||"";
+        const street=rawStreet?addVul(rawStreet):"Самовивіз";
+        const addr=o.customer?.city?(o.customer.city+(rawStreet?", "+addVul(rawStreet):"")):street;
+        const activeItems=(o.items||[]).filter(i=>!i.deleted);
+        html+=`<div class="ocard" style="border-color:${urgencyBorder};${urgencyBg?'background:'+urgencyBg:''}">
+          <div class="ocard-bar bar-preorder"></div>
+          <div style="padding:8px 13px;background:rgba(6,182,212,.06);border-bottom:1px solid var(--brd);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:15px">⏰</span>
+              <div>
+                <div style="font-size:13px;font-weight:700;color:#06b6d4">${timeStr}</div>
+                <div style="font-size:11px;margin-top:1px">${countdownStr}</div>
+              </div>
+            </div>
+            <span class="o-badge b-preorder">Передзамовлення</span>
+          </div>
+          <div class="ocard-head" style="border-bottom:none;padding-bottom:6px">
+            <div><div class="o-num">${o.orderNum||o.id.slice(0,8)}</div><div class="o-time">${fmtTime(o.createdAt)}</div></div>
+          </div>
+          <div class="ocard-body" style="padding-top:0">
+            <div class="o-cust">
+              <div class="o-name">${o.customer?.name||"—"}</div>
+              <div class="o-phone"><a href="tel:${o.customer?.phone}">${o.customer?.phone||"—"}</a></div>
+              <div class="o-addr">${addr}</div>
+            </div>
+            <div class="o-items">${activeItems.map(i=>`<div class="o-item" style="border-radius:6px;padding:3px 4px;display:flex;align-items:center;gap:2px"><span class="o-item-n">${i.name} ×${i.qty}</span><span class="o-item-p" style="margin-left:auto">${i.price*i.qty} грн</span></div>`).join("")}</div>
+            <div class="o-totals" style="margin-top:8px">
+              <div>
+                <div class="o-total">${o.total} грн</div>
+                ${o.promoCode?`<div style="font-size:10px;margin-top:2px;color:var(--p);font-weight:700">🏷 ${o.promoCode}${o.promoDiscount?" −"+o.promoDiscount+" грн":""}</div>`:""}
+                <div class="o-dlv" style="color:${o.delivery===0?"var(--green)":"var(--dim)"}">${o.delivery===0?"Доставка безкоштовна":"+"+o.delivery+" грн доставка"}</div>
+              </div>
+              <div class="o-eta">~${o.eta||"—"} хв</div>
+            </div>
+            ${o.customer?.comment?`<div class="o-comment">${o.customer.comment}</div>`:""}
+            <div class="o-actions" style="margin-top:10px">
+              <button class="oa oa-accept" onclick="acceptPreorder('${o.id}')" style="flex:2;font-weight:700">✓ Прийняти замовлення</button>
+              <button class="oa oa-back" onclick="printOrderReceipt('${o.id}')" title="Друк чека" style="flex:0 0 32px;min-width:32px;padding:7px;font-size:13px">🖨</button>
+              <button class="oa oa-del" onclick="delOrder('${o.id}')" title="Видалити">🗑</button>
+            </div>
+          </div>
+        </div>`;
+      });
+    });
+    el.innerHTML=html;
+    return;
   } else {
     list=[...allOrders.new,...allOrders.accepted,...allOrders.in_progress,...allOrders.shipped];
     if(statusFilter) list=list.filter(o=>o.status===statusFilter);
@@ -2401,6 +2493,17 @@ window.delOrder=async id=>{
   catch(e){console.error(e);}
 };
 
+window.acceptPreorder=async id=>{
+  const o=Object.values(allOrders).flat().find(x=>x.id===id);
+  const ok=await admConfirm("Прийняти передзамовлення","Замовлення буде переміщено до активних та позначено як «Нове». Клієнту буде показано звичайний статус відстеження.","⏰","warn","Прийняти");
+  if(!ok)return;
+  try{
+    await safeWrite(()=>update(ref(db,`orders/${id}`),{status:"new",updatedAt:Date.now()}));
+    showToast("Передзамовлення прийнято","Замовлення переміщено до активних","✓","success");
+    if(o)logHistory("order","Передзамовлення прийнято → Нове",o.orderNum||id.slice(0,8));
+  }catch(e){showToast("Помилка",e.message,"⚠","error");}
+};
+
 /* ——— STATS ——— */
 function renderStats(){
   const all=Object.values(allOrders).flat().filter(o=>o&&o.status);
@@ -2453,29 +2556,30 @@ function renderStats(){
   const revLabelEl=document.getElementById("revTotalLabel");
   if(revLabelEl) revLabelEl.textContent=`${weekRev} грн за тиждень`;
   if(revChartEl){
-    const maxH=120;
+    const maxH=100;
+    // Shorter day labels: weekday abbr + day number on separate lines
+    const shortWds=["Нд","Пн","Вт","Ср","Чт","Пт","Сб"];
     revChartEl.innerHTML=`
-      <div style="display:flex;align-items:flex-end;gap:8px;width:100%;height:${maxH}px;padding-top:24px;position:relative">
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:5px;width:100%;align-items:end">
         ${dayRevs.map((r,i)=>{
-          const pct=maxH>0?Math.max(r>0?6:0,Math.round(r/maxRev*(maxH-24))):0;
           const isToday=i===6;
-          return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:0;position:relative;height:100%;justify-content:flex-end">
-            ${r>0?`<div style="position:absolute;top:0;left:50%;transform:translateX(-50%);font-size:10px;font-weight:700;color:${isToday?'var(--p)':'var(--txt)'};white-space:nowrap;bottom:auto">${r>=1000?(r/1000).toFixed(1)+'к':r}</div>`:''}
-            <div style="width:100%;border-radius:6px 6px 0 0;height:${pct}px;background:${isToday?'var(--p)':r>0?'var(--brd2)':'transparent'};transition:height .4s ease;position:relative;overflow:hidden">
-              ${r>0&&!isToday?`<div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(249,115,22,.25),rgba(249,115,22,.08))"></div>`:''}
+          const barH=maxH>0&&maxRev>0?Math.max(r>0?6:0,Math.round(r/maxRev*maxH)):0;
+          const d=new Date();d.setDate(d.getDate()-(6-i));
+          const wdIdx=d.getDay();
+          const wdName=shortWds[wdIdx];
+          const dayNum=d.getDate();
+          const valLabel=r>=1000?(r/1000).toFixed(1)+'к':r>0?String(r):'';
+          return `<div style="display:flex;flex-direction:column;align-items:center;gap:0">
+            <div style="font-size:10px;font-weight:700;color:${isToday?'var(--p)':r>0?'var(--txt)':'transparent'};height:16px;display:flex;align-items:center;justify-content:center;line-height:1">${valLabel}</div>
+            <div style="width:100%;min-height:4px;height:${barH}px;border-radius:6px 6px 0 0;background:${isToday?'var(--p)':r>0?'rgba(249,115,22,.45)':'transparent'};transition:height .4s ease;margin-top:2px"></div>
+            <div style="width:100%;border-top:1px solid var(--brd);padding-top:5px;margin-top:0;text-align:center">
+              <div style="font-size:10px;font-weight:${isToday?700:400};color:${isToday?'var(--p)':'var(--sub)'};line-height:1.2">${wdName}</div>
+              <div style="font-size:9px;color:var(--dim);line-height:1.2">${dayNum}</div>
+              <div style="font-size:9px;color:var(--sub);height:12px;line-height:12px">${dayOrds[i]>0?dayOrds[i]+'з':''}</div>
             </div>
           </div>`;
         }).join('')}
       </div>
-      <div style="display:flex;gap:8px;width:100%;margin-top:6px;border-top:1px solid var(--brd);padding-top:6px">
-        ${dayLabels.map((l,i)=>{
-          const isToday=i===6;
-          return `<div style="flex:1;text-align:center;font-size:9px;color:${isToday?'var(--p)':'var(--dim)'};font-weight:${isToday?700:400};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${l}</div>`;
-        }).join('')}
-      </div>
-      ${dayOrds.some(o=>o>0)?`<div style="display:flex;gap:8px;width:100%;margin-top:2px">
-        ${dayOrds.map((o,i)=>`<div style="flex:1;text-align:center;font-size:9px;color:var(--sub)">${o>0?o+'зам':''}</div>`).join('')}
-      </div>`:''}
     `;
   }
 
@@ -3836,7 +3940,7 @@ window.createPromo=async()=>{
   if(allPromos[code]){errEl.textContent="Такий код вже існує";return;}
   const type=_pcType;
   let value=0;
-  if(type!=="free_delivery"&&type!=="nth_free"){
+  if(type!=="free_delivery"&&type!=="nth_free"&&type!=="buy_x_get_y"&&type!=="second_free"){
     value=parseInt(document.getElementById("pcValue").value)||0;
     if(!value){errEl.textContent="Введіть розмір знижки";return;}
     if(type==="percent"&&value>100){errEl.textContent="Відсоток не може бути більше 100";return;}
@@ -3869,7 +3973,6 @@ window.createPromo=async()=>{
   if(type==="buy_x_get_y"&&(!buyX||!getY)){errEl.textContent="Вкажіть кількість товарів";return;}
   const finalDishId=(type==="dish"?dishId:null)||(type==="buy_x_get_y"?bxyDishId:null)||null;
   const finalCatId=(type==="category"?catId:null)||(type==="buy_x_get_y"?bxyCatId:null)||null;
-  const promo={type,value,dishId:finalDishId,catId:finalCatId,buyX,getY,minOrderVal:null,nthN,nthDiscount,nthTarget,nthDishId,singleUse,expiresAt,active:true,createdAt:Date.now(),uses:{}};
   try{
     await dbSet(ref(db,"promoCodes/"+code),promo);
     await logHistory("promo","Промокод "+code);
