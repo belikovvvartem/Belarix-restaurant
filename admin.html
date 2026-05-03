@@ -339,10 +339,7 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
 .mf-err{font-size:12px;min-height:14px;margin-bottom:8px;color:var(--red)}
 /* Dish table list */
 .dish-table{width:100%;border-collapse:collapse}
-.dish-table-filters{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
-.dish-table-filters input,.dish-table-filters select{padding:7px 10px;background:var(--surf);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--txt);font-size:12px;font-family:'Inter',sans-serif;outline:none;transition:border-color var(--t)}
-.dish-table-filters input:focus,.dish-table-filters select:focus{border-color:var(--p)}
-.dish-table-filters input{flex:1;min-width:130px}
+
 .dish-trow{display:flex;align-items:center;gap:0;padding:0;border-bottom:1px solid var(--brd);transition:background var(--t)}
 .dish-trow:first-child{border-top:1px solid var(--brd);border-radius:var(--rs) var(--rs) 0 0}
 .dish-trow:last-child{border-radius:0 0 var(--rs) var(--rs)}
@@ -1109,20 +1106,6 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
           ⏰ Передзам. <span class="otab-badge" id="otab-preorder-badge">0</span>
         </button>
         <div style="flex:1"></div>
-        <!-- Status filter (only for active tab) -->
-        <select class="tb-sel" id="statusFilterSel" onchange="renderOrders()" style="margin:0 8px 0 0;align-self:center;font-size:12px;display:none">
-          <option value="">Всі статуси</option>
-          <option value="new">Нові</option>
-          <option value="accepted">Прийнято</option>
-          <option value="in_progress">Готується</option>
-          <option value="shipped">В дорозі</option>
-        </select>
-        <select class="tb-sel" id="sortSel" onchange="renderOrders()" style="margin:0 0 0 0;align-self:center;font-size:12px">
-          <option value="newest">Нові спочатку</option>
-          <option value="oldest">Старі спочатку</option>
-          <option value="high">Сума ↓</option>
-          <option value="low">Сума ↑</option>
-        </select>
       </div>
       <div class="orders-grid" id="ordersGrid">
         <div class="state-box"><div class="spinner"></div><strong>Завантаження...</strong></div>
@@ -1291,23 +1274,6 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
 
         <!-- RIGHT: Dish list -->
         <div class="menu-list-col">
-          <div class="dish-table-filters">
-            <input id="dishSearch" placeholder="Пошук страви..." oninput="renderDishList()">
-            <select id="dishFilterCat" onchange="renderDishList()">
-              <option value="">Всі категорії</option>
-            </select>
-            <select id="dishFilterSort" onchange="renderDishList()">
-              <option value="name">А → Я</option>
-              <option value="price_asc">Ціна ↑</option>
-              <option value="price_desc">Ціна ↓</option>
-              <option value="newest">Нові</option>
-            </select>
-            <select id="dishFilterStop" onchange="renderDishList()">
-              <option value="">Всі</option>
-              <option value="active">Активні</option>
-              <option value="stopped">Стоп-лист</option>
-            </select>
-          </div>
           <div id="dishCount" class="dish-count-row"></div>
           <div id="dishGrid"></div>
         </div>
@@ -2284,15 +2250,13 @@ window.setOrderTab=tab=>{
     const el=document.getElementById("otab-"+t);
     if(el) el.classList.toggle("on",t===tab);
   });
-  // Show status filter only for active tab
-  const sf=document.getElementById("statusFilterSel");
-  if(sf) sf.style.display=tab==="active"?"":"none";
+  // Show status filter only for active tab — removed
   renderOrders();
 };
 
 function renderOrders(){
-  const sortMode=document.getElementById("sortSel").value;
-  const statusFilter=document.getElementById("statusFilterSel")?.value||"";
+  const sortMode="newest";
+  const statusFilter="";
   let list;
   if(curOrderTab==="completed"){
     list=[...allOrders.completed];
@@ -2884,18 +2848,14 @@ window.toggleDishStop=async(id,stop)=>{
   }catch(e){showToast("Помилка",e.message,"⚠","error");}
 };
 function populateDishCatFilter(){
-  const catSel=document.getElementById("dishFilterCat");
-  if(!catSel)return;
-  const cats=[...new Set(allDishes.map(d=>d.cat).filter(Boolean))].sort();
-  const cur=catSel.value;
-  catSel.innerHTML='<option value="">Всі категорії</option>'+cats.map(c=>`<option value="${c}"${c===cur?' selected':''}>${c}</option>`).join("");
+  // dish-table-filters removed — nothing to populate
 }
 function renderDishList(){
   const el=document.getElementById("dishGrid");if(!el)return;
-  const q=(document.getElementById("dishSearch")?.value||"").toLowerCase();
-  const filterCat=document.getElementById("dishFilterCat")?.value||"";
-  const sortMode=document.getElementById("dishFilterSort")?.value||"name";
-  const filterStop=document.getElementById("dishFilterStop")?.value||"";
+  const q="";
+  const filterCat="";
+  const sortMode="name";
+  const filterStop="";
   let dishes=allDishes.filter(d=>{
     if(filterCat && d.cat!==filterCat) return false;
     if(filterStop==="active" && d.stopped) return false;
