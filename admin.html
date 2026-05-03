@@ -1343,6 +1343,7 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
               <button class="ptc" onclick="pcSetType('dish')" id="ptc-dish">🍽 На страву</button>
               <button class="ptc" onclick="pcSetType('category')" id="ptc-category">📋 Категорія</button>
               <button class="ptc" onclick="pcSetType('nth_free')" id="ptc-nth_free" style="grid-column:1/-1">🎁 N-й безкоштовно</button>
+              <button class="ptc" onclick="pcSetType('buy_x_get_y')" id="ptc-buy_x_get_y" style="grid-column:1/-1">🛍 Купи X — отримай Y</button>
             </div>
             <!-- hidden select for JS compatibility -->
             <select id="pcTypeSelect" style="display:none" onchange="pcSetType(this.value)">
@@ -1351,6 +1352,7 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
               <option value="dish">dish</option>
               <option value="category">category</option>
               <option value="nth_free">nth_free</option>
+              <option value="buy_x_get_y">buy_x_get_y</option>
             </select>
           </div>
 
@@ -1409,6 +1411,46 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
             <div id="pcNthPreview" style="font-size:11px;color:var(--sub);padding:5px 2px 0"></div>
           </div>
 
+          <!-- buy_x_get_y block -->
+          <div id="pcBuyXGetYRow" style="display:none;margin-bottom:10px">
+            <div style="background:var(--surf2);border-radius:var(--rs);padding:12px">
+              <div style="font-size:10px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Умова подарунку</div>
+              <div class="nth-free-grid">
+                <div>
+                  <div class="nth-sub">Купи (шт.)</div>
+                  <input id="pcBuyX" type="number" min="1" value="2" class="nth-inp" oninput="updateBuyXPreview()">
+                </div>
+                <div class="nth-arrow">→</div>
+                <div>
+                  <div class="nth-sub">Отримай (шт.)</div>
+                  <input id="pcGetY" type="number" min="1" value="1" class="nth-inp" oninput="updateBuyXPreview()">
+                </div>
+              </div>
+              <div style="font-size:10px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.4px;margin:8px 0 6px">Застосовувати до</div>
+              <div class="nth-target-row">
+                <label class="nth-target-label on" id="pcBuyXLabelAll">
+                  <input type="radio" name="pcBuyXTarget" value="all" checked style="accent-color:var(--p)" onchange="pcBuyXTargetChange()"> Всі товари
+                </label>
+                <label class="nth-target-label" id="pcBuyXLabelCat">
+                  <input type="radio" name="pcBuyXTarget" value="category" style="accent-color:var(--p)" onchange="pcBuyXTargetChange()"> Категорія
+                </label>
+                <label class="nth-target-label" id="pcBuyXLabelDish">
+                  <input type="radio" name="pcBuyXTarget" value="dish" style="accent-color:var(--p)" onchange="pcBuyXTargetChange()"> Конкретна
+                </label>
+              </div>
+              <div id="pcBuyXCatPicker" style="display:none;margin-top:8px">
+                <select id="pcBuyXCatId" style="width:100%;padding:7px 10px;background:var(--bg2);border:1.5px solid var(--brd2);border-radius:var(--rs);color:var(--txt);font-size:12px;font-family:'Inter',sans-serif;outline:none">
+                  <option value="">— Обрати категорію —</option>
+                </select>
+              </div>
+              <div id="pcBuyXDishPicker" style="display:none;margin-top:8px">
+                <input id="pcBuyXDishSearch" placeholder="Пошук страви..." style="width:100%;padding:7px 10px;background:var(--bg2);border:1.5px solid var(--brd2);border-radius:var(--rs);color:var(--txt);font-size:12px;font-family:'Inter',sans-serif;margin-bottom:6px;outline:none" oninput="rebuildBuyXDishGrid()">
+                <div id="pcBuyXDishGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:5px;max-height:180px;overflow-y:auto"></div>
+              </div>
+            </div>
+            <div id="pcBuyXPreview" style="font-size:11px;color:var(--sub);padding:5px 2px 0"></div>
+          </div>
+
           <!-- Toggles -->
           <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px">
             <div class="promo-toggle-row">
@@ -1444,6 +1486,7 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
               <option value="dish">На страву</option>
               <option value="category">Категорія</option>
               <option value="nth_free">N-й</option>
+              <option value="buy_x_get_y">Купи X+Y</option>
             </select>
           </div>
           <div id="promoList"></div>
@@ -2253,7 +2296,10 @@ function renderOrders(){
           <div class="o-phone"><a href="tel:${o.customer?.phone}">${o.customer?.phone||"—"}</a></div>
           <div class="o-addr">${addr}</div>
         </div>
-        <div class="o-items">${(o.items||[]).map((i,idx)=>{
+        <div class="o-items">${(()=>{
+          const regularItems=(o.items||[]).filter(i=>!i.isGift);
+          const giftItems=(o.items||[]).filter(i=>i.isGift);
+          let html=regularItems.map((i,idx)=>{
           const hasPhoto=!!i.photo;
           const isDeleted=!!i.deleted;
           const photoBtn=hasPhoto&&!isDeleted
@@ -2267,7 +2313,7 @@ function renderOrders(){
             </div>`;
           }
           const delBtn=o.status!=="completed"
-            ?`<button onclick="event.stopPropagation();removeItemFromOrder('${o.id}',${idx})" style="margin-left:5px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:var(--red);cursor:pointer;font-size:10px;padding:2px 6px;border-radius:4px;font-weight:700;font-family:'Inter',sans-serif;flex-shrink:0" title="Видалити">✕</button>`
+            ?`<button onclick="event.stopPropagation();removeItemFromOrder('${o.id}',${(o.items||[]).indexOf(i)})" style="margin-left:5px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:var(--red);cursor:pointer;font-size:10px;padding:2px 6px;border-radius:4px;font-weight:700;font-family:'Inter',sans-serif;flex-shrink:0" title="Видалити">✕</button>`
             :'';
           return `<div class="o-item" style="border-radius:6px;padding:3px 4px;display:flex;align-items:center;gap:2px">
             <span class="o-item-n">${i.name} ×${i.qty}</span>
@@ -2275,7 +2321,17 @@ function renderOrders(){
             <span class="o-item-p" style="margin-left:auto">${i.price*i.qty} грн</span>
             ${delBtn}
           </div>`;
-        }).join("")}</div>
+          }).join("");
+          if(giftItems.length){
+            html+=`<div style="font-size:9px;font-weight:700;color:#2A9D5C;text-transform:uppercase;letter-spacing:.5px;padding:5px 4px 2px;border-top:1px dashed rgba(42,157,92,.3);margin-top:2px">🎁 Подарунки</div>`;
+            html+=giftItems.map(i=>`<div class="o-item" style="border-radius:6px;padding:3px 4px;display:flex;align-items:center;gap:2px;background:rgba(42,157,92,.05)">
+              <span class="o-item-n" style="color:#2A9D5C">${i.name} ×${i.qty}</span>
+              <span style="font-size:9px;font-weight:700;color:#2A9D5C;background:rgba(42,157,92,.12);padding:1px 5px;border-radius:8px;margin:0 3px">Подарунок</span>
+              <span class="o-item-p" style="margin-left:auto;color:#2A9D5C">0 грн</span>
+            </div>`).join("");
+          }
+          return html;
+        })()}</div>
         <div class="o-totals">
           <div>
             <div class="o-total">${o.total} грн</div>
@@ -3234,7 +3290,7 @@ window.pcSetType=type=>{
   const sel=document.getElementById("pcTypeSelect");
   if(sel&&sel.value!==type) sel.value=type;
   // Sync chip buttons
-  ["percent","fixed","dish","category","nth_free"].forEach(t=>{
+  ["percent","fixed","dish","category","nth_free","buy_x_get_y"].forEach(t=>{
     const btn=document.getElementById("ptc-"+t);
     if(btn) btn.classList.toggle("on",t===type);
   });
@@ -3242,13 +3298,18 @@ window.pcSetType=type=>{
   const dishRow=document.getElementById("pcDishRow");
   const catRow=document.getElementById("pcCatRow");
   const nthRow=document.getElementById("pcNthFreeRow");
+  const bxyRow=document.getElementById("pcBuyXGetYRow");
   const unit=document.getElementById("pcValueUnit");
   const lbl=document.getElementById("pcValueLabel");
   dishRow.style.display="none"; catRow.style.display="none";
   if(nthRow) nthRow.style.display="none";
+  if(bxyRow) bxyRow.style.display="none";
   if(type==="nth_free"){
     valueRow.style.display="none";
     if(nthRow) nthRow.style.display="block";
+  } else if(type==="buy_x_get_y"){
+    valueRow.style.display="none";
+    if(bxyRow){ bxyRow.style.display="block"; rebuildBuyXDishGrid(); rebuildBuyXCatSelect(); updateBuyXPreview(); }
   } else if(type==="free_delivery"||type==="second_free"){
     valueRow.style.display="none";
   } else if(type==="dish"){
@@ -3380,6 +3441,7 @@ function promoDescription(p){
   if(p.type==="fixed") return p.value+" грн знижка";
   if(p.type==="free_delivery") return "Безкоштовна доставка";
   if(p.type==="second_free") return "Другий товар безкоштовно";
+  if(p.type==="buy_x_get_y") return `Купи ${p.buyX||2} → отримай ${p.getY||1} 🎁 безкоштовно`;
   if(p.type==="dish"){
     const dish=allDishes.find(d=>d.id===p.dishId);
     return p.value+"% на "+(dish?dish.name:(p.dishId||"страву"));
@@ -3488,6 +3550,58 @@ window.updateNthPreview=()=>{
   const name=dish?dish.name:"товару";
   const preview=document.getElementById("pcNthPreview");
   if(preview)preview.textContent=`Напр.: купи ${buy} ${name} → ${free} в подарунок`;
+};
+
+/* buy_x_get_y helpers */
+let _pcBuyXDishId=null;
+window.rebuildBuyXDishGrid=()=>{
+  const grid=document.getElementById("pcBuyXDishGrid");if(!grid)return;
+  const q=(document.getElementById("pcBuyXDishSearch")?.value||"").toLowerCase();
+  const dishes=allDishes.filter(d=>!q||d.name.toLowerCase().includes(q));
+  grid.innerHTML=dishes.map(d=>`
+    <div onclick="pcPickBuyXDish('${d.id}')" id="pcBuyXDishCard-${d.id}" style="border:2px solid ${_pcBuyXDishId===d.id?"var(--p)":"var(--brd)"};border-radius:var(--rs);overflow:hidden;cursor:pointer;background:${_pcBuyXDishId===d.id?"var(--pl)":"var(--surf)"};transition:border-color var(--t),background var(--t)">
+      <div style="height:60px;background:var(--bg2);overflow:hidden;position:relative">
+        ${d.photo?`<img src="${d.photo}" style="width:100%;height:100%;object-fit:cover" alt="">`:`<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:22px">${d.emoji||"🍽"}</div>`}
+      </div>
+      <div style="padding:4px 5px"><div style="font-size:10px;font-weight:600;line-height:1.2;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">${d.name}</div></div>
+    </div>`).join("");
+};
+window.pcPickBuyXDish=id=>{
+  _pcBuyXDishId=id;
+  document.querySelectorAll("[id^='pcBuyXDishCard-']").forEach(el=>{
+    const sel=el.id==="pcBuyXDishCard-"+id;
+    el.style.borderColor=sel?"var(--p)":"var(--brd)";
+    el.style.background=sel?"var(--pl)":"var(--surf)";
+  });
+  updateBuyXPreview();
+};
+window.rebuildBuyXCatSelect=()=>{
+  const sel=document.getElementById("pcBuyXCatId");if(!sel)return;
+  const cats=Array.isArray(siteSettings.categories)?siteSettings.categories:[];
+  sel.innerHTML='<option value="">— Обрати категорію —</option>'+cats.map(c=>`<option value="${c}">${c}</option>`).join("");
+};
+window.pcBuyXTargetChange=()=>{
+  const target=document.querySelector("input[name='pcBuyXTarget']:checked")?.value||"all";
+  document.getElementById("pcBuyXDishPicker").style.display=target==="dish"?"block":"none";
+  document.getElementById("pcBuyXCatPicker").style.display=target==="category"?"block":"none";
+  ["pcBuyXLabelAll","pcBuyXLabelCat","pcBuyXLabelDish"].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.classList.remove("on");
+  });
+  const map={all:"pcBuyXLabelAll",category:"pcBuyXLabelCat",dish:"pcBuyXLabelDish"};
+  const lbl=document.getElementById(map[target]);if(lbl)lbl.classList.add("on");
+  if(target==="dish")rebuildBuyXDishGrid();
+  if(target==="category")rebuildBuyXCatSelect();
+  updateBuyXPreview();
+};
+window.updateBuyXPreview=()=>{
+  const buy=parseInt(document.getElementById("pcBuyX")?.value)||2;
+  const get=parseInt(document.getElementById("pcGetY")?.value)||1;
+  const target=document.querySelector("input[name='pcBuyXTarget']:checked")?.value||"all";
+  let scope="будь-якого товару";
+  if(target==="dish"&&_pcBuyXDishId){const d=allDishes.find(x=>x.id===_pcBuyXDishId);if(d)scope=`«${d.name}»`;}
+  if(target==="category"){const v=document.getElementById("pcBuyXCatId")?.value;if(v)scope=`категорії «${v}»`;}
+  const p=document.getElementById("pcBuyXPreview");
+  if(p)p.textContent=`Напр.: купи ${buy} шт. ${scope} → ${get} в подарунок безкоштовно`;
 };
 
 window.manualRefresh=()=>{const btn=document.getElementById("refreshBtn");btn.textContent="↻ ...";setTimeout(()=>btn.textContent="↻ Оновити",700);setUpd();};
@@ -3712,7 +3826,16 @@ window.createPromo=async()=>{
   const nthDishId=type==="nth_free"&&nthTarget==="dish"?(_pcNthDishId||null):null;
   const nthN=nthBuy,nthDiscount=100;
   if(type==="nth_free"&&(!nthBuy||!nthFreeCount)){errEl.textContent="Вкажіть кількість";return;}
-  const promo={type,value,dishId:dishId||null,catId:catId||null,buyX:null,getY:null,minOrderVal:null,nthN,nthDiscount,nthTarget,nthDishId,singleUse,expiresAt,active:true,createdAt:Date.now(),uses:{}};
+  // buy_x_get_y fields
+  const bxyTarget=type==="buy_x_get_y"?(document.querySelector("input[name='pcBuyXTarget']:checked")?.value||"all"):null;
+  const buyX=type==="buy_x_get_y"?(parseInt(document.getElementById("pcBuyX")?.value)||2):null;
+  const getY=type==="buy_x_get_y"?(parseInt(document.getElementById("pcGetY")?.value)||1):null;
+  const bxyDishId=type==="buy_x_get_y"&&bxyTarget==="dish"?(_pcBuyXDishId||null):null;
+  const bxyCatId=type==="buy_x_get_y"&&bxyTarget==="category"?(document.getElementById("pcBuyXCatId")?.value||null):null;
+  if(type==="buy_x_get_y"&&(!buyX||!getY)){errEl.textContent="Вкажіть кількість товарів";return;}
+  const finalDishId=(type==="dish"?dishId:null)||(type==="buy_x_get_y"?bxyDishId:null)||null;
+  const finalCatId=(type==="category"?catId:null)||(type==="buy_x_get_y"?bxyCatId:null)||null;
+  const promo={type,value,dishId:finalDishId,catId:finalCatId,buyX,getY,minOrderVal:null,nthN,nthDiscount,nthTarget,nthDishId,singleUse,expiresAt,active:true,createdAt:Date.now(),uses:{}};
   try{
     await dbSet(ref(db,"promoCodes/"+code),promo);
     await logHistory("promo","Промокод "+code);

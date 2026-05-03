@@ -113,6 +113,10 @@ input,select,textarea{font-size:16px!important} /* prevents iOS zoom on focus */
 .qty-n{font-weight:700;font-size:16px;min-width:22px;text-align:center}
 .empty-menu{text-align:center;padding:60px 20px;color:var(--muted)}
 .empty-menu p{font-size:15px;margin-top:8px}
+/* GIFT ITEMS IN CART */
+.cart-gifts-sep{font-size:11px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.6px;padding:8px 4px 4px;margin-top:4px;border-top:1px dashed rgba(42,157,92,.3);display:flex;align-items:center;gap:6px}
+.cart-item-gift{background:rgba(42,157,92,.05);border:1px dashed rgba(42,157,92,.3)!important;border-radius:var(--radius-s);margin-top:2px;pointer-events:none;opacity:.92}
+.gift-badge{font-size:10px;font-weight:700;color:var(--green);background:rgba(42,157,92,.12);padding:1px 6px;border-radius:10px;vertical-align:middle;margin-left:4px}
 /* BANNER SLIDER */
 #bannerSlider{
   width:100%;background:var(--bg);position:relative;
@@ -1488,6 +1492,30 @@ function dlvCost(sub) {
   return DLV_COST;
 }
 
+/* ——— GIFT ITEMS (buy_x_get_y) ——— */
+function computeGiftItems() {
+  if (!appliedPromo || appliedPromo.type !== "buy_x_get_y") return [];
+  var p = appliedPromo;
+  var buy = (p.raw && p.raw.buyX) || 2;
+  var get = (p.raw && p.raw.getY) || 1;
+  var eligible;
+  if (p.dishId) {
+    eligible = cart.filter(function(i) { return i.id === p.dishId; });
+  } else if (p.catId) {
+    eligible = cart.filter(function(i) { return i.cat === p.catId; });
+  } else {
+    eligible = cart.slice();
+  }
+  var gifts = [];
+  eligible.forEach(function(item) {
+    var freeCount = Math.floor(item.qty / buy) * get;
+    if (freeCount > 0) {
+      gifts.push(Object.assign({}, item, { qty: freeCount, price: 0, isGift: true }));
+    }
+  });
+  return gifts;
+}
+
 /* ——— PROMO CODE ——— */
 window.applyPromo = async function() {
   var code = (document.getElementById("promoInput").value || "").trim().toUpperCase();
@@ -1594,15 +1622,8 @@ function promoDiscount(sub) {
     return cheapest.price;
   }
   if (p.type === "buy_x_get_y") {
-    // Sort by price asc, give getY cheapest ones free
-    var sorted = cart.slice().sort(function(a,b){ return a.price-b.price; });
-    var totalQty = cart.reduce(function(s,i){ return s+i.qty; },0);
-    var needed = p.buyX || 2;
-    var free = p.getY || 1;
-    if (totalQty < needed + free) return 0;
-    // Cheapest getY items are free
-    var freeItems = sorted.slice(0, free);
-    return freeItems.reduce(function(s,i){ return s+i.price; },0);
+    // Gifts are added as free items (price=0), not as a monetary discount
+    return 0;
   }
   if (p.type === "min_order") {
     if (sub < (p.minOrderVal || 500)) return 0;
@@ -1642,9 +1663,23 @@ function promoCartValidate(p) {
     if (!hasCat) return "Промокод діє лише на категорію «" + (p.catId || "") + "», якої немає в кошику";
   }
   if (p.type === "buy_x_get_y") {
-    var totalQ = cart.reduce(function(s,i){ return s+i.qty; },0);
-    var needed = (p.buyX||2) + (p.getY||1);
-    if (totalQ < needed) return "Промокод діє при замовленні від " + needed + " позицій. У вас: " + totalQ;
+    var buyX2 = (p.raw && p.raw.buyX) || 2;
+    var getY2 = (p.raw && p.raw.getY) || 1;
+    var pool;
+    if (p.dishId) {
+      pool = cart.filter(function(i){ return i.id === p.dishId; });
+    } else if (p.catId) {
+      pool = cart.filter(function(i){ return i.cat === p.catId; });
+    } else {
+      pool = cart.slice();
+    }
+    var hasEnough = pool.some(function(i){ return i.qty >= buyX2; });
+    if (!hasEnough) {
+      var label = p.dishId
+        ? ("«" + ((MENU.find(function(d){ return d.id===p.dishId; })||{}).name || "страву") + "»")
+        : (p.catId ? ("категорії «" + p.catId + "»") : "однієї страви");
+      return "Потрібно щонайменше " + buyX2 + " шт. " + label + " у кошику";
+    }
   }
   if (p.type === "min_order") {
     var sub2 = cart.reduce(function(s,i){ return s+i.price*i.qty; },0);
@@ -1700,6 +1735,12 @@ function updateCart() {
     promoRow.style.display = "flex";
     promoRowLbl.textContent = "🏷 " + appliedPromo.code;
     promoRowVal.textContent = "Безкоштовна доставка";
+  } else if (appliedPromo && appliedPromo.type === "buy_x_get_y") {
+    var gifts = computeGiftItems();
+    var totalGifts = gifts.reduce(function(s,g){ return s+g.qty; }, 0);
+    promoRow.style.display = "flex";
+    promoRowLbl.textContent = "🏷 " + appliedPromo.code;
+    promoRowVal.textContent = totalGifts ? "🎁 +" + totalGifts + " безкоштовно" : "Потрібно більше товарів";
   } else {
     promoRow.style.display = "none";
   }
@@ -1741,6 +1782,21 @@ function updateCart() {
       + '<button onclick="chQty(\'' + i.id + '\',1)">+</button>'
       + '</div></div>';
   });
+  // Gift items (buy_x_get_y) — read-only, shown separately
+  var giftItems = computeGiftItems();
+  if (giftItems.length) {
+    html += '<div class="cart-gifts-sep">🎁 Подарунки від промокоду</div>';
+    giftItems.forEach(function(g) {
+      var gThumb = g.photo
+        ? '<div class="ci-thumb"><img src="' + g.photo + '" alt="' + g.name + '" loading="lazy"></div>'
+        : '<div class="ci-thumb">' + (g.emoji || "🎁") + '</div>';
+      html += '<div class="cart-item cart-item-gift">' + gThumb
+        + '<div class="ci-info">'
+        + '<div class="ci-name">' + g.name + ' <span class="gift-badge">🎁 Подарунок</span></div>'
+        + '<div class="ci-price" style="color:var(--green)">Безкоштовно × ' + g.qty + '</div>'
+        + '</div></div>';
+    });
+  }
   body.innerHTML = html;
 }
 
@@ -1931,6 +1987,15 @@ function buildPreview() {
   cart.forEach(function(i) {
     items += '<div class="prev-item"><span>' + i.name + ' ×' + i.qty + '</span><span>' + (i.price * i.qty) + ' грн</span></div>';
   });
+  // Gift items
+  var previewGifts = computeGiftItems();
+  var giftsHtml = "";
+  if (previewGifts.length) {
+    giftsHtml = '<div style="font-size:11px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.5px;padding:6px 0 3px;border-top:1px dashed rgba(42,157,92,.3);margin-top:4px">🎁 Подарунки від промокоду</div>';
+    previewGifts.forEach(function(g) {
+      giftsHtml += '<div class="prev-item" style="color:var(--green)"><span>' + g.name + ' ×' + g.qty + ' <span style="font-size:10px;font-weight:700;background:rgba(42,157,92,.12);padding:1px 5px;border-radius:8px">Подарунок</span></span><span>Безкоштовно</span></div>';
+    });
+  }
 
   var dlvLabel = dlv === 0 ? "(доставка безкоштовна)" : "+" + dlv + " грн доставка";
 
@@ -1947,6 +2012,7 @@ function buildPreview() {
     closedNotice
     + '<h3>Ваше замовлення</h3>'
     + items
+    + giftsHtml
     + (discount > 0 ? '<div class="prev-item" style="color:var(--green)">'
       + '<span>🏷 ' + appliedPromo.code + '</span>'
       + '<span>−' + discount + ' грн</span>'
@@ -1986,11 +2052,14 @@ window.placeOrder = async function() {
       var pt = document.getElementById("preorderTime")?.value;
       if (pd && pt) preorderAt = pd + "T" + pt;
     }
+    var giftOrderItems = computeGiftItems().map(function(g) {
+      return {id:g.id,name:g.name,emoji:g.emoji||"",photo:g.photo||null,qty:g.qty,price:0,prep:g.prep||15,isGift:true};
+    });
     await push(ref(db, "orders"), {
       orderNum:     orderNum,
       promoCode:    appliedPromo ? appliedPromo.code : null,
       promoDiscount:discount || 0,
-      items:        cart.map(function(i) { return {id:i.id,name:i.name,emoji:i.emoji||"",photo:i.photo||null,qty:i.qty,price:i.price,prep:i.prep||15}; }),
+      items:        cart.map(function(i) { return {id:i.id,name:i.name,emoji:i.emoji||"",photo:i.photo||null,qty:i.qty,price:i.price,prep:i.prep||15}; }).concat(giftOrderItems),
       customer:     {name:nm, phone:ph, city:city, street:streetAddr, address:addr, comment:note},
       deliveryType: dlvType,
       subtotal:     sub,
@@ -2008,7 +2077,9 @@ window.placeOrder = async function() {
       promoDiscount: discount || 0,
       items:         cart.map(function(i) {
         return { id:i.id, name:i.name, qty:i.qty, price:i.price, photo:i.photo||null };
-      }),
+      }).concat(giftOrderItems.map(function(g) {
+        return { id:g.id, name:g.name, qty:g.qty, price:0, photo:g.photo||null, isGift:true };
+      })),
       customer:      { name:nm, phone:ph, city:city, street:streetAddr, address:addr, comment:note },
       deliveryType:  dlvType,
       subtotal:      sub,
