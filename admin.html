@@ -225,7 +225,7 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
 .bar-accepted{background:linear-gradient(90deg,var(--blue),#60A5FA)}
 .bar-in_progress{background:linear-gradient(90deg,var(--yellow),#FDE68A)}
 .bar-shipped{background:linear-gradient(90deg,#A855F7,#C084FC)}
-.bar-completed{background:linear-gradient(90deg,var(--green),#86EFAC)}
+.bar-preorder{background:linear-gradient(90deg,#06b6d4,#67e8f9)}
 .ocard-head{padding:11px 13px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--brd)}
 .o-num{font-size:13px;font-weight:700;color:var(--p)}
 .o-time{font-size:10px;color:var(--sub);margin-top:2px}
@@ -235,6 +235,7 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
 .b-in_progress{background:rgba(234,179,8,.15);color:#FACC15}
 .b-shipped{background:rgba(168,85,247,.15);color:#C084FC}
 .b-completed{background:rgba(34,197,94,.15);color:#4ADE80}
+.b-preorder{background:rgba(6,182,212,.15);color:#06b6d4}
 .ocard-body{padding:11px 13px;display:flex;flex-direction:column;flex:1}
 .o-cust{margin-bottom:9px;padding-bottom:9px;border-bottom:1px solid var(--brd)}
 .o-name{font-weight:600;font-size:13px;margin-bottom:2px}
@@ -568,9 +569,9 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
   border-radius:var(--rs);color:var(--green);
   font-size:11px;font-weight:600;cursor:pointer;
   font-family:'Inter',sans-serif;transition:var(--t);white-space:nowrap;
-  flex-shrink:0;opacity:0;pointer-events:none;
+  flex-shrink:0;visibility:hidden;pointer-events:none;
 }
-.city-save.dirty{opacity:1;pointer-events:auto}
+.city-save.dirty{visibility:visible;pointer-events:auto}
 .city-save:hover{background:rgba(34,197,94,.2);border-color:rgba(34,197,94,.6)}
 .city-del{
   width:26px;height:26px;flex-shrink:0;
@@ -872,7 +873,7 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
   .lbox{border-radius:16px;padding:26px 18px}
 
   /* Topbar right */
-  .topbar-right .upd-txt,.topbar-right #sortSel{display:none}
+  .topbar-right .upd-txt{display:none}
 }
 @media(min-width:600px){
   .modal-bg{align-items:center;padding:20px}
@@ -1104,8 +1105,19 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
         <button class="otab" id="otab-completed" onclick="setOrderTab('completed')">
           Завершені <span class="otab-badge" id="otab-completed-badge">0</span>
         </button>
+        <button class="otab" id="otab-preorder" onclick="setOrderTab('preorder')" style="display:none">
+          Передзам. <span class="otab-badge" id="otab-preorder-badge">0</span>
+        </button>
         <div style="flex:1"></div>
-        <select class="tb-sel" id="sortSel" onchange="renderOrders()" style="margin:0 12px 0 0;align-self:center;font-size:12px">
+        <!-- Status filter (only for active tab) -->
+        <select class="tb-sel" id="statusFilterSel" onchange="renderOrders()" style="margin:0 8px 0 0;align-self:center;font-size:12px;display:none">
+          <option value="">Всі статуси</option>
+          <option value="new">Нові</option>
+          <option value="accepted">Прийнято</option>
+          <option value="in_progress">Готується</option>
+          <option value="shipped">В дорозі</option>
+        </select>
+        <select class="tb-sel" id="sortSel" onchange="renderOrders()" style="margin:0 0 0 0;align-self:center;font-size:12px">
           <option value="newest">Нові спочатку</option>
           <option value="oldest">Старі спочатку</option>
           <option value="high">Сума ↓</option>
@@ -1155,6 +1167,21 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;flex-shrink:0">
         <div class="chart-card"><div class="chart-title">Топ страв</div><div class="bar-chart" id="topDishes"></div></div>
         <div class="chart-card"><div class="chart-title">По категоріях</div><div class="bar-chart" id="catChart"></div></div>
+      </div>
+      <!-- Peak hours & days -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;flex-shrink:0">
+        <div class="chart-card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+            <div class="chart-title" style="margin-bottom:0">⏰ Час пік (за годинами)</div>
+          </div>
+          <div id="peakHoursChart" style="width:100%"></div>
+        </div>
+        <div class="chart-card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+            <div class="chart-title" style="margin-bottom:0">📅 Час пік (по днях)</div>
+          </div>
+          <div id="peakDaysChart" style="width:100%"></div>
+        </div>
       </div>
       <!-- Promo analytics -->
       <div class="chart-card" id="promoStatsCard">
@@ -2123,7 +2150,7 @@ function listenR2Deletions(){
 }
 
 /* ——— STATUS LABELS ——— */
-const SL={new:"Нове",accepted:"Прийнято",in_progress:"Готується",shipped:"В дорозі",completed:"Виконано"};
+const SL={new:"Нове",accepted:"Прийнято",in_progress:"Готується",shipped:"В дорозі",completed:"Виконано",preorder:"Передзамовлення"};
 const SN={
   new:{status:"accepted",label:"Прийняти",cls:"oa-accept"},
   accepted:{status:"in_progress",label:"На кухню",cls:"oa-cook"},
@@ -2135,14 +2162,15 @@ const SN={
 function listenOrders(){
   unsubOrders=onValue(ref(db,"orders"),snap=>{
     const newOnes=[];
-    allOrders={new:[],accepted:[],in_progress:[],shipped:[],completed:[]};
+    allOrders={new:[],accepted:[],in_progress:[],shipped:[],completed:[],preorder:[]};
     if(snap.exists()){
       const raw=snap.val();
       Object.keys(raw).forEach(key=>{
         const od=raw[key];
         if(!od||typeof od!=="object")return;
         od.id=key;
-        (allOrders[od.status]?allOrders[od.status]:allOrders.new).push(od);
+        const bucket=allOrders[od.status]?allOrders[od.status]:allOrders.new;
+        bucket.push(od);
         if(od.status==="new"&&!seen.has(od.id))newOnes.push(od);
       });
     }
@@ -2165,23 +2193,42 @@ function updateBadges(){
   nb.textContent=active;nb.classList.toggle("on",active>0);
   const allActive=["new","accepted","in_progress","shipped"].reduce((s,k)=>s+(allOrders[k]||[]).length,0);
   const comp=(allOrders.completed||[]).length;
+  const preord=(allOrders.preorder||[]).length;
   const ab=document.getElementById("otab-active-badge");
   ab.textContent=allActive;ab.classList.toggle("on",allActive>0);
   const cb=document.getElementById("otab-completed-badge");
   cb.textContent=comp;cb.classList.toggle("on",comp>0);
+  // Preorder tab
+  const ptab=document.getElementById("otab-preorder");
+  const pb=document.getElementById("otab-preorder-badge");
+  if(ptab){ptab.style.display=preord>0?"flex":"none";}
+  if(pb){pb.textContent=preord;pb.classList.toggle("on",preord>0);}
 }
 
 window.setOrderTab=tab=>{
   curOrderTab=tab;
-  ["active","completed"].forEach(t=>document.getElementById("otab-"+t).classList.toggle("on",t===tab));
+  ["active","completed","preorder"].forEach(t=>{
+    const el=document.getElementById("otab-"+t);
+    if(el) el.classList.toggle("on",t===tab);
+  });
+  // Show status filter only for active tab
+  const sf=document.getElementById("statusFilterSel");
+  if(sf) sf.style.display=tab==="active"?"":"none";
   renderOrders();
 };
 
 function renderOrders(){
   const sortMode=document.getElementById("sortSel").value;
-  let list=curOrderTab==="active"
-    ? [...allOrders.new,...allOrders.accepted,...allOrders.in_progress,...allOrders.shipped]
-    : [...allOrders.completed];
+  const statusFilter=document.getElementById("statusFilterSel")?.value||"";
+  let list;
+  if(curOrderTab==="completed"){
+    list=[...allOrders.completed];
+  } else if(curOrderTab==="preorder"){
+    list=[...allOrders.preorder];
+  } else {
+    list=[...allOrders.new,...allOrders.accepted,...allOrders.in_progress,...allOrders.shipped];
+    if(statusFilter) list=list.filter(o=>o.status===statusFilter);
+  }
   if(sortMode==="oldest")list.sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
   else if(sortMode==="high")list.sort((a,b)=>(b.total||0)-(a.total||0));
   else if(sortMode==="low")list.sort((a,b)=>(a.total||0)-(b.total||0));
@@ -2237,6 +2284,7 @@ function renderOrders(){
 
           </div>
           <div class="o-eta">~${o.eta} хв</div>
+          ${o.preorderAt?`<div style="font-size:10px;color:#06b6d4;font-weight:700;margin-top:3px;background:rgba(6,182,212,.1);padding:2px 8px;border-radius:4px">⏰ ${new Date(o.preorderAt).toLocaleString("uk-UA",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})}</div>`:""}
         </div>
         ${o.customer?.comment?`<div class="o-comment">${o.customer.comment}</div>`:""}
         <div class="o-actions">
@@ -2376,6 +2424,44 @@ function renderStats(){
   const tc=Object.entries(cc).sort((a,b)=>b[1]-a[1]);
   const maxC=tc[0]?.[1]||1;
   document.getElementById("catChart").innerHTML=tc.length?tc.map(([c,n])=>`<div class="bar-row"><span class="bar-label">${c}</span><div class="bar-track"><div class="bar-fill" style="width:${Math.round(n/maxC*100)}%;background:var(--blue)"></div></div><span class="bar-val">${n} шт</span></div>`).join(""):"<p style='color:var(--sub);font-size:13px'>Немає даних</p>";
+
+  // Peak hours chart (0-23)
+  const hourCounts=new Array(24).fill(0);
+  all.forEach(o=>{ if(o.createdAt){ const h=new Date(o.createdAt).getHours(); hourCounts[h]++; } });
+  const maxH2=Math.max(...hourCounts,1);
+  const peakHoursEl=document.getElementById("peakHoursChart");
+  if(peakHoursEl){
+    const barH=80;
+    const cols=hourCounts.map((cnt,h)=>{
+      const pct=Math.max(cnt>0?4:0, Math.round(cnt/maxH2*barH));
+      const isPeak=cnt===Math.max(...hourCounts)&&cnt>0;
+      return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;position:relative;height:${barH+28}px;justify-content:flex-end">
+        ${cnt>0?`<div style="position:absolute;top:0;left:50%;transform:translateX(-50%);font-size:9px;font-weight:700;color:${isPeak?"var(--p)":"var(--txt)"};white-space:nowrap">${cnt}</div>`:""}
+        <div style="width:100%;border-radius:3px 3px 0 0;height:${pct}px;background:${isPeak?"var(--p)":cnt>0?"rgba(249,115,22,.35)":"transparent"};transition:height .4s ease"></div>
+        <div style="font-size:8px;color:var(--dim);margin-top:3px;text-align:center;line-height:1">${h}</div>
+      </div>`;
+    }).join("");
+    peakHoursEl.innerHTML=`<div style="display:flex;gap:1px;width:100%;align-items:flex-end">${cols}</div>
+      <div style="font-size:10px;color:var(--dim);margin-top:6px;text-align:center">Година (0–23)</div>`;
+  }
+
+  // Peak days chart
+  const dayNames=["Нд","Пн","Вт","Ср","Чт","Пт","Сб"];
+  const dayCounts=new Array(7).fill(0);
+  all.forEach(o=>{ if(o.createdAt){ const d=new Date(o.createdAt).getDay(); dayCounts[d]++; } });
+  const maxD2=Math.max(...dayCounts,1);
+  const peakDaysEl=document.getElementById("peakDaysChart");
+  if(peakDaysEl){
+    peakDaysEl.innerHTML=dayNames.map((name,d)=>{
+      const cnt=dayCounts[d];
+      const isPeak=cnt===Math.max(...dayCounts)&&cnt>0;
+      return `<div class="bar-row">
+        <span class="bar-label" style="font-weight:${isPeak?700:400};color:${isPeak?"var(--p)":"var(--sub)"};width:28px">${name}</span>
+        <div class="bar-track" style="height:22px"><div class="bar-fill" style="width:${Math.round(cnt/maxD2*100)}%;height:100%;background:${isPeak?"var(--p)":"rgba(249,115,22,.35)"}"></div></div>
+        <span class="bar-val">${cnt}</span>
+      </div>`;
+    }).join("");
+  }
 
   // Promo analytics
   const promoGridEl=document.getElementById("promoStatsGrid");

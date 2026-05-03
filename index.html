@@ -831,6 +831,31 @@ input,select,textarea{font-size:16px!important} /* prevents iOS zoom on focus */
           <small style="color:var(--muted)">Час очікування: 20–30 хв</small>
         </div>
       </div>
+      <!-- Preorder toggle -->
+      <div style="margin-bottom:14px">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border:1.5px solid var(--border);border-radius:var(--radius-s);background:var(--bg);cursor:pointer;user-select:none" onclick="togglePreorder()">
+          <div>
+            <div style="font-size:14px;font-weight:600;color:var(--text)">⏰ Передзамовлення</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:1px">Замовити на конкретний час/дату</div>
+          </div>
+          <div id="preorderToggleDot" style="width:40px;height:24px;border-radius:12px;background:var(--border);position:relative;transition:.3s;flex-shrink:0">
+            <div style="width:20px;height:20px;border-radius:50%;background:#fff;position:absolute;top:2px;left:2px;transition:.3s;box-shadow:0 1px 4px rgba(0,0,0,.2)" id="preorderToggleThumb"></div>
+          </div>
+        </div>
+        <div id="preorderFields" style="display:none;margin-top:8px;padding:12px 14px;background:var(--bg2);border-radius:var(--radius-s);border:1.5px solid var(--border)">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div class="fg" style="margin:0">
+              <label>Дата</label>
+              <input id="preorderDate" type="date" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-s);font-size:14px;font-family:'Exo 2',sans-serif;background:var(--bg);outline:none;color:var(--text)">
+            </div>
+            <div class="fg" style="margin:0">
+              <label>Час</label>
+              <input id="preorderTime" type="time" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-s);font-size:14px;font-family:'Exo 2',sans-serif;background:var(--bg);outline:none;color:var(--text)">
+            </div>
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-top:7px">Замовлення буде готове до вказаного часу</div>
+        </div>
+      </div>
       <div class="fg">
         <label>Коментар <span id="noteCount" style="font-size:10px;color:var(--light);font-weight:400">(0/300)</span></label>
         <textarea id="fNote" placeholder="Побажання, алергії, спосіб оплати..." rows="3" maxlength="300"
@@ -1215,14 +1240,10 @@ function checkHours() {
 
 /* ——— FILTERS ——— */
 function buildFilters() {
-  // Show all categories from settings (even empty ones) — filter buttons
-  var activeCats = CATS.filter(function(c) {
-    if (c === "Всі") return true;
-    return MENU.some(function(d) { return d.cat === c && !d.stopped; });
-  });
-  // Also include "Всі" always, and all CATS (so empty cats from settings show too)
+  // Only show categories that have at least one visible (non-stopped) dish
   var html = "";
   CATS.forEach(function(c) {
+    if (c !== "Всі" && !MENU.some(function(d) { return d.cat === c && !d.stopped; })) return;
     html += '<button class="cat-btn' + (c === activeCat ? " on" : "") + '" onclick="setCat(\'' + c + '\')">' + c + '</button>';
   });
   document.getElementById("filterBar").innerHTML = html;
@@ -1823,6 +1844,13 @@ function resetCheckoutForm() {
   var ib = document.getElementById("promoInputBox"); if (ib) ib.style.display = "flex";
   updateCart();
   // Reset step
+  preorderEnabled = false;
+  var dot2 = document.getElementById("preorderToggleDot");
+  var thumb2 = document.getElementById("preorderToggleThumb");
+  var pf2 = document.getElementById("preorderFields");
+  if (dot2) dot2.style.background = "var(--border)";
+  if (thumb2) thumb2.style.left = "2px";
+  if (pf2) pf2.style.display = "none";
   toStep(1);
   setDlv("delivery");
 }
@@ -1931,6 +1959,7 @@ function buildPreview() {
     + '<div class="prev-info"><span>' + nm + '</span><span>' + ph + '</span><span>' + addr + '</span>'
     + (dlv === 0 && dlvType === 'delivery' ? '<span style="color:var(--green);font-size:12px">🎁 Доставка безкоштовна</span>' : dlv > 0 ? '<span>Доставка: +' + dlv + ' грн</span>' : '')
     + (note ? '<span>' + note + '</span>' : '')
+    + (preorderEnabled && document.getElementById("preorderDate")?.value ? '<span style="color:var(--primary);font-weight:700">⏰ Передзамовлення: ' + document.getElementById("preorderDate").value + ' о ' + (document.getElementById("preorderTime")?.value || "") + '</span>' : '')
     + '<span>Орієнтовно ~' + eta + ' хв</span></div>';
 }
 
@@ -1951,6 +1980,12 @@ window.placeOrder = async function() {
   var orderNum = "PA-" + String(Date.now()).slice(-4);
 
   try {
+    var preorderAt = null;
+    if (preorderEnabled) {
+      var pd = document.getElementById("preorderDate")?.value;
+      var pt = document.getElementById("preorderTime")?.value;
+      if (pd && pt) preorderAt = pd + "T" + pt;
+    }
     await push(ref(db, "orders"), {
       orderNum:     orderNum,
       promoCode:    appliedPromo ? appliedPromo.code : null,
@@ -1962,7 +1997,8 @@ window.placeOrder = async function() {
       delivery:     dlv,
       total:        tot,
       eta:          eta,
-      status:       "new",
+      preorderAt:   preorderAt,
+      status:       preorderAt ? "preorder" : "new",
       createdAt:    Date.now(),
     });
     // Telegram notification — fire and don't block UI
@@ -2238,7 +2274,31 @@ window.trackOrder = async function() {
   }
 };
 
-/* ——— PHONE INPUT ——— */
+/* ——— PREORDER ——— */
+var preorderEnabled = false;
+window.togglePreorder = function() {
+  preorderEnabled = !preorderEnabled;
+  var dot = document.getElementById("preorderToggleDot");
+  var thumb = document.getElementById("preorderToggleThumb");
+  var fields = document.getElementById("preorderFields");
+  if (dot) dot.style.background = preorderEnabled ? "var(--primary)" : "var(--border)";
+  if (thumb) thumb.style.left = preorderEnabled ? "18px" : "2px";
+  if (fields) fields.style.display = preorderEnabled ? "block" : "none";
+  if (preorderEnabled) {
+    // Set min date to today
+    var d = new Date();
+    var dateStr = d.toISOString().split("T")[0];
+    var el = document.getElementById("preorderDate");
+    if (el) { el.min = dateStr; if (!el.value) el.value = dateStr; }
+    var tel = document.getElementById("preorderTime");
+    if (tel && !tel.value) {
+      var h = String(d.getHours()).padStart(2,"0"), m = String(d.getMinutes()).padStart(2,"0");
+      tel.value = h + ":" + m;
+    }
+  }
+};
+
+
 var PHONE_PREFIX = "+380";
 function initPhoneInput() {
   var el = document.getElementById("fPhone");
