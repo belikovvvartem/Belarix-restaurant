@@ -1107,6 +1107,21 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
         </button>
         <div style="flex:1"></div>
       </div>
+      <!-- ORDER FILTERS -->
+      <div id="orderFiltersBar" style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;flex-shrink:0">
+        <select id="orderStatusFilter" onchange="renderOrders()" style="padding:7px 10px;background:var(--surf);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--txt);font-size:12px;font-weight:500;cursor:pointer;outline:none;font-family:'Inter',sans-serif">
+          <option value="">Всі статуси</option>
+          <option value="new">🟠 Нові</option>
+          <option value="accepted">🔵 Прийняті</option>
+          <option value="in_progress">🟡 Готуються</option>
+          <option value="shipped">🟣 В дорозі</option>
+          <option value="completed">🟢 Виконані</option>
+        </select>
+        <select id="orderDateSort" onchange="renderOrders()" style="padding:7px 10px;background:var(--surf);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--txt);font-size:12px;font-weight:500;cursor:pointer;outline:none;font-family:'Inter',sans-serif">
+          <option value="newest">⬆ Нові спочатку</option>
+          <option value="oldest">⬇ Старі спочатку</option>
+        </select>
+      </div>
       <div class="orders-grid" id="ordersGrid">
         <div class="state-box"><div class="spinner"></div><strong>Завантаження...</strong></div>
       </div>
@@ -1274,6 +1289,12 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
 
         <!-- RIGHT: Dish list -->
         <div class="menu-list-col">
+          <div style="display:flex;gap:7px;margin-bottom:10px;flex-wrap:wrap;flex-shrink:0">
+            <input id="dishSearchInput" placeholder="🔍 Пошук страви..." oninput="renderDishList()" style="flex:1;min-width:140px;padding:8px 11px;background:var(--surf2);border:1.5px solid var(--brd2);border-radius:var(--rs);color:var(--txt);font-size:13px;font-family:'Inter',sans-serif;outline:none;transition:border-color var(--t)" onfocus="this.style.borderColor='var(--p)'" onblur="this.style.borderColor='var(--brd2)'">
+            <select id="dishCatFilter" onchange="renderDishList()" style="padding:8px 10px;background:var(--surf2);border:1.5px solid var(--brd2);border-radius:var(--rs);color:var(--txt);font-size:13px;font-family:'Inter',sans-serif;outline:none;cursor:pointer;transition:border-color var(--t)">
+              <option value="">Всі категорії</option>
+            </select>
+          </div>
           <div id="dishCount" class="dish-count-row"></div>
           <div id="dishGrid"></div>
         </div>
@@ -2250,16 +2271,29 @@ window.setOrderTab=tab=>{
     const el=document.getElementById("otab-"+t);
     if(el) el.classList.toggle("on",t===tab);
   });
-  // Show status filter only for active tab — removed
+  // Show filter bar only for active/completed tabs
+  const bar=document.getElementById("orderFiltersBar");
+  if(bar) bar.style.display=(tab==="preorder")?"none":"flex";
+  // Update status filter options based on tab
+  const sf=document.getElementById("orderStatusFilter");
+  if(sf){
+    if(tab==="completed"){
+      sf.style.display="none";
+    } else {
+      sf.style.display="";
+    }
+  }
   renderOrders();
 };
 
 function renderOrders(){
-  const sortMode="newest";
-  const statusFilter="";
+  const sortMode=document.getElementById("orderDateSort")?.value||"newest";
+  const statusFilter=document.getElementById("orderStatusFilter")?.value||"";
   let list;
   if(curOrderTab==="completed"){
     list=[...allOrders.completed];
+    if(sortMode==="oldest")list.sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
+    else list.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
   } else if(curOrderTab==="preorder"){
     list=[...allOrders.preorder];
     // Sort by scheduled time ascending (soonest first)
@@ -2669,6 +2703,13 @@ function rebuildCatSelects(){
   const cats=Array.isArray(siteSettings.categories)?siteSettings.categories:["Перші страви","Другі страви","Салати","Напої","Випічка"];
   const opts=cats.map(c=>`<option>${c}</option>`).join("");
   ["mCat","eCat"].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=opts;});
+  // Populate dish category filter in menu panel
+  const dcf=document.getElementById("dishCatFilter");
+  if(dcf){
+    const cur=dcf.value;
+    dcf.innerHTML=`<option value="">Всі категорії</option>`+cats.map(c=>`<option value="${c}">${c}</option>`).join("");
+    if(cur) dcf.value=cur;
+  }
 }
 function renderSettings(){
   const minVal=siteSettings.minOrder||200;
@@ -2852,8 +2893,8 @@ function populateDishCatFilter(){
 }
 function renderDishList(){
   const el=document.getElementById("dishGrid");if(!el)return;
-  const q="";
-  const filterCat="";
+  const q=(document.getElementById("dishSearchInput")?.value||"").toLowerCase().trim();
+  const filterCat=document.getElementById("dishCatFilter")?.value||"";
   const sortMode="name";
   const filterStop="";
   let dishes=allDishes.filter(d=>{
