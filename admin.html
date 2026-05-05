@@ -1041,14 +1041,13 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
 .perm-close-btn:hover{color:var(--txt)}
 
 /* ========== STATS PERMISSION OVERLAYS ========== */
-/* Full-section block when stats=false */
+/* Full-section block when stats=false — fixed so it covers the scrollable panel fully */
 #statsPermOverlay{
-  position:absolute;inset:0;z-index:20;
-  background:rgba(10,12,16,.82);
-  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  position:fixed;inset:0;z-index:200;
+  background:rgba(10,12,16,.92);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
   display:flex;align-items:center;justify-content:center;
   flex-direction:column;gap:10px;text-align:center;padding:24px;
-  border-radius:0;
 }
 /* Per-block blur overlay for statsPlus=false */
 .stats-plus-block{position:relative;overflow:hidden}
@@ -2217,31 +2216,32 @@ async function loadPermissions(){
 }
 
 function applyPermissions(){
+  const UNIV_MSG="Ця функція недоступна у вашому тарифі. Щоб підключити — зверніться до розробника.";
   Object.entries(PERM_SECTIONS).forEach(([perm, sec])=>{
     const btn = document.getElementById("nb-"+sec);
     if(!btn) return;
     const allowed = window.PERMS[perm] !== false;
     if(!allowed){
       btn.classList.add("nb-locked");
-      // Add lock icon if not already there
       if(!btn.querySelector(".nb-lock-icon")){
         const lock = document.createElement("span");
         lock.className = "nb-lock-icon";
         lock.textContent = "🔒";
         btn.appendChild(lock);
       }
-      btn.onclick = (e)=>{ e.stopPropagation(); showPermOverlay(); };
+      btn.onclick = (e)=>{ e.stopPropagation(); showPermOverlay(UNIV_MSG); };
     } else {
       btn.classList.remove("nb-locked");
       const lock = btn.querySelector(".nb-lock-icon");
       if(lock) lock.remove();
-      // Restore correct onclick
       btn.onclick = ()=>setSection(sec);
     }
   });
 }
 
-function showPermOverlay(){
+function showPermOverlay(msg){
+  const box=document.querySelector("#permOverlay .perm-msg");
+  if(box) box.textContent=msg||"Ця функція недоступна у вашому тарифі. Щоб підключити — зверніться до розробника.";
   document.getElementById("permOverlay").classList.add("on");
 }
 window.closePermOverlay=()=>{
@@ -2293,7 +2293,7 @@ function applySettingsTabPerms(){
           <div class="stab-lock-box">
             <div class="stab-lock-icon">🔒</div>
             <div class="stab-lock-title">Розділ недоступний</div>
-            <div class="stab-lock-sub">Цей розділ не входить у ваш тариф.<br>Зверніться до розробника для підключення.</div>
+            <div class="stab-lock-sub">Ця функція недоступна у вашому тарифі. Щоб підключити — зверніться до розробника.</div>
             <a class="spo-contact" href="https://t.me/belarix_agency" target="_blank" style="margin-top:10px;display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:40px;background:var(--p);color:#fff;font-size:12px;font-weight:700;text-decoration:none">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-2.01 9.47c-.147.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.332-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.873.75z"/></svg>
               Підключити
@@ -2350,14 +2350,16 @@ function applyStatsPermissions(){
       fullOv.innerHTML = `
         <div style="font-size:48px;line-height:1;margin-bottom:10px">📊</div>
         <div style="font-size:17px;font-weight:700;color:var(--txt);margin-bottom:8px">Статистика недоступна</div>
-        <div style="font-size:13px;color:var(--sub);line-height:1.65;max-width:300px">Статистика недоступна у вашому тарифі.<br>Зверніться до розробника для підключення.</div>
+        <div style="font-size:13px;color:var(--sub);line-height:1.65;max-width:300px">Ця функція недоступна у вашому тарифі.<br>Щоб підключити — зверніться до розробника.</div>
         <a class="spo-contact" href="https://t.me/belarix_agency" target="_blank" style="margin-top:14px">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-2.01 9.47c-.147.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.332-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.873.75z"/></svg>
           Зв'язатися з розробником
         </a>`;
-      statsSection.appendChild(fullOv);
+      document.body.appendChild(fullOv);
     }
-    fullOv.style.display = "flex";
+    // Show only when stats panel is active
+    const isActive = statsSection.classList.contains("active");
+    fullOv.style.display = isActive ? "flex" : "none";
   } else {
     if(fullOv) fullOv.style.display = "none";
   }
@@ -2376,7 +2378,7 @@ function applyStatsPermissions(){
         gate.innerHTML = `
           <div class="spo-icon">🔐</div>
           <div class="spo-title">Розширений тариф</div>
-          <div class="spo-sub">Доступно в розширеному тарифі.<br>Зверніться до розробника.</div>
+          <div class="spo-sub">Ця функція недоступна у вашому тарифі.<br>Щоб підключити — зверніться до розробника.</div>
           <a class="spo-contact" href="https://t.me/belarix_agency" target="_blank">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-2.01 9.47c-.147.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.332-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.873.75z"/></svg>
             Підключити
@@ -3061,6 +3063,7 @@ function listenMenu(){
   },e=>console.error("Menu:",e.message));
 }
 window.addDish=async()=>{
+  if(!checkPerm("menu")) return;
   const name=document.getElementById("mName").value.trim();
   const price=parseInt(document.getElementById("mPrice").value)||0;
   const errEl=document.getElementById("mErr");
@@ -3090,6 +3093,7 @@ window.addDish=async()=>{
   if(btn){btn.disabled=false;btn.textContent="Додати страву";}
 };
 window.openEditDish=id=>{
+  if(!checkPerm("menu")) return;
   const d=allDishes.find(x=>x.id===id);if(!d)return;
   editingDishId=id;
   document.getElementById("eName").value=d.name||"";
@@ -3121,6 +3125,7 @@ window.openEditDish=id=>{
 };
 window.closeEditModal=()=>document.getElementById("editModal").classList.remove("on");
 window.saveDishEdit=async()=>{
+  if(!checkPerm("menu")) return;
   const id=editingDishId;if(!id)return;
   const name=document.getElementById("eName").value.trim();
   const price=parseInt(document.getElementById("ePrice").value)||0;
@@ -3139,8 +3144,12 @@ window.saveDishEdit=async()=>{
   const eHasSizes=document.getElementById("eHasSizes").checked;
   const eSizes=eHasSizes?getSizesFromList("eSizesList"):null;
   const data={name,price:finalPrice,cat:document.getElementById("eCat").value,prep:parseInt(document.getElementById("ePrep").value)||15,desc:document.getElementById("eDesc").value.trim(),pop:document.getElementById("ePop").checked,oldPrice:finalOldPrice,sizes:eSizes&&eSizes.length?eSizes:null,photo:photoUrl};
-  try{await dbUpdate(ref(db,`menu/${id}`),data);logHistory("menu","Відредаговано: "+name);closeEditModal();}
-  catch(e){alert("Помилка: "+e.message);}
+  try{
+    await dbUpdate(ref(db,`menu/${id}`),data);
+    logHistory("menu","Відредаговано: "+name);
+    closeEditModal();
+    showToast("Страву збережено","«"+name+"» оновлено","✓","success");
+  }catch(e){showToast("Помилка збереження",e.message,"⚠","error");}
   if(saveBtn){saveBtn.disabled=false;saveBtn.textContent="Зберегти";}
 };
 window.deleteDish=async id=>{
@@ -3149,7 +3158,7 @@ window.deleteDish=async id=>{
     await dbRemove(ref(db,`menu/${id}`));
     if(d?.photo) await deleteFromR2(d.photo);
     logHistory("menu","Видалено: "+(d?.name||id));
-  }catch(e){alert("Помилка: "+e.message);}
+  }catch(e){showToast("Помилка видалення",e.message,"⚠","error");}
 };
 window.toggleDishStop=async(id,stop)=>{
   const d=allDishes.find(x=>x.id===id);if(!d)return;
@@ -3317,14 +3326,17 @@ window.onBannerDragEnd=()=>{
   dragBannerId=null;
   document.querySelectorAll(".banner-card").forEach(c=>{c.classList.remove("dragging","drag-target");});
 };
-window.toggleBanner=async(id,active)=>{try{await dbUpdate(ref(db,"banners/"+id),{active});}catch(e){alert("Помилка");}};
+window.toggleBanner=async(id,active)=>{
+  if(!checkPerm("banners")){showToast("Недоступно","Ця функція недоступна у вашому тарифі. Щоб підключити — зверніться до розробника.","🔒","warn");return;}
+  try{await dbUpdate(ref(db,"banners/"+id),{active});}
+  catch(e){showToast("Помилка",e.message,"⚠","error");}};
 window.deleteBanner=async id=>{
   try{
     const b=allBanners.find(x=>x.id===id);
     await dbRemove(ref(db,"banners/"+id));
     if(b?.photo) await deleteFromR2(b.photo);
     logHistory("banner","Видалено банер");
-  }catch(e){alert("Помилка: "+e.message);}
+  }catch(e){showToast("Помилка видалення",e.message,"⚠","error");}
 };
 
 /* ——— HISTORY ——— */
@@ -3408,6 +3420,11 @@ window.setSection=sec=>{
   document.getElementById("refreshBtn").style.display=sec==="orders"?"flex":"none";
   if(sec==="orders")renderOrders();
   if(sec==="stats"){renderStats();applyStatsPermissions();}
+  else {
+    // Hide stats fixed overlay when leaving stats section
+    const ov=document.getElementById("statsPermOverlay");
+    if(ov) ov.style.display="none";
+  }
   if(sec==="menu"){renderDishList();rebuildCatSelects();}
   if(sec==="banners"){renderBannerList();}
   if(sec==="history")renderHistory();
@@ -3667,7 +3684,7 @@ window.confirmAddDish=async()=>{
     await dbUpdate(ref(db,`orders/${_adOrderId}`),{items,total:newTotal,updatedAt:Date.now()});
     logHistory("order",`Додано: ${_adPicked.name} ×${_adQty}`,order.orderNum||_adOrderId.slice(0,8));
     document.getElementById("addDishModal").classList.remove("on");
-  }catch(e){alert("Помилка: "+e.message);}
+  }catch(e){showToast("Помилка",e.message,"⚠","error");}
 };
 
 
@@ -3869,7 +3886,8 @@ function promoTypeName(t){
 
 // Toggle promo active/inactive
 window.togglePromoActive=async(code,active)=>{
-  try{await dbUpdate(ref(db,"promoCodes/"+code),{active});}catch(e){alert("Помилка");}
+  if(!checkPerm("promo")){showToast("Недоступно","Ця функція недоступна у вашому тарифі. Щоб підключити — зверніться до розробника.","🔒","warn");return;}
+  try{await dbUpdate(ref(db,"promoCodes/"+code),{active});}catch(e){showToast("Помилка",e.message,"⚠","error");}
 };
 
 // Delete promo
@@ -3877,7 +3895,7 @@ window.deletePromo=async code=>{
   try{
     await dbRemove(ref(db,"promoCodes/"+code));
     await logHistory("promo","Промокод "+code+" видалено");
-  }catch(e){alert("Помилка: "+e.message);}
+  }catch(e){showToast("Помилка видалення",e.message,"⚠","error");}
 };
 
 // Render promo list
@@ -4265,6 +4283,7 @@ window.createPromo=async()=>{
 
 // Patch saveDishEdit to show toast on success
 window.saveDishEdit=async()=>{
+  if(!checkPerm("menu")) return;
   const id=editingDishId;if(!id)return;
   const name=document.getElementById("eName").value.trim();
   const price=parseInt(document.getElementById("ePrice").value)||0;
@@ -4570,7 +4589,7 @@ ${o.eta?`<div class="row" style="margin-top:4px"><span>ETA:</span><span>~${o.eta
   <div class="print-perm-box">
     <div style="font-size:44px;margin-bottom:14px;line-height:1">🖨</div>
     <div style="font-size:16px;font-weight:700;color:var(--txt);margin-bottom:8px">Друк чеку недоступний</div>
-    <div style="font-size:13px;color:var(--sub);line-height:1.65;margin-bottom:22px">Ваш тариф не включає друк чеку.<br>Щоб підключити — зверніться до розробника.</div>
+    <div style="font-size:13px;color:var(--sub);line-height:1.65;margin-bottom:22px">Ця функція недоступна у вашому тарифі. Щоб підключити — зверніться до розробника.</div>
     <div style="display:flex;gap:8px">
       <button onclick="closePrintPermModal()" class="perm-close-btn" style="flex:1">Закрити</button>
       <a class="perm-contact" href="https://t.me/belarix_agency" target="_blank" style="flex:2">
@@ -4586,7 +4605,7 @@ ${o.eta?`<div class="row" style="margin-top:4px"><span>ETA:</span><span>~${o.eta
   <div class="perm-box">
     <div class="perm-icon">🔒</div>
     <div class="perm-title">Розділ недоступний</div>
-    <div class="perm-msg">У ваш тариф не входить доступ до цього розділу.<br>Щоб отримати доступ, зверніться до розробника.</div>
+    <div class="perm-msg">Ця функція недоступна у вашому тарифі. Щоб підключити — зверніться до розробника.</div>
     <div class="perm-btns">
       <button class="perm-close-btn" onclick="closePermOverlay()">Закрити</button>
       <a class="perm-contact" href="https://t.me/belarix_agency" target="_blank">
