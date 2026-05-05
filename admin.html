@@ -1011,6 +1011,53 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
   font-family:'Inter',sans-serif;transition:var(--t);
 }
 .perm-close-btn:hover{color:var(--txt)}
+
+/* ========== STATS PERMISSION OVERLAYS ========== */
+/* Full-section block when stats=false */
+#statsPermOverlay{
+  position:absolute;inset:0;z-index:20;
+  background:rgba(10,12,16,.82);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:10px;text-align:center;padding:24px;
+  border-radius:0;
+}
+/* Per-block blur overlay for statsPlus=false */
+.stats-plus-block{position:relative;overflow:hidden}
+.stats-plus-overlay{
+  position:absolute;inset:0;z-index:10;
+  background:rgba(10,12,16,.76);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:6px;text-align:center;padding:20px;
+  border-radius:var(--r);
+}
+.spo-icon{font-size:28px;line-height:1;margin-bottom:4px}
+.spo-title{font-size:14px;font-weight:700;color:var(--txt)}
+.spo-sub{font-size:12px;color:var(--sub);line-height:1.5;max-width:280px}
+.spo-contact{
+  margin-top:6px;padding:8px 18px;background:var(--p);color:#fff;
+  border:none;border-radius:40px;font-size:12px;font-weight:700;
+  cursor:pointer;font-family:'Inter',sans-serif;text-decoration:none;
+  display:inline-flex;align-items:center;gap:6px;transition:background var(--t);
+}
+.spo-contact:hover{background:var(--pd)}
+
+/* ========== PRINT RECEIPT MODAL ========== */
+#printPermModal{
+  position:fixed;inset:0;z-index:5000;
+  background:rgba(0,0,0,.6);backdrop-filter:blur(6px);
+  display:none;align-items:center;justify-content:center;padding:20px;
+}
+#printPermModal.on{display:flex}
+.print-perm-box{
+  background:var(--surf);border:1px solid var(--brd2);border-radius:20px;
+  padding:28px 24px 22px;max-width:340px;width:100%;text-align:center;
+  box-shadow:0 24px 64px rgba(0,0,0,.5);
+  transform:scale(.92) translateY(16px);
+  transition:transform .28s cubic-bezier(.34,1.3,.64,1);
+}
+#printPermModal.on .print-perm-box{transform:scale(1) translateY(0)}
 </style>
 </head>
 <body>
@@ -1128,7 +1175,7 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
     </div>
 
     <!-- STATS -->
-    <div id="sec-stats" class="panel">
+    <div id="sec-stats" class="panel" style="position:relative">
       <!-- Status row -->
       <div id="statsStatusRow" style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--surf);border:1px solid var(--brd);border-radius:var(--r);margin-bottom:16px;flex-shrink:0;flex-wrap:wrap">
         <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
@@ -1147,7 +1194,7 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
       <!-- Main KPI cards -->
       <div class="stats-grid" id="statsCards"></div>
       <!-- Revenue by day chart -->
-      <div class="chart-card" id="revenueChartCard">
+      <div class="chart-card stats-plus-block" id="revenueChartCard">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
           <div class="chart-title" style="margin-bottom:0">Виручка за 7 днів</div>
           <span id="revTotalLabel" style="font-size:12px;color:var(--sub)"></span>
@@ -1162,12 +1209,12 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
         <div id="statusChart" style="display:flex;gap:8px;flex-wrap:wrap"></div>
       </div>
       <!-- Two columns: top dishes + promo stats -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;flex-shrink:0">
+      <div id="topDishesGrid" class="stats-plus-block" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;flex-shrink:0">
         <div class="chart-card"><div class="chart-title">Топ страв</div><div class="bar-chart" id="topDishes"></div></div>
         <div class="chart-card"><div class="chart-title">По категоріях</div><div class="bar-chart" id="catChart"></div></div>
       </div>
       <!-- Peak hours & days -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;flex-shrink:0">
+      <div id="peakGrid" class="stats-plus-block" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;flex-shrink:0">
         <div class="chart-card">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
             <div class="chart-title" style="margin-bottom:0">⏰ Час пік (за годинами)</div>
@@ -2065,12 +2112,14 @@ setTheme(savedTheme);
 
 /* ——— PERMISSIONS / FEATURE FLAGS ——— */
 window.PERMS = {
-  stats:true, menu:true, banners:true,
+  stats:true, statsPlus:true, printReceipt:true,
+  menu:true, banners:true,
   history:true, promo:true, settings:true
 };
 // Sections that can be feature-flagged (orders + menu always on)
+// NOTE: stats is intentionally NOT here — stats nav always navigates,
+// access control happens inside the section via overlay.
 const PERM_SECTIONS = {
-  stats:    "stats",
   banners:  "banners",
   history:  "history",
   promo:    "promo",
@@ -2086,6 +2135,7 @@ async function loadPermissions(){
     }
   }catch(e){ console.warn("Permissions load failed:",e.message); }
   applyPermissions();
+  applyStatsPermissions();
 }
 
 function applyPermissions(){
@@ -2129,6 +2179,65 @@ document.addEventListener("DOMContentLoaded",()=>{
 function checkPerm(perm){
   if(window.PERMS[perm]===false){ showPermOverlay(); return false; }
   return true;
+}
+
+/* ——— PRINT RECEIPT PERMISSION MODAL ——— */
+window.closePrintPermModal=()=>{
+  document.getElementById("printPermModal").classList.remove("on");
+};
+
+/* ——— STATS PERMISSION OVERLAYS ——— */
+function applyStatsPermissions(){
+  const statsSection = document.getElementById("sec-stats");
+  if(!statsSection) return;
+
+  // 1. Full section overlay — shown when stats=false
+  let fullOv = document.getElementById("statsPermOverlay");
+  if(!window.PERMS.stats){
+    if(!fullOv){
+      fullOv = document.createElement("div");
+      fullOv.id = "statsPermOverlay";
+      fullOv.innerHTML = `
+        <div style="font-size:48px;line-height:1;margin-bottom:10px">📊</div>
+        <div style="font-size:17px;font-weight:700;color:var(--txt);margin-bottom:8px">Статистика недоступна</div>
+        <div style="font-size:13px;color:var(--sub);line-height:1.65;max-width:300px">Статистика недоступна у вашому тарифі.<br>Зверніться до розробника для підключення.</div>
+        <a class="spo-contact" href="https://t.me/belarix_agency" target="_blank" style="margin-top:14px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-2.01 9.47c-.147.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.332-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.873.75z"/></svg>
+          Зв'язатися з розробником
+        </a>`;
+      statsSection.appendChild(fullOv);
+    }
+    fullOv.style.display = "flex";
+  } else {
+    if(fullOv) fullOv.style.display = "none";
+  }
+
+  // 2. Per-block overlays — shown when stats=true but statsPlus=false
+  const plusBlocks = ["revenueChartCard","topDishesGrid","peakGrid"];
+  const showPlusOverlay = window.PERMS.stats && !window.PERMS.statsPlus;
+  plusBlocks.forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el) return;
+    let gate = el.querySelector(".stats-plus-overlay");
+    if(showPlusOverlay){
+      if(!gate){
+        gate = document.createElement("div");
+        gate.className = "stats-plus-overlay";
+        gate.innerHTML = `
+          <div class="spo-icon">🔐</div>
+          <div class="spo-title">Розширений тариф</div>
+          <div class="spo-sub">Доступно в розширеному тарифі.<br>Зверніться до розробника.</div>
+          <a class="spo-contact" href="https://t.me/belarix_agency" target="_blank">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-2.01 9.47c-.147.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.332-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.873.75z"/></svg>
+            Підключити
+          </a>`;
+        el.appendChild(gate);
+      }
+      gate.style.display = "flex";
+    } else {
+      if(gate) gate.style.display = "none";
+    }
+  });
 }
 
 /* ——— STATE ——— */
@@ -2676,6 +2785,8 @@ function renderStats(){
       ?topPromos.map(p=>`<div class="bar-row"><span class="bar-label" style="font-weight:700;font-size:11px;letter-spacing:.5px">${p.code}</span><div class="bar-track"><div class="bar-fill" style="width:${Math.round(p.uses/maxU*100)}%;background:var(--yellow)"></div></div><span class="bar-val">${p.uses}×</span></div>`).join("")
       :`<p style="color:var(--sub);font-size:12px">Промокоди ще не використовувались</p>`;
   }
+  // Apply stats-level permission overlays after rendering
+  applyStatsPermissions();
 }
 
 /* ——— SETTINGS ——— */
@@ -3136,7 +3247,7 @@ window.setSection=sec=>{
   document.getElementById("topSub").textContent=subs[sec];
   document.getElementById("refreshBtn").style.display=sec==="orders"?"flex":"none";
   if(sec==="orders")renderOrders();
-  if(sec==="stats")renderStats();
+  if(sec==="stats"){renderStats();applyStatsPermissions();}
   if(sec==="menu"){renderDishList();rebuildCatSelects();}
   if(sec==="banners"){renderBannerList();}
   if(sec==="history")renderHistory();
@@ -4214,6 +4325,11 @@ tbody tr:hover{background:#fffbf7}
    ДРУК ЧЕКА
    ============================== */
 window.printOrderReceipt=id=>{
+  // Check printReceipt permission
+  if(window.PERMS.printReceipt===false){
+    document.getElementById("printPermModal").classList.add("on");
+    return;
+  }
   const o=Object.values(allOrders).flat().find(x=>x.id===id);
   if(!o){showToast("Замовлення не знайдено","","⚠","warn");return;}
   const SLoc={new:"Нове",accepted:"Прийнято",in_progress:"Готується",shipped:"В дорозі",completed:"Виконано"};
@@ -4287,6 +4403,22 @@ ${o.eta?`<div class="row" style="margin-top:4px"><span>ETA:</span><span>~${o.eta
 
 
 </script>
+
+<!-- PRINT RECEIPT PERMISSION MODAL -->
+<div id="printPermModal" onclick="if(event.target===this)closePrintPermModal()">
+  <div class="print-perm-box">
+    <div style="font-size:44px;margin-bottom:14px;line-height:1">🖨</div>
+    <div style="font-size:16px;font-weight:700;color:var(--txt);margin-bottom:8px">Друк чеку недоступний</div>
+    <div style="font-size:13px;color:var(--sub);line-height:1.65;margin-bottom:22px">Ваш тариф не включає друк чеку.<br>Щоб підключити — зверніться до розробника.</div>
+    <div style="display:flex;gap:8px">
+      <button onclick="closePrintPermModal()" class="perm-close-btn" style="flex:1">Закрити</button>
+      <a class="perm-contact" href="https://t.me/belarix_agency" target="_blank" style="flex:2">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-2.01 9.47c-.147.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.332-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.873.75z"/></svg>
+        Зв'язатися
+      </a>
+    </div>
+  </div>
+</div>
 
 <!-- PERMISSION OVERLAY -->
 <div id="permOverlay">
