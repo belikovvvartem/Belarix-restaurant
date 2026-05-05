@@ -1218,7 +1218,7 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
           <span>Категорій: <strong id="spCats" style="color:var(--txt)">—</strong></span>
           <span>Мін: <strong id="spMin" style="color:var(--p)">—</strong></span>
           <span>Від: <strong id="spFree" style="color:var(--green)">—</strong></span>
-          <button onclick="exportDayReport()" style="display:flex;align-items:center;gap:5px;padding:6px 12px;background:var(--surf2);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--txt);font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:var(--t)" onmouseover="this.style.borderColor='var(--p)';this.style.color='var(--p)'" onmouseout="this.style.borderColor='var(--brd2)';this.style.color='var(--txt)'">⬇ Звіт за день</button>
+          <button onclick="openReportsModal()" style="display:flex;align-items:center;gap:5px;padding:6px 12px;background:var(--surf2);border:1px solid var(--brd2);border-radius:var(--rs);color:var(--txt);font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:var(--t)" onmouseover="this.style.borderColor='var(--p)';this.style.color='var(--p)'" onmouseout="this.style.borderColor='var(--brd2)';this.style.color='var(--txt)'">📊 Звіти</button>
         </div>
       </div>
       <!-- Main KPI cards -->
@@ -2193,7 +2193,7 @@ window.PERMS = {
   menu:true, banners:true,
   history:true, promo:true, settings:true,
   settingsDelivery:true, settingsCategories:true, settingsSchedule:true, settingsConditions:true,
-  telegramNotifications:true
+  telegramNotifications:true, reports:true
 };
 // Sections that can be feature-flagged (orders + menu always on)
 // NOTE: stats is intentionally NOT here — stats nav always navigates,
@@ -4407,6 +4407,207 @@ window.deletePromo=async code=>{
 };
 
 /* ==============================
+   REPORTS MODAL — LAST 7 DAYS
+   ============================== */
+window.openReportsModal = () => {
+  if(window.PERMS.reports === false){
+    showToast("Недоступно","Звіти недоступні у вашому тарифі. Зверніться до розробника.","🔒","warn");
+    return;
+  }
+  renderReportsDays();
+  document.getElementById("reportsModal").classList.add("on");
+};
+
+window.closeReportsModal = () => {
+  document.getElementById("reportsModal").classList.remove("on");
+};
+
+function renderReportsDays(){
+  const container = document.getElementById("reportsDaysList");
+  const days = [];
+  const DAY_NAMES = ["Неділя","Понеділок","Вівторок","Середа","Четвер","П'ятниця","Субота"];
+  const MONTH_NAMES = ["січня","лютого","березня","квітня","травня","червня","липня","серпня","вересня","жовтня","листопада","грудня"];
+
+  for(let i = 0; i < 7; i++){
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    d.setHours(0,0,0,0);
+    const dEnd = new Date(d);
+    dEnd.setDate(dEnd.getDate() + 1);
+
+    const dayOrders = Object.values(allOrders).flat().filter(o =>
+      o && o.createdAt >= d.getTime() && o.createdAt < dEnd.getTime()
+    );
+    const completed = dayOrders.filter(o => o.status === "completed");
+    const revenue = completed.reduce((s,o) => s + (o.total||0), 0);
+    const dayLabel = i === 0 ? "Сьогодні" : i === 1 ? "Вчора" : DAY_NAMES[d.getDay()];
+    const dateStr = `${d.getDate()} ${MONTH_NAMES[d.getMonth()]}`;
+
+    days.push({d, dEnd, dayLabel, dateStr, dayOrders, completed, revenue});
+  }
+
+  container.innerHTML = days.map((day, i) => {
+    const isEmpty = day.dayOrders.length === 0;
+    const dotColor = isEmpty ? "var(--dim)" : day.revenue > 0 ? "var(--green)" : "var(--yellow)";
+    return `<div style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--surf);border:1px solid var(--brd);border-radius:var(--r);transition:border-color var(--t)" onmouseover="this.style.borderColor='var(--brd2)'" onmouseout="this.style.borderColor='var(--brd)'">
+      <div style="width:38px;height:38px;border-radius:9px;background:var(--surf2);border:1px solid var(--brd2);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0">
+        <div style="font-size:14px;font-weight:800;color:var(--txt);line-height:1">${day.d.getDate()}</div>
+        <div style="font-size:8px;color:var(--sub);text-transform:uppercase;letter-spacing:.3px">${["Нд","Пн","Вт","Ср","Чт","Пт","Сб"][day.d.getDay()]}</div>
+      </div>
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:7px;margin-bottom:3px">
+          <span style="font-size:13px;font-weight:700;color:var(--txt)">${day.dayLabel}</span>
+          <span style="font-size:11px;color:var(--sub)">${day.dateStr}</span>
+          <div style="width:6px;height:6px;border-radius:50%;background:${dotColor};flex-shrink:0"></div>
+        </div>
+        <div style="display:flex;gap:14px;font-size:11px;color:var(--sub)">
+          <span>Замовлень: <strong style="color:var(--txt)">${day.dayOrders.length}</strong></span>
+          <span>Виконано: <strong style="color:var(--green)">${day.completed.length}</strong></span>
+          <span>Виручка: <strong style="color:var(--p)">${day.revenue} грн</strong></span>
+        </div>
+      </div>
+      ${isEmpty
+        ? `<span style="font-size:11px;color:var(--dim);padding:6px 12px;border:1px solid var(--brd);border-radius:var(--rs);white-space:nowrap">Немає даних</span>`
+        : `<button onclick="exportDayReportForDate(${day.d.getTime()},${day.dEnd.getTime()},'${day.dayLabel} ${day.dateStr}')" style="display:flex;align-items:center;gap:5px;padding:8px 14px;background:var(--p);color:#fff;border:none;border-radius:var(--rs);font-size:11px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:background var(--t);white-space:nowrap;flex-shrink:0" onmouseover="this.style.background='var(--pd)'" onmouseout="this.style.background='var(--p)'">⬇ Завантажити</button>`
+      }
+    </div>`;
+  }).join("");
+}
+
+window.exportDayReportForDate = (tsFrom, tsTo, label) => {
+  const dayOrders = Object.values(allOrders).flat()
+    .filter(o => o && o.createdAt >= tsFrom && o.createdAt < tsTo)
+    .sort((a,b) => (a.createdAt||0) - (b.createdAt||0));
+
+  if(!dayOrders.length){ showToast("Немає замовлень","За цей день даних немає","ℹ","info"); return; }
+
+  const SLoc = {new:"Нове",accepted:"Прийнято",in_progress:"Готується",shipped:"В дорозі",completed:"Виконано"};
+  const SCol = {new:"#c2410c",accepted:"#1d4ed8",in_progress:"#a16207",shipped:"#6d28d9",completed:"#15803d"};
+  const esc = s => String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+
+  const completed = dayOrders.filter(o => o.status === "completed");
+  const totalRev = completed.reduce((s,o) => s+(o.total||0), 0);
+  const totalDlv = completed.reduce((s,o) => s+(o.delivery||0), 0);
+  const totalDisc = dayOrders.reduce((s,o) => s+(o.promoDiscount||0), 0);
+  const avgCheck = completed.length ? Math.round(totalRev/completed.length) : 0;
+
+  const rows = dayOrders.map((o,i) => {
+    const time = new Date(o.createdAt).toLocaleTimeString("uk-UA",{hour:"2-digit",minute:"2-digit"});
+    const activeItems = (o.items||[]).filter(it => !it.deleted);
+    const itemsStr = activeItems.map(it => `${esc(it.name)} ×${it.qty}`).join("; ");
+    const addr = o.deliveryType === "pickup"
+      ? "Самовивіз"
+      : esc([o.customer?.city, o.customer?.street].filter(Boolean).join(", ") || "—");
+    const sc = SCol[o.status] || "#555";
+    const promoStr = o.promoCode ? `${esc(o.promoCode)}${o.promoDiscount>0?" −"+o.promoDiscount+" грн":""}` : "—";
+    const dlvStr = o.delivery === 0 ? "Безкоштовно" : `${o.delivery||0} грн`;
+
+    return `<tr>
+      <td>${i+1}</td>
+      <td style="font-weight:700;letter-spacing:.5px">${esc(o.orderNum||o.id.slice(0,8))}</td>
+      <td>${time}</td>
+      <td><strong>${esc(o.customer?.name||"—")}</strong><br><span class="meta">${esc(o.customer?.phone||"")}</span></td>
+      <td>${addr}</td>
+      <td>${itemsStr}</td>
+      <td class="num">${o.subtotal||o.total||0} грн</td>
+      <td class="num">${dlvStr}</td>
+      <td class="num">${promoStr}</td>
+      <td class="num total-cell">${o.total||0} грн</td>
+      <td><span class="status-tag" style="color:${sc};border-color:${sc}40;background:${sc}0d">${SLoc[o.status]||o.status}</span></td>
+    </tr>`;
+  }).join("");
+
+  const html = `<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<title>Звіт — ${label}</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Times New Roman',Times,serif;background:#fff;color:#111;font-size:12px;padding:24px 28px}
+  .report-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid #111}
+  .report-logo{font-size:22px;font-weight:700;letter-spacing:-0.5px;color:#111}
+  .report-logo span{font-weight:400;font-size:13px;color:#555;display:block;margin-top:2px;letter-spacing:0}
+  .report-meta{text-align:right;font-size:11px;color:#555;line-height:1.8}
+  .report-meta strong{color:#111;font-size:13px;display:block}
+  .kpi-row{display:grid;grid-template-columns:repeat(6,1fr);gap:0;border:1px solid #ccc;border-radius:2px;margin-bottom:20px;overflow:hidden}
+  .kpi{padding:10px 12px;border-right:1px solid #ccc}
+  .kpi:last-child{border-right:none}
+  .kpi-label{font-size:9px;font-weight:400;text-transform:uppercase;letter-spacing:.6px;color:#888;margin-bottom:4px}
+  .kpi-val{font-size:17px;font-weight:700;color:#111;line-height:1}
+  .kpi-sub{font-size:9px;color:#aaa;margin-top:3px}
+  table{width:100%;border-collapse:collapse;font-size:11px}
+  thead tr{border-top:2px solid #111;border-bottom:1.5px solid #111}
+  thead th{padding:7px 8px;text-align:left;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#111;white-space:nowrap}
+  thead th.num{text-align:right}
+  tbody tr{border-bottom:1px solid #ddd}
+  tbody tr:last-child{border-bottom:2px solid #111}
+  tbody td{padding:7px 8px;vertical-align:top;color:#222}
+  tbody td.num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+  tbody td.total-cell{font-weight:700}
+  .meta{color:#888;font-size:10px}
+  .status-tag{display:inline-block;padding:2px 7px;border-radius:2px;font-size:9px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;border:1px solid}
+  .report-footer{margin-top:16px;padding-top:10px;border-top:1px solid #ccc;font-size:10px;color:#aaa;display:flex;justify-content:space-between}
+  .print-btn{position:fixed;bottom:20px;right:20px;padding:10px 20px;background:#111;color:#fff;border:none;border-radius:2px;font-size:12px;font-weight:700;cursor:pointer;letter-spacing:.5px;font-family:'Times New Roman',serif}
+  @media print{
+    body{padding:8mm 10mm;font-size:10px}
+    .print-btn{display:none}
+    @page{margin:8mm;size:A4 landscape}
+    .kpi-val{font-size:15px}
+  }
+</style>
+</head>
+<body>
+<div class="report-header">
+  <div class="report-logo">PANORAMA<span>Звіт по замовленнях</span></div>
+  <div class="report-meta">
+    <strong>${label}</strong>
+    Дата друку: ${new Date().toLocaleDateString("uk-UA",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"})}
+    <br>Всього записів: ${dayOrders.length}
+  </div>
+</div>
+<div class="kpi-row">
+  <div class="kpi"><div class="kpi-label">Замовлень</div><div class="kpi-val">${dayOrders.length}</div><div class="kpi-sub">за день</div></div>
+  <div class="kpi"><div class="kpi-label">Виконано</div><div class="kpi-val">${completed.length}</div><div class="kpi-sub">${dayOrders.length?Math.round(completed.length/dayOrders.length*100):0}%</div></div>
+  <div class="kpi"><div class="kpi-label">Виручка</div><div class="kpi-val">${totalRev} грн</div><div class="kpi-sub">виконані</div></div>
+  <div class="kpi"><div class="kpi-label">Доставка</div><div class="kpi-val">${totalDlv} грн</div><div class="kpi-sub">зібрано</div></div>
+  <div class="kpi"><div class="kpi-label">Знижки</div><div class="kpi-val">${totalDisc} грн</div><div class="kpi-sub">промокоди</div></div>
+  <div class="kpi"><div class="kpi-label">Середній чек</div><div class="kpi-val">${avgCheck} грн</div><div class="kpi-sub">виконані</div></div>
+</div>
+<table>
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Номер</th>
+      <th>Час</th>
+      <th>Клієнт</th>
+      <th>Адреса</th>
+      <th>Склад</th>
+      <th class="num">Сума</th>
+      <th class="num">Доставка</th>
+      <th class="num">Промокод</th>
+      <th class="num">Разом</th>
+      <th>Статус</th>
+    </tr>
+  </thead>
+  <tbody>${rows}</tbody>
+</table>
+<div class="report-footer">
+  <span>Panorama — Система управління замовленнями</span>
+  <span>Сформовано: ${new Date().toLocaleString("uk-UA")}</span>
+</div>
+<button class="print-btn" onclick="window.print()">Друк / PDF</button>
+</body>
+</html>`;
+
+  const win = window.open("","_blank","width=1300,height=820,scrollbars=yes");
+  if(!win){ showToast("Заблоковано","Дозвольте відкриття вікон у браузері","⚠","warn"); return; }
+  win.document.write(html);
+  win.document.close();
+  showToast("Звіт відкрито",label+" · "+dayOrders.length+" замовлень","📊","success");
+};
+
+/* ==============================
    ЗВІТ ЗА ДЕНЬ — CSV EXPORT
    ============================== */
 window.exportDayReport=()=>{
@@ -4599,6 +4800,21 @@ ${o.eta?`<div class="row" style="margin-top:4px"><span>ETA:</span><span>~${o.eta
         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-2.01 9.47c-.147.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.332-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.873.75z"/></svg>
         Зв'язатися
       </a>
+    </div>
+  </div>
+</div>
+
+<!-- REPORTS MODAL -->
+<div class="modal-bg" id="reportsModal" onclick="if(event.target===this)closeReportsModal()" style="z-index:3000">
+  <div class="modal-box" style="max-width:680px;border-radius:18px">
+    <div class="modal-drag-bar"></div>
+    <div class="modal-header">
+      <span class="modal-title">📊 Звіти по днях</span>
+      <button class="modal-x" onclick="closeReportsModal()">✕</button>
+    </div>
+    <div class="modal-scroll" style="padding:20px">
+      <div style="font-size:12px;color:var(--sub);margin-bottom:16px">Завантажте звіт за будь-який із останніх 7 днів у вигляді суворої таблиці</div>
+      <div id="reportsDaysList" style="display:flex;flex-direction:column;gap:8px"></div>
     </div>
   </div>
 </div>
