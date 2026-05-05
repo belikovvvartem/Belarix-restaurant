@@ -485,7 +485,7 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
 
 /* ── Вміст ── */
 .sett-content{overflow-y:auto;padding:20px;flex:1;min-width:0;-webkit-overflow-scrolling:touch}
-.sett-section{display:none;animation:settFadeUp .2s ease both}
+.sett-section{display:none;animation:settFadeUp .2s ease both;position:relative}
 .sett-section.active{display:block}
 @keyframes settFadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 
@@ -696,6 +696,34 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
   .sett-info-row{grid-template-columns:1fr 1fr}
   .hours-day-row{grid-template-columns:64px 1fr}
 }
+
+
+/* ── Settings tab lock overlay ── */
+.stab-lock-overlay{
+  position:absolute;inset:0;z-index:15;
+  background:rgba(10,12,16,.84);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  display:flex;align-items:center;justify-content:center;
+  padding:24px;border-radius:var(--r);
+}
+.stab-lock-box{
+  background:var(--surf);border:1px solid var(--brd2);border-radius:16px;
+  padding:24px 22px;max-width:290px;width:100%;text-align:center;
+  box-shadow:0 16px 48px rgba(0,0,0,.45);
+}
+.stab-lock-icon{font-size:38px;margin-bottom:12px;line-height:1}
+.stab-lock-title{font-size:15px;font-weight:700;color:var(--txt);margin-bottom:6px}
+.stab-lock-sub{font-size:12px;color:var(--sub);line-height:1.55;margin-bottom:16px}
+.sett-nav-item.locked{opacity:.55}
+.sett-nav-item.locked .sett-nav-icon::after{content:" 🔒";font-size:9px}
+/* Telegram status pill */
+.tg-status-pill{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;
+  flex-shrink:0;white-space:nowrap;
+}
+.tg-pill-on{background:rgba(34,197,94,.12);color:var(--green)}
+.tg-pill-off{background:rgba(239,68,68,.08);color:var(--red)}
 
 /* ========== MODAL — REDESIGN ========== */
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);z-index:2000;display:none;align-items:flex-end;justify-content:center}
@@ -1579,6 +1607,10 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
           <button class="sett-nav-item" id="snav-conditions" onclick="setSettTab('conditions')">
             <span class="sett-nav-icon">💰</span>Умови
           </button>
+          <div class="sett-nav-sep"></div>
+          <button class="sett-nav-item" id="snav-notifications" onclick="setSettTab('notifications')">
+            <span class="sett-nav-icon">🔔</span>Сповіщення
+          </button>
         </div>
 
         <!-- RIGHT CONTENT -->
@@ -1815,6 +1847,49 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
                   <div style="font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Банер</div>
                   <div style="font-size:12px;color:var(--txt)">«Безкоштовна доставка від <strong id="prev-free" style="color:var(--green)">500 грн</strong>»</div>
                 </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── NOTIFICATIONS ── -->
+          <div class="sett-section" id="stab-notifications">
+            <div class="sett-header">
+              <h2>Сповіщення</h2>
+              <p>Налаштування Telegram-сповіщень про нові замовлення</p>
+            </div>
+
+            <div class="sett-block">
+              <div class="sett-block-head">
+                <div class="sett-block-icon">📱</div>
+                <div style="flex:1">
+                  <div class="sett-block-title">Telegram-сповіщення</div>
+                  <div class="sett-block-sub">Повідомлення при кожному новому замовленні</div>
+                </div>
+                <span id="tgStatusPill" class="tg-status-pill tg-pill-off">Вимкнено</span>
+                <label class="ios-toggle" style="margin-left:10px">
+                  <input type="checkbox" id="sTgEnabled" onchange="onTgToggle(this)">
+                  <span class="ios-toggle-slider"></span>
+                </label>
+              </div>
+              <div class="sett-block-body" id="tgInfoBody" style="display:none">
+                <div style="padding:10px 12px;background:var(--surf2);border-radius:var(--rs);font-size:12px;color:var(--sub);line-height:1.7">
+                  📬 Сповіщення надсилаються до Telegram при кожному новому замовленні.<br>
+                  <span style="color:var(--txt);font-weight:600">Chat ID та токен налаштовуються на сервері (/api/config).</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="sett-block" style="margin-top:10px">
+              <div class="sett-block-head">
+                <div class="sett-block-icon" style="background:rgba(59,130,246,.12)">ℹ</div>
+                <div><div class="sett-block-title">Що потрапляє до сповіщення</div></div>
+              </div>
+              <div style="padding:12px 16px 14px;display:flex;flex-direction:column;gap:6px">
+                <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--sub)"><span style="font-size:15px">📋</span><span>Номер замовлення та час</span></div>
+                <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--sub)"><span style="font-size:15px">👤</span><span>Ім'я, телефон та адреса клієнта</span></div>
+                <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--sub)"><span style="font-size:15px">🍽</span><span>Склад замовлення та загальна сума</span></div>
+                <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--sub)"><span style="font-size:15px">🏷</span><span>Промокод та знижка (якщо є)</span></div>
+                <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--sub)"><span style="font-size:15px">📸</span><span>Фото страв (медіа-група)</span></div>
               </div>
             </div>
           </div>
@@ -2114,7 +2189,9 @@ setTheme(savedTheme);
 window.PERMS = {
   stats:true, statsPlus:true, printReceipt:true,
   menu:true, banners:true,
-  history:true, promo:true, settings:true
+  history:true, promo:true, settings:true,
+  settingsDelivery:true, settingsCategories:true, settingsSchedule:true, settingsConditions:true,
+  telegramNotifications:true
 };
 // Sections that can be feature-flagged (orders + menu always on)
 // NOTE: stats is intentionally NOT here — stats nav always navigates,
@@ -2136,6 +2213,7 @@ async function loadPermissions(){
   }catch(e){ console.warn("Permissions load failed:",e.message); }
   applyPermissions();
   applyStatsPermissions();
+  applySettingsTabPerms();
 }
 
 function applyPermissions(){
@@ -2184,6 +2262,78 @@ function checkPerm(perm){
 /* ——— PRINT RECEIPT PERMISSION MODAL ——— */
 window.closePrintPermModal=()=>{
   document.getElementById("printPermModal").classList.remove("on");
+};
+
+
+/* ——— SETTINGS TAB PERMISSIONS ——— */
+function applySettingsTabPerms(){
+  const tabPerms={
+    delivery:'settingsDelivery',
+    categories:'settingsCategories',
+    hours:'settingsSchedule',
+    conditions:'settingsConditions',
+    notifications:'telegramNotifications',
+  };
+  Object.entries(tabPerms).forEach(([tab,perm])=>{
+    const section=document.getElementById('stab-'+tab);
+    if(!section)return;
+    const navBtn=document.getElementById('snav-'+tab);
+    const allowed=window.PERMS[perm]!==false;
+
+    // Nav locked indicator
+    if(navBtn) navBtn.classList.toggle('locked',!allowed);
+
+    // Create/show/hide overlay
+    let ov=section.querySelector('.stab-lock-overlay');
+    if(!allowed){
+      if(!ov){
+        ov=document.createElement('div');
+        ov.className='stab-lock-overlay';
+        ov.innerHTML=`
+          <div class="stab-lock-box">
+            <div class="stab-lock-icon">🔒</div>
+            <div class="stab-lock-title">Розділ недоступний</div>
+            <div class="stab-lock-sub">Цей розділ не входить у ваш тариф.<br>Зверніться до розробника для підключення.</div>
+            <a class="spo-contact" href="https://t.me/belarix_agency" target="_blank" style="margin-top:10px;display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:40px;background:var(--p);color:#fff;font-size:12px;font-weight:700;text-decoration:none">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-2.01 9.47c-.147.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.332-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.873.75z"/></svg>
+              Підключити
+            </a>
+          </div>`;
+        section.appendChild(ov);
+      }
+      ov.style.display='flex';
+    } else {
+      if(ov) ov.style.display='none';
+    }
+  });
+}
+
+window.onTgToggle=async(checkbox)=>{
+  if(window.PERMS.telegramNotifications===false){
+    // Revert immediately
+    checkbox.checked=!checkbox.checked;
+    showToast("Функція недоступна","Telegram-сповіщення недоступні у вашому тарифі","🔒","warn");
+    return;
+  }
+  siteSettings.telegramEnabled=checkbox.checked;
+  try{
+    await dbSet(ref(db,"settings"),siteSettings);
+    const pill=document.getElementById("tgStatusPill");
+    const info=document.getElementById("tgInfoBody");
+    if(pill){
+      pill.textContent=checkbox.checked?"Увімкнено":"Вимкнено";
+      pill.className="tg-status-pill "+(checkbox.checked?"tg-pill-on":"tg-pill-off");
+    }
+    if(info) info.style.display=checkbox.checked?"block":"none";
+    showToast(
+      checkbox.checked?"Сповіщення увімкнено":"Сповіщення вимкнено",
+      "Зміни збережено в налаштуваннях","📱","success"
+    );
+    logHistory("settings","Telegram-сповіщення: "+(checkbox.checked?"увімкнено":"вимкнено"));
+  }catch(e){
+    checkbox.checked=!checkbox.checked;
+    showToast("Помилка збереження",e.message,"⚠","error");
+  }
 };
 
 /* ——— STATS PERMISSION OVERLAYS ——— */
@@ -2803,6 +2953,7 @@ window.updateCityPrice=(idx,val)=>{
   if(btn) btn.classList.add("dirty");
 };
 window.saveCityPrice=async idx=>{
+  if(!checkPerm("settingsDelivery")){renderSettings();return;}
   await dbSet(ref(db,"settings"),siteSettings);
   const el=document.getElementById("cpSave"+idx);if(el){el.textContent="✓";setTimeout(()=>el.textContent="Зберегти",2000);}
 };
@@ -2886,6 +3037,15 @@ function renderSettings(){
   if(spDot2) spDot2.style.background=open?"var(--green)":"var(--red)";
   if(spStatus2) spStatus2.textContent=open?"Відкрито":"Зачинено";
   if(spTime2) spTime2.textContent=`Пн–Пт ${fmt(wh.weekdays?.open??10,wh.weekdays?.openMin??0)}–${fmt(wh.weekdays?.close??22,wh.weekdays?.closeMin??0)}`;
+  // ── Telegram toggle state ──
+  const tgEnabled=!!siteSettings.telegramEnabled;
+  const tgEl=document.getElementById("sTgEnabled");
+  const tgPill=document.getElementById("tgStatusPill");
+  const tgInfo=document.getElementById("tgInfoBody");
+  if(tgEl) tgEl.checked=tgEnabled;
+  if(tgPill){tgPill.textContent=tgEnabled?"Увімкнено":"Вимкнено";tgPill.className="tg-status-pill "+(tgEnabled?"tg-pill-on":"tg-pill-off");}
+  if(tgInfo) tgInfo.style.display=tgEnabled?"block":"none";
+  applySettingsTabPerms();
 }
 // saveWorkHours defined once below (patched version)
 
@@ -3252,13 +3412,13 @@ window.setSection=sec=>{
   if(sec==="banners"){renderBannerList();}
   if(sec==="history")renderHistory();
   if(sec==="promo"){renderPromoList();rebuildPromoDishSelect();}
-  if(sec==="settings")renderSettings();
+  if(sec==="settings"){renderSettings();applySettingsTabPerms();}
 };
 window.setMenuTab=()=>{renderDishList();};
 
 /* ——— MISC ——— */
 window.setSettTab=tab=>{
-  const tabs=["delivery","categories","hours","conditions"];
+  const tabs=["delivery","categories","hours","conditions","notifications"];
   tabs.forEach(t=>{
     const btn=document.getElementById("snav-"+t);
     const body=document.getElementById("stab-"+t);
@@ -3282,6 +3442,7 @@ window.catDragOver=(e,idx)=>{
 };
 window.catDragEnd=()=>{document.querySelectorAll(".cat-drag-item").forEach(el=>el.classList.remove("drag-over"));};
 window.catDrop=async(idx)=>{
+  if(!checkPerm("settingsCategories"))return;
   if(dragCatIdx===null||dragCatIdx===idx)return;
   const cats=siteSettings.categories;
   const moved=cats.splice(dragCatIdx,1)[0];
@@ -3951,7 +4112,7 @@ window.updStatus=async(id,st)=>{
 
 // Patch saveSettings
 window.saveSettings=async()=>{
-  if(!checkPerm("settings")) return;
+  if(!checkPerm("settingsConditions")) return;
   siteSettings.minOrder=parseInt(document.getElementById("sMin").value)||200;
   siteSettings.freeDelivery=parseInt(document.getElementById("sFree").value)||500;
   try{
@@ -3964,7 +4125,7 @@ window.saveSettings=async()=>{
 
 // Patch saveWorkHours
 window.saveWorkHours=async()=>{
-  if(!checkPerm("settings")) return;
+  if(!checkPerm("settingsSchedule")) return;
   const wdOpen=parseInt(document.getElementById("sWdOpen").value)||0;
   const wdOpenM=parseInt(document.getElementById("sWdOpenM").value)||0;
   const wdClose=parseInt(document.getElementById("sWdClose").value)||0;
@@ -3994,7 +4155,7 @@ window.saveWorkHours=async()=>{
 
 // Patch addCity
 window.addCity=async()=>{
-  if(!checkPerm("settings")) return;
+  if(!checkPerm("settingsDelivery")) return;
   const name=document.getElementById("newCityName").value.trim();
   const price=parseInt(document.getElementById("newCityPrice").value)||50;
   if(!name){showToast("Введіть назву","Вкажіть місто або село","⚠","warn");return;}
@@ -4010,7 +4171,7 @@ window.addCity=async()=>{
 
 // Patch addCategory
 window.addCategory=async()=>{
-  if(!checkPerm("settings")) return;
+  if(!checkPerm("settingsCategories")) return;
   const name=document.getElementById("newCatName").value.trim();
   if(!name){showToast("Введіть назву категорії","","⚠","warn");return;}
   if(!Array.isArray(siteSettings.categories))siteSettings.categories=[];
