@@ -4269,6 +4269,7 @@ window.createPromo=async()=>{
   if(type==="buy_x_get_y"&&(!buyX||!getY)){errEl.textContent="Вкажіть кількість товарів";return;}
   const finalDishId=(type==="dish"?dishId:null)||(type==="buy_x_get_y"?bxyDishId:null)||null;
   const finalCatId=(type==="category"?catId:null)||(type==="buy_x_get_y"?bxyCatId:null)||null;
+  const promo={type,value,dishId:finalDishId,catId:finalCatId,buyX,getY,nthN,nthDiscount,nthTarget,nthDishId,singleUse,expiresAt,active:true,createdAt:Date.now(),uses:{}};
   try{
     await dbSet(ref(db,"promoCodes/"+code),promo);
     await logHistory("promo","Промокод "+code);
