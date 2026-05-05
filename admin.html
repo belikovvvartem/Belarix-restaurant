@@ -4214,16 +4214,61 @@ window.confirmAddDish=async()=>{
     const sz=_adPicked.sizes[sIdx];
     if(sz){ price=sz.price; name=_adPicked.name+" "+sz.label; }
   }
-  const newItem={id:_adPicked.id,name,qty:_adQty,price,photo:_adPicked.photo||null,emoji:_adPicked.emoji||"",prep:_adPicked.prep||15,addedByAdmin:true};
+  const newItem={id:_adPicked.id,name,qty:_adQty,price,photo:_adPicked.photo||null,emoji:_adPicked.emoji||"",prep:_adPicked.prep||15,addedByAdmin:true,cat:_adPicked.cat||""};
   const order=Object.values(allOrders).flat().find(o=>o.id===_adOrderId);
   if(!order) return;
-  const items=[...(order.items||[]),newItem];
-  const newTotal=(order.total||0)+price*_adQty;
+
+  // Build updated items list (non-gift items + new item)
+  let items=[...(order.items||[]).filter(i=>!i.isGift), newItem];
+
+  // Fix 2: if order has buy_x_get_y promo — recalculate gift items automatically
+  let giftItems=[];
+  if(order.promoCode){
+    try{
+      const promoSnap=await get(ref(db,"promoCodes/"+order.promoCode));
+      if(promoSnap.exists()){
+        const p=promoSnap.val();
+        if(p.type==="buy_x_get_y"&&p.active){
+          const buyX=p.buyX||2, getY=p.getY||1;
+          // Find eligible non-gift, non-deleted items
+          const eligible=items.filter(i=>!i.isGift&&!i.deleted&&(
+            !p.dishId&&!p.catId ? true :
+            p.dishId ? i.id===p.dishId :
+            p.catId ? i.cat===p.catId : true
+          ));
+          eligible.forEach(item=>{
+            const freeCount=Math.floor(item.qty/buyX)*getY;
+            if(freeCount>0){
+              giftItems.push({
+                id:item.id,name:item.name,qty:freeCount,price:0,
+                photo:item.photo||null,emoji:item.emoji||"",prep:item.prep||15,
+                isGift:true,giftFromPromo:order.promoCode,addedByAdmin:true
+              });
+            }
+          });
+        }
+      }
+    }catch(e){console.warn("Promo check on add:",e);}
+  }
+
+  items=[...items,...giftItems];
+
+  // Recalculate total from non-gift paid items
+  const paidItems=items.filter(i=>!i.isGift&&!i.deleted);
+  const newSub=paidItems.reduce((s,i)=>s+i.price*i.qty,0);
+  const dlv=order.delivery||0;
+  const discount=order.promoDiscount||0;
+  const newTotal=Math.max(0,newSub+dlv-discount);
+
   try{
-    await dbUpdate(ref(db,`orders/${_adOrderId}`),{items,total:newTotal,updatedAt:Date.now()});
-    logHistory("order",`Додано: ${_adPicked.name} ×${_adQty}`,order.orderNum||_adOrderId.slice(0,8));
+    await dbUpdate(ref(db,`orders/${_adOrderId}`),{items,total:newTotal,subtotal:newSub,updatedAt:Date.now()});
+    logHistory("order",`Додано: ${_adPicked.name} ×${_adQty}`+(giftItems.length?` + ${giftItems.reduce((s,g)=>s+g.qty,0)} подарунок(ів)`:""),order.orderNum||_adOrderId.slice(0,8));
     document.getElementById("addDishModal").classList.remove("on");
-    showToast("Додано до замовлення","«"+name+"» ×"+_adQty,"✓","success");
+    showToast(
+      "Додано до замовлення",
+      "«"+name+"» ×"+_adQty+(giftItems.length?" · 🎁 +"+giftItems.reduce((s,g)=>s+g.qty,0)+" подарунок":""),
+      "✓","success"
+    );
   }catch(e){showToast("Помилка",e.message,"⚠","error");}
 };
 
@@ -4495,13 +4540,24 @@ window.exportDayReportForDate = (tsFrom, tsTo, label) => {
   const rows = dayOrders.map((o,i) => {
     const time = new Date(o.createdAt).toLocaleTimeString("uk-UA",{hour:"2-digit",minute:"2-digit"});
     const activeItems = (o.items||[]).filter(it => !it.deleted);
-    const itemsStr = activeItems.map(it => `${esc(it.name)} ×${it.qty}`).join("; ");
+    // Fix 1: gift items get "(подарунок)" label; Fix 3: recalculate total from actual items
+    const itemsStr = activeItems.map(it => {
+      const giftLabel = it.isGift ? " (подарунок)" : "";
+      const adminLabel = it.addedByAdmin && !it.isGift ? " (адмін)" : "";
+      return `${esc(it.name)}${giftLabel}${adminLabel} ×${it.qty}`;
+    }).join("; ");
+    // Fix 3: recalculate actual total from live items (admin may have added items)
+    const paidItems = activeItems.filter(it => !it.isGift);
+    const recalcSub = paidItems.reduce((s,it) => s + it.price * it.qty, 0);
+    const dlvCost = o.delivery || 0;
+    const discount = o.promoDiscount || 0;
+    const actualTotal = Math.max(0, recalcSub + dlvCost - discount);
     const addr = o.deliveryType === "pickup"
       ? "Самовивіз"
       : esc([o.customer?.city, o.customer?.street].filter(Boolean).join(", ") || "—");
     const sc = SCol[o.status] || "#555";
-    const promoStr = o.promoCode ? `${esc(o.promoCode)}${o.promoDiscount>0?" −"+o.promoDiscount+" грн":""}` : "—";
-    const dlvStr = o.delivery === 0 ? "Безкоштовно" : `${o.delivery||0} грн`;
+    const promoStr = o.promoCode ? `${esc(o.promoCode)}${discount>0?" −"+discount+" грн":""}` : "—";
+    const dlvStr = dlvCost === 0 ? "Безкоштовно" : `${dlvCost} грн`;
 
     return `<tr>
       <td>${i+1}</td>
@@ -4510,10 +4566,10 @@ window.exportDayReportForDate = (tsFrom, tsTo, label) => {
       <td><strong>${esc(o.customer?.name||"—")}</strong><br><span class="meta">${esc(o.customer?.phone||"")}</span></td>
       <td>${addr}</td>
       <td>${itemsStr}</td>
-      <td class="num">${o.subtotal||o.total||0} грн</td>
+      <td class="num">${recalcSub} грн</td>
       <td class="num">${dlvStr}</td>
       <td class="num">${promoStr}</td>
-      <td class="num total-cell">${o.total||0} грн</td>
+      <td class="num total-cell">${actualTotal} грн</td>
       <td><span class="status-tag" style="color:${sc};border-color:${sc}40;background:${sc}0d">${SLoc[o.status]||o.status}</span></td>
     </tr>`;
   }).join("");
