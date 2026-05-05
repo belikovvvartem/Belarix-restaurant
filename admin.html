@@ -2710,11 +2710,18 @@ function renderOrders(){
           }).join("");
           if(giftItems.length){
             html+=`<div style="font-size:9px;font-weight:700;color:#2A9D5C;text-transform:uppercase;letter-spacing:.5px;padding:5px 4px 2px;border-top:1px dashed rgba(42,157,92,.3);margin-top:2px">🎁 Подарунки</div>`;
-            html+=giftItems.map(i=>`<div class="o-item" style="border-radius:6px;padding:3px 4px;display:flex;align-items:center;gap:2px;background:rgba(42,157,92,.05)">
+            html+=giftItems.map(i=>{
+              const gIdx=(o.items||[]).indexOf(i);
+              const delBtn=o.status!=="completed"
+                ?`<button onclick="event.stopPropagation();removeItemFromOrder('${o.id}',${gIdx})" style="margin-left:5px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:var(--red);cursor:pointer;font-size:10px;padding:2px 6px;border-radius:4px;font-weight:700;font-family:'Inter',sans-serif;flex-shrink:0" title="Видалити подарунок">✕</button>`
+                :"";
+              return `<div class="o-item" style="border-radius:6px;padding:3px 4px;display:flex;align-items:center;gap:2px;background:rgba(42,157,92,.05)">
               <span class="o-item-n" style="color:#2A9D5C">${i.name} ×${i.qty}</span>
               <span style="font-size:9px;font-weight:700;color:#2A9D5C;background:rgba(42,157,92,.12);padding:1px 5px;border-radius:8px;margin:0 3px">Подарунок</span>
               <span class="o-item-p" style="margin-left:auto;color:#2A9D5C">0 грн</span>
-            </div>`).join("");
+              ${delBtn}
+            </div>`;
+            }).join("");
           }
           return html;
         })()}</div>
@@ -3068,18 +3075,20 @@ function listenMenu(){
 window.addDish=async()=>{
   if(!checkPerm("menu")) return;
   const name=document.getElementById("mName").value.trim();
-  const price=parseInt(document.getElementById("mPrice").value)||0;
+  const hasSizes=document.getElementById("mHasSizes").checked;
+  const price=hasSizes?0:(parseInt(document.getElementById("mPrice").value)||0);
   const errEl=document.getElementById("mErr");
-  if(!name||!price){errEl.style.color="var(--red)";errEl.textContent="Заповніть назву та ціну!";setTimeout(()=>errEl.textContent="",3000);return;}
+  if(!name){errEl.style.color="var(--red)";errEl.textContent="Заповніть назву!";setTimeout(()=>errEl.textContent="",3000);return;}
+  if(!hasSizes&&!price){errEl.style.color="var(--red)";errEl.textContent="Заповніть ціну!";setTimeout(()=>errEl.textContent="",3000);return;}
   const btn=document.querySelector(".menu-add-col .btn-pri");
   if(btn){btn.disabled=true;btn.textContent="Зберігаємо...";}
   let photoUrl=null;
   const pf=document.getElementById("mPhoto")?.files?.[0];
   if(pf){try{errEl.style.color="var(--sub)";errEl.textContent="Завантаження фото...";photoUrl=await uploadToR2(pf);errEl.textContent="";}catch(e){errEl.style.color="var(--yellow)";errEl.textContent="Фото не завантажено: "+e.message;}}
-  const hasSizes=document.getElementById("mHasSizes").checked;
   const sizes=hasSizes?getSizesFromList("mSizesList"):null;
+  if(hasSizes&&(!sizes||!sizes.length)){errEl.style.color="var(--red)";errEl.textContent="Додайте хоча б один розмір з ціною!";setTimeout(()=>errEl.textContent="",3000);if(btn){btn.disabled=false;btn.textContent="Додати страву";}return;}
   const finalPrice=hasSizes&&sizes&&sizes.length?sizes[0].price:price;
-  if(!finalPrice){errEl.style.color="var(--red)";errEl.textContent="Заповніть ціну або додайте розмір!";setTimeout(()=>errEl.textContent="",3000);if(btn){btn.disabled=false;btn.textContent="Додати страву";}return;}
+  if(!finalPrice){errEl.style.color="var(--red)";errEl.textContent="Вкажіть ціну розміру!";setTimeout(()=>errEl.textContent="",3000);if(btn){btn.disabled=false;btn.textContent="Додати страву";}return;}
   const dish={name,price:finalPrice,cat:document.getElementById("mCat").value,prep:parseInt(document.getElementById("mPrep").value)||15,desc:document.getElementById("mDesc").value.trim(),pop:document.getElementById("mPop").checked,oldPrice:null,sizes:sizes&&sizes.length?sizes:null,photo:photoUrl,createdAt:Date.now()};
   try{
     await dbPush(ref(db,"menu"),dish);
@@ -3636,21 +3645,37 @@ window.removeItemFromOrder=async(orderId,itemIdx)=>{
   const item=items[itemIdx];
   if(item.deleted) return;
 
-  // Promo warning
-  if(order.promoCode){
+  // Promo warning — all types
+  if(order.promoCode&&!item.isGift){
     const promoSnap=await get(ref(db,"promoCodes/"+order.promoCode)).catch(()=>null);
     if(promoSnap&&promoSnap.exists()){
       const p=promoSnap.val();
       let promoWarn="";
+      const remainingItems=items.filter((_,i)=>i!==itemIdx&&!items[i].deleted&&!items[i].isGift);
       if(p.type==="dish"&&item.id===p.dishId){
-        promoWarn=`Промокод «${order.promoCode}» діє на «${item.name}». Після видалення — знижка не буде нарахована.`;
+        const leftOfDish=remainingItems.filter(it=>it.id===p.dishId).length;
+        if(leftOfDish===0) promoWarn=`Промокод «${order.promoCode}» діє на «${item.name}». Після видалення знижка зникне.`;
       } else if(p.type==="category"&&item.cat===p.catId){
-        const catLeft=items.filter((it,i)=>i!==itemIdx&&!it.deleted&&it.cat===p.catId).length;
-        if(catLeft===0) promoWarn=`Промокод «${order.promoCode}» діє на категорію «${p.catId}». Це остання страва цієї категорії — знижка зникне.`;
+        const catLeft=remainingItems.filter(it=>it.cat===p.catId).length;
+        if(catLeft===0) promoWarn=`Промокод «${order.promoCode}» діє на категорію «${p.catId}». Це остання страва категорії — знижка зникне.`;
+      } else if(p.type==="percent"||p.type==="fixed"){
+        const remSub=remainingItems.reduce((s,it)=>s+it.price*it.qty,0);
+        if(remSub===0) promoWarn=`Промокод «${order.promoCode}» перестане діяти — кошик стане порожнім.`;
       } else if(p.type==="nth_free"){
         const nthN=p.nthN||3;
-        const remaining=items.filter((it,i)=>i!==itemIdx&&!it.deleted).reduce((s,it)=>s+it.qty,0);
-        if(remaining<nthN) promoWarn=`Після видалення товарів залишиться менше ${nthN} — промокод «${order.promoCode}» не буде застосовано.`;
+        const remaining=remainingItems.reduce((s,it)=>s+it.qty,0);
+        if(remaining<nthN) promoWarn=`Залишиться менше ${nthN} товарів — промокод «${order.promoCode}» не буде застосовано.`;
+      } else if(p.type==="buy_x_get_y"){
+        const buyX=p.buyX||2;
+        const pool=p.dishId?remainingItems.filter(it=>it.id===p.dishId):p.catId?remainingItems.filter(it=>it.cat===p.catId):remainingItems;
+        const poolQty=pool.reduce((s,it)=>s+it.qty,0);
+        if(poolQty<buyX) promoWarn=`Після видалення не вистачає ${buyX} товарів для промокоду «${order.promoCode}» — подарунок зникне.`;
+      } else if(p.type==="second_free"){
+        const eligible=remainingItems.filter(it=>it.qty>=2);
+        if(!eligible.length) promoWarn=`Промокод «${order.promoCode}» (2-й безкоштовно) перестане діяти.`;
+      } else if(p.type==="min_order"){
+        const remSub=remainingItems.reduce((s,it)=>s+it.price*it.qty,0);
+        if(remSub<(p.minOrderVal||500)) promoWarn=`Сума впаде нижче ${p.minOrderVal||500} грн — промокод «${order.promoCode}» не застосується.`;
       }
       if(promoWarn){
         const ok=await admConfirm("Промокод може не діяти",promoWarn+" Видалити?","🏷","warn","Так, видалити");
@@ -3659,15 +3684,71 @@ window.removeItemFromOrder=async(orderId,itemIdx)=>{
     }
   }
 
-  const removed=items[itemIdx];
-  items[itemIdx]={...removed,deleted:true,deletedAt:Date.now()};
-  const newTotal=Math.max(0,(order.total||0)-removed.price*removed.qty);
+  // Mark item as deleted
+  items[itemIdx]={...item,deleted:true,deletedAt:Date.now()};
+
+  // Fix 2: recalculate gifts for all promo types after removal
+  let updatedItems=recalcGiftItems(items,order);
+
+  // Recalculate total
+  const {newTotal,newSub}=calcOrderTotal(updatedItems,order);
+
   try{
-    await dbUpdate(ref(db,`orders/${orderId}`),{items,total:newTotal,updatedAt:Date.now()});
-    logHistory("order",`Видалено: ${removed.name} ×${removed.qty} (−${removed.price*removed.qty} грн)`,order.orderNum||orderId.slice(0,8));
-    showToast("Позицію видалено","«"+removed.name+"» прибрано із замовлення","🗑","warn");
+    await dbUpdate(ref(db,`orders/${orderId}`),{items:updatedItems,total:newTotal,subtotal:newSub,updatedAt:Date.now()});
+    logHistory("order",`Видалено: ${item.name} ×${item.qty} (${item.isGift?"подарунок":"-"+item.price*item.qty+" грн"})`,order.orderNum||orderId.slice(0,8));
+    showToast(item.isGift?"Подарунок видалено":"Позицію видалено","«"+item.name+"» прибрано","🗑","warn");
   }catch(e){showToast("Помилка",e.message,"⚠","error");}
 };
+
+// Helper: recalculate gift items based on promo type after any item change
+function recalcGiftItems(items,order){
+  if(!order.promoCode) return items;
+  const p=allPromos[order.promoCode];
+  if(!p||!p.active) return items;
+
+  // Remove old auto-generated gifts
+  let result=items.filter(i=>!i.isGift||i.manualGift);
+
+  const paidItems=result.filter(i=>!i.deleted&&!i.isGift);
+
+  if(p.type==="buy_x_get_y"){
+    const buyX=p.buyX||2, getY=p.getY||1;
+    const eligible=p.dishId?paidItems.filter(i=>i.id===p.dishId):p.catId?paidItems.filter(i=>i.cat===p.catId):paidItems;
+    eligible.forEach(item=>{
+      const freeCount=Math.floor(item.qty/buyX)*getY;
+      if(freeCount>0){
+        result.push({id:item.id,name:item.name,qty:freeCount,price:0,photo:item.photo||null,emoji:item.emoji||"",prep:item.prep||15,isGift:true,giftFromPromo:order.promoCode});
+      }
+    });
+  } else if(p.type==="nth_free"){
+    const nthN=p.nthN||3;
+    const pool=p.nthDishId?paidItems.filter(i=>i.id===p.nthDishId):paidItems;
+    const totalQty=pool.reduce((s,i)=>s+i.qty,0);
+    const freeCount=Math.floor(totalQty/nthN);
+    if(freeCount>0){
+      // cheapest item as gift
+      const cheapest=pool.reduce((a,b)=>a.price<b.price?a:b,pool[0]);
+      if(cheapest) result.push({id:cheapest.id,name:cheapest.name,qty:freeCount,price:0,photo:cheapest.photo||null,emoji:cheapest.emoji||"",prep:cheapest.prep||15,isGift:true,giftFromPromo:order.promoCode});
+    }
+  } else if(p.type==="second_free"){
+    const eligible=paidItems.filter(i=>i.qty>=2);
+    if(eligible.length){
+      const cheapest=eligible.reduce((a,b)=>a.price<b.price?a:b);
+      result.push({id:cheapest.id,name:cheapest.name,qty:1,price:0,photo:cheapest.photo||null,emoji:cheapest.emoji||"",prep:cheapest.prep||15,isGift:true,giftFromPromo:order.promoCode});
+    }
+  }
+
+  return result;
+}
+
+function calcOrderTotal(items,order){
+  const paidItems=items.filter(i=>!i.deleted&&!i.isGift);
+  const newSub=paidItems.reduce((s,i)=>s+i.price*i.qty,0);
+  const dlv=order.delivery||0;
+  const discount=order.promoDiscount||0;
+  const newTotal=Math.max(0,newSub+dlv-discount);
+  return {newTotal,newSub};
+}
 
 window.confirmAddDish=async()=>{
   if(!_adOrderId||!_adPicked) return;
@@ -4218,57 +4299,20 @@ window.confirmAddDish=async()=>{
   const order=Object.values(allOrders).flat().find(o=>o.id===_adOrderId);
   if(!order) return;
 
-  // Build updated items list (non-gift items + new item)
-  let items=[...(order.items||[]).filter(i=>!i.isGift), newItem];
+  // Add new item to non-gift items, then recalc gifts
+  const baseItems=[...(order.items||[]).filter(i=>!i.isGift), newItem];
+  const updatedItems=recalcGiftItems(baseItems,order);
+  const {newTotal,newSub}=calcOrderTotal(updatedItems,order);
 
-  // Fix 2: if order has buy_x_get_y promo — recalculate gift items automatically
-  let giftItems=[];
-  if(order.promoCode){
-    try{
-      const promoSnap=await get(ref(db,"promoCodes/"+order.promoCode));
-      if(promoSnap.exists()){
-        const p=promoSnap.val();
-        if(p.type==="buy_x_get_y"&&p.active){
-          const buyX=p.buyX||2, getY=p.getY||1;
-          // Find eligible non-gift, non-deleted items
-          const eligible=items.filter(i=>!i.isGift&&!i.deleted&&(
-            !p.dishId&&!p.catId ? true :
-            p.dishId ? i.id===p.dishId :
-            p.catId ? i.cat===p.catId : true
-          ));
-          eligible.forEach(item=>{
-            const freeCount=Math.floor(item.qty/buyX)*getY;
-            if(freeCount>0){
-              giftItems.push({
-                id:item.id,name:item.name,qty:freeCount,price:0,
-                photo:item.photo||null,emoji:item.emoji||"",prep:item.prep||15,
-                isGift:true,giftFromPromo:order.promoCode,addedByAdmin:true
-              });
-            }
-          });
-        }
-      }
-    }catch(e){console.warn("Promo check on add:",e);}
-  }
-
-  items=[...items,...giftItems];
-
-  // Recalculate total from non-gift paid items
-  const paidItems=items.filter(i=>!i.isGift&&!i.deleted);
-  const newSub=paidItems.reduce((s,i)=>s+i.price*i.qty,0);
-  const dlv=order.delivery||0;
-  const discount=order.promoDiscount||0;
-  const newTotal=Math.max(0,newSub+dlv-discount);
+  const giftAdded=updatedItems.filter(i=>i.isGift).reduce((s,g)=>s+g.qty,0);
+  const prevGifts=(order.items||[]).filter(i=>i.isGift).reduce((s,g)=>s+g.qty,0);
+  const newGifts=giftAdded-prevGifts;
 
   try{
-    await dbUpdate(ref(db,`orders/${_adOrderId}`),{items,total:newTotal,subtotal:newSub,updatedAt:Date.now()});
-    logHistory("order",`Додано: ${_adPicked.name} ×${_adQty}`+(giftItems.length?` + ${giftItems.reduce((s,g)=>s+g.qty,0)} подарунок(ів)`:""),order.orderNum||_adOrderId.slice(0,8));
+    await dbUpdate(ref(db,`orders/${_adOrderId}`),{items:updatedItems,total:newTotal,subtotal:newSub,updatedAt:Date.now()});
+    logHistory("order",`Додано: ${_adPicked.name} ×${_adQty}`+(newGifts>0?` + ${newGifts} подарунок(ів)`:""),order.orderNum||_adOrderId.slice(0,8));
     document.getElementById("addDishModal").classList.remove("on");
-    showToast(
-      "Додано до замовлення",
-      "«"+name+"» ×"+_adQty+(giftItems.length?" · 🎁 +"+giftItems.reduce((s,g)=>s+g.qty,0)+" подарунок":""),
-      "✓","success"
-    );
+    showToast("Додано до замовлення","«"+name+"» ×"+_adQty+(newGifts>0?" · 🎁 +"+newGifts+" подарунок":""),"✓","success");
   }catch(e){showToast("Помилка",e.message,"⚠","error");}
 };
 
