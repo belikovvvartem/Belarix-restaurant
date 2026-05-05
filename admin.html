@@ -1041,13 +1041,16 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
 .perm-close-btn:hover{color:var(--txt)}
 
 /* ========== STATS PERMISSION OVERLAYS ========== */
-/* Full-section block when stats=false — fixed so it covers the scrollable panel fully */
+/* Full-section block when stats=false — fixed within .main area only (excludes sidebar) */
 #statsPermOverlay{
-  position:fixed;inset:0;z-index:200;
+  position:fixed;top:0;bottom:0;right:0;left:220px;z-index:200;
   background:rgba(10,12,16,.92);
   backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
   display:flex;align-items:center;justify-content:center;
   flex-direction:column;gap:10px;text-align:center;padding:24px;
+}
+@media(max-width:768px){
+  #statsPermOverlay{left:0;bottom:60px;}
 }
 /* Per-block blur overlay for statsPlus=false */
 .stats-plus-block{position:relative;overflow:hidden}
