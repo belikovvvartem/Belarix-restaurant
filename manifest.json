@@ -1,33 +1,33 @@
 {
-    "name": "Panorama — Доставка їжі",
-    "short_name": "Panorama",
-    "description": "Замовляйте їжу з ресторану Panorama з доставкою додому",
-    "start_url": "/",
-    "display": "standalone",
-    "orientation": "portrait",
-    "background_color": "#FDFAF6",
-    "theme_color": "#C94B1F",
-    "lang": "uk",
-    "icons": [
-      {
-        "src": "/favicon.png",
-        "sizes": "192x192",
-        "type": "image/png",
-        "purpose": "any maskable"
-      },
-      {
-        "src": "/favicon.png",
-        "sizes": "512x512",
-        "type": "image/png",
-        "purpose": "any maskable"
-      }
-    ],
-    "categories": ["food", "shopping"],
-    "shortcuts": [
-      {
-        "name": "Меню",
-        "url": "/",
-        "description": "Переглянути меню ресторану"
-      }
-    ]
-  }
+  "name": "Brand — Доставка їжі",
+  "short_name": "Brand",
+  "description": "Замовляйте їжу з ресторану Brand з доставкою додому",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FDFAF6",
+  "theme_color": "#C94B1F",
+  "lang": "uk",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["food", "shopping"],
+  "shortcuts": [
+    {
+      "name": "Меню",
+      "url": "/",
+      "description": "Переглянути меню ресторану"
+    }
+  ]
+}

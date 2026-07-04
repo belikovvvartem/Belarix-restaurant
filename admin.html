@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Panorama — Адмін</title>
+<title>Brand — Адмін</title>
 <link rel="shortcut icon" href="./favicon.png" type="image/x-icon">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -1104,7 +1104,7 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
 <!-- LOADING -->
 <div id="loadingScreen">
   <div class="ld-mark">P</div>
-  <div class="ld-name">Panorama</div>
+  <div class="ld-name">Brand</div>
   <div class="ld-bar"><div class="ld-fill"></div></div>
 </div>
 
@@ -1113,11 +1113,11 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
   <div class="lbox">
     <div class="llogo">
       <div class="lmark">P</div>
-      <div><div class="lname">Panorama</div><div class="lrole">Admin Panel</div></div>
+      <div><div class="lname">Brand</div><div class="lrole">Admin Panel</div></div>
     </div>
     <h2>Вхід</h2>
     <div class="lerr" id="lerr"></div>
-    <div class="lf"><label>Email</label><input id="lu" type="email" placeholder="admin@panorama.ua" autocomplete="email"></div>
+    <div class="lf"><label>Email</label><input id="lu" type="email" placeholder="admin@example.com" autocomplete="email"></div>
     <div class="lf"><label>Пароль</label><input id="lp" type="password" placeholder="••••••••" autocomplete="current-password"></div>
     <button class="lbtn" onclick="doLogin()">Увійти</button>
   </div>
@@ -1129,7 +1129,7 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
   <aside class="side">
     <div class="side-head">
       <div class="side-mark">P</div>
-      <div><div class="side-name">Panorama</div><div class="side-role">Admin</div></div>
+      <div><div class="side-name">Brand</div><div class="side-role">Admin</div></div>
     </div>
     <nav class="side-nav">
       <div class="nav-label">Замовлення</div>
@@ -4683,7 +4683,7 @@ window.exportDayReportForDate = (tsFrom, tsTo, label) => {
   <tbody>${rows}</tbody>
 </table>
 <div class="report-footer">
-  <span>Panorama — Система управління замовленнями</span>
+  <span>Brand — Система управління замовленнями</span>
   <span>Сформовано: ${new Date().toLocaleString("uk-UA")}</span>
 </div>
 <button class="print-btn" onclick="window.print()">Друк / PDF</button>
@@ -4747,7 +4747,7 @@ window.exportDayReport=()=>{
 
   const html=`<!DOCTYPE html>
 <html lang="uk"><head><meta charset="UTF-8">
-<title>Звіт Panorama — ${dateStr}</title>
+<title>Звіт Brand — ${dateStr}</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:Arial,sans-serif;background:#f8f9fa;color:#1a1a1a;padding:20px;font-size:13px}
@@ -4768,7 +4768,7 @@ tbody tr:hover{background:#fffbf7}
 .pbtn{position:fixed;bottom:20px;right:20px;padding:11px 20px;background:#f97316;color:#fff;border:none;border-radius:40px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(249,115,22,.4);font-family:inherit}
 @media print{body{padding:4px;background:#fff}.pbtn{display:none}@page{margin:8mm;size:A4 landscape}}
 </style></head><body>
-<div class="hd"><div><div class="logo">Panorama</div><div class="sub">Звіт за день</div></div><strong>📅 ${dateStr}</strong></div>
+<div class="hd"><div><div class="logo">Brand</div><div class="sub">Звіт за день</div></div><strong>📅 ${dateStr}</strong></div>
 <div class="kpis">
   <div class="kpi"><div class="kl">Замовлень</div><div class="kv" style="color:#f97316">${todayOrders.length}</div><div class="ks">Активних: ${todayOrders.length-completed.length}</div></div>
   <div class="kpi"><div class="kl">Виконано</div><div class="kv" style="color:#22c55e">${completed.length}</div><div class="ks">${completed.length?Math.round(completed.length/todayOrders.length*100):0}%</div></div>

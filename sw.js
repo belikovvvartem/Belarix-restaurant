@@ -1,5 +1,5 @@
 /**
- * Panorama Service Worker
+ * Brand Service Worker
  * Strategy: Network-first for HTML/API, Cache-first for static assets
  */
 
