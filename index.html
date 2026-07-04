@@ -918,12 +918,12 @@ input,select,textarea{font-size:16px!important} /* prevents iOS zoom on focus */
 <!-- CLOSED MODAL -->
 <div class="modal-bg" id="closedModal">
   <div class="modal" style="text-align:center;max-width:420px">
-    <div style="font-size:48px;margin-bottom:12px">🕐</div>
-    <h2 style="margin-bottom:10px">Ресторан зачинено</h2>
-    <p style="font-size:14px;color:var(--muted);margin-bottom:6px">В даний момент ми не приймаємо замовлення.</p>
-    <p style="font-size:14px;color:var(--muted);margin-bottom:18px">Ваше замовлення буде опрацьовано <strong id="closedOpenTime">завтра о 10:00</strong></p>
+    <div style="font-size:48px;margin-bottom:12px" id="closedIcon">🕐</div>
+    <h2 style="margin-bottom:10px" id="closedTitle">Ресторан зачинено</h2>
+    <p style="font-size:14px;color:var(--muted);margin-bottom:6px" id="closedMsg1">В даний момент ми не приймаємо замовлення.</p>
+    <p style="font-size:14px;color:var(--muted);margin-bottom:18px" id="closedMsg2">Ваше замовлення буде опрацьовано <strong id="closedOpenTime">завтра о 10:00</strong></p>
     <div style="display:flex;gap:10px;flex-direction:column">
-      <button class="btn-pri" onclick="proceedAnyway()" style="background:var(--primary)">Підтвердити замовлення</button>
+      <button class="btn-pri" id="closedProceedBtn" onclick="proceedAnyway()" style="background:var(--primary)">Підтвердити замовлення</button>
       <button class="btn-ghost" onclick="closeModal('closedModal')">Скасувати</button>
     </div>
   </div>
@@ -969,6 +969,7 @@ let DLV_COST = 50;
 let CITIES  = [{name:"Ужгород", price:50}];
 // Work hours from Firebase: {weekdays:{open:10,close:22}, weekends:{open:11,close:23}}
 let WORK_HOURS = {weekdays:{open:10,openMin:0,close:22,closeMin:0}, weekends:{open:11,openMin:0,close:23,closeMin:0}, saturday:null, sunday:null};
+let STORE_STATUS = {emergencyClosed:false, emergencyReason:"", closedDays:{weekdays:false,saturday:false,sunday:false}};
 
 const STATUSES = [
   {k:"new",        l:"Новий"},
@@ -1120,6 +1121,16 @@ function listenFirebase() {
         if (s.workHours.weekdays) WORK_HOURS.weekdays = s.workHours.weekdays;
         if (s.workHours.weekends) WORK_HOURS.weekends = s.workHours.weekends;
       }
+      // Manual store status (emergency close / recurring day closures)
+      if (s.storeStatus) {
+        STORE_STATUS.emergencyClosed = !!s.storeStatus.emergencyClosed;
+        STORE_STATUS.emergencyReason = s.storeStatus.emergencyReason || "";
+        if (s.storeStatus.closedDays) {
+          STORE_STATUS.closedDays.weekdays = !!s.storeStatus.closedDays.weekdays;
+          STORE_STATUS.closedDays.saturday = !!s.storeStatus.closedDays.saturday;
+          STORE_STATUS.closedDays.sunday   = !!s.storeStatus.closedDays.sunday;
+        }
+      }
     }
     updateBannerText();
     populateCitySelect();
@@ -1202,7 +1213,15 @@ function getDayHours(d) {
   if (d === 0 || d === 6) return WORK_HOURS.weekends;
   return WORK_HOURS.weekdays;
 }
+function isManuallyClosed() {
+  if (STORE_STATUS.emergencyClosed) return true;
+  var d = new Date().getDay(); // 0=Нд..6=Сб
+  if (d === 0) return !!STORE_STATUS.closedDays.sunday;
+  if (d === 6) return !!STORE_STATUS.closedDays.saturday;
+  return !!STORE_STATUS.closedDays.weekdays;
+}
 function isOpenNow() {
+  if (isManuallyClosed()) return false;
   var n = new Date(), d = n.getDay();
   var nowMin = n.getHours()*60 + n.getMinutes();
   var hours = getDayHours(d);
@@ -1231,10 +1250,20 @@ function checkHours() {
   var hours = isWeekend ? WORK_HOURS.weekends : WORK_HOURS.weekdays;
   var openMin  = toMinutes(hours.open,  hours.openMin);
   var closeMin = toMinutes(hours.close, hours.closeMin);
-  var open = nowMin >= openMin && nowMin < closeMin;
-  document.getElementById("hoursLabel").textContent = open
-    ? ("Відкрито до " + fmtHour(hours.close, hours.closeMin))
-    : ("Зачинено (відкр. о " + fmtHour(hours.open, hours.openMin) + ")");
+  var manuallyClosed = isManuallyClosed();
+  var open = !manuallyClosed && nowMin >= openMin && nowMin < closeMin;
+  var hoursLabelEl = document.getElementById("hoursLabel");
+  if (hoursLabelEl) {
+    if (manuallyClosed) {
+      hoursLabelEl.textContent = STORE_STATUS.emergencyClosed
+        ? (STORE_STATUS.emergencyReason ? "Тимчасово зачинено: " + STORE_STATUS.emergencyReason : "Тимчасово зачинено")
+        : "Сьогодні вихідний";
+    } else {
+      hoursLabelEl.textContent = open
+        ? ("Відкрито до " + fmtHour(hours.close, hours.closeMin))
+        : ("Зачинено (відкр. о " + fmtHour(hours.open, hours.openMin) + ")");
+    }
+  }
   document.getElementById("hoursDot").className = "hours-dot" + (open ? "" : " off");
   var wd = fmtHour(WORK_HOURS.weekdays.open, WORK_HOURS.weekdays.openMin) + " – " + fmtHour(WORK_HOURS.weekdays.close, WORK_HOURS.weekdays.closeMin);
   var we = fmtHour(WORK_HOURS.weekends.open, WORK_HOURS.weekends.openMin) + " – " + fmtHour(WORK_HOURS.weekends.close, WORK_HOURS.weekends.closeMin);
@@ -1922,7 +1951,25 @@ window.openCheckout = function() {
   document.body.style.overflow = "";
 
   if (!isOpenNow()) {
-    document.getElementById("closedOpenTime").textContent = getNextOpenLabel();
+    var manuallyClosed = isManuallyClosed();
+    var titleEl = document.getElementById("closedTitle");
+    var msg1El  = document.getElementById("closedMsg1");
+    var msg2El  = document.getElementById("closedMsg2");
+    var proceedBtn = document.getElementById("closedProceedBtn");
+    if (manuallyClosed) {
+      titleEl.textContent = "Заклад тимчасово не працює";
+      msg1El.textContent = STORE_STATUS.emergencyReason
+        ? STORE_STATUS.emergencyReason
+        : "Наразі ми не приймаємо замовлення. Перепрошуємо за незручності.";
+      msg2El.style.display = "none";
+      proceedBtn.style.display = "none";
+    } else {
+      titleEl.textContent = "Ресторан зачинено";
+      msg1El.textContent = "В даний момент ми не приймаємо замовлення.";
+      msg2El.style.display = "";
+      proceedBtn.style.display = "";
+      document.getElementById("closedOpenTime").textContent = getNextOpenLabel();
+    }
     setTimeout(function() { openModal("closedModal"); }, 250);
     return;
   }
@@ -2031,6 +2078,21 @@ function buildPreview() {
 }
 
 window.placeOrder = async function() {
+  if (isManuallyClosed()) {
+    closeModal("checkoutModal");
+    var titleEl = document.getElementById("closedTitle");
+    var msg1El  = document.getElementById("closedMsg1");
+    var msg2El  = document.getElementById("closedMsg2");
+    var proceedBtn = document.getElementById("closedProceedBtn");
+    titleEl.textContent = "Заклад тимчасово не працює";
+    msg1El.textContent = STORE_STATUS.emergencyReason
+      ? STORE_STATUS.emergencyReason
+      : "Наразі ми не приймаємо замовлення. Перепрошуємо за незручності.";
+    msg2El.style.display = "none";
+    proceedBtn.style.display = "none";
+    setTimeout(function() { openModal("closedModal"); }, 250);
+    return;
+  }
   var btn = document.getElementById("placeBtn");
   btn.disabled = true; btn.textContent = "Відправляємо...";
 

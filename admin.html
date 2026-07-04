@@ -1720,6 +1720,80 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
               <p>Визначає статус «Відкрито / Зачинено» на сайті в реальному часі</p>
             </div>
 
+            <!-- LIVE STATUS BANNER -->
+            <div class="sett-block" id="storeStatusBanner" style="border-left:4px solid var(--green)">
+              <div class="sett-block-head" style="border-bottom:none">
+                <div class="sett-block-icon" id="storeStatusIcon">🟢</div>
+                <div style="flex:1">
+                  <div class="sett-block-title" id="storeStatusText">Заклад зараз відкрито</div>
+                  <div class="sett-block-sub" id="storeStatusSub">Працює за звичайним графіком</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- EMERGENCY CLOSE -->
+            <div class="sett-block" style="border-left:4px solid var(--red)">
+              <div class="sett-block-head">
+                <div class="sett-block-icon" style="background:rgba(239,68,68,.12)">🚨</div>
+                <div style="flex:1">
+                  <div class="sett-block-title">Термінове закриття</div>
+                  <div class="sett-block-sub">Негайно зупиняє прийом замовлень на сайті, незалежно від графіка</div>
+                </div>
+              </div>
+              <div class="sett-block-body">
+                <div class="mf-toggle-row">
+                  <div>
+                    <div class="mf-toggle-label">Заклад зачинено зараз</div>
+                    <div class="mf-toggle-sub">Клієнти побачать повідомлення й не зможуть оформити замовлення</div>
+                  </div>
+                  <label class="ios-toggle"><input type="checkbox" id="sEmergencyClosed" onchange="toggleEmergencyReasonField()"><span class="ios-toggle-slider"></span></label>
+                </div>
+                <div id="emergencyReasonWrap" style="display:none;margin-top:4px">
+                  <label style="font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">Причина (покажеться клієнтам)</label>
+                  <input id="sEmergencyReason" class="sett-inp sett-inp-full" placeholder="Наприклад: технічна перерва, повернемось о 18:00" maxlength="140">
+                </div>
+                <div class="sett-save-bar">
+                  <button class="btn-pri" id="emergencySaveBtn" style="background:var(--red)" onclick="saveStoreStatus()">Зберегти статус</button>
+                  <span id="statusMsg" style="font-size:12px;color:var(--green)"></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- RECURRING CLOSED DAYS -->
+            <div class="sett-block">
+              <div class="sett-block-head">
+                <div class="sett-block-icon">📅</div>
+                <div style="flex:1">
+                  <div class="sett-block-title">Вихідні дні</div>
+                  <div class="sett-block-sub">Заклад повністю не працює у ці дні (замовлення недоступні)</div>
+                </div>
+              </div>
+              <div class="sett-block-body">
+                <div class="mf-toggle-row">
+                  <div>
+                    <div class="mf-toggle-label">Будні (Пн–Пт) зачинено</div>
+                    <div class="mf-toggle-sub">Наприклад, на час відпустки чи ремонту</div>
+                  </div>
+                  <label class="ios-toggle"><input type="checkbox" id="sClosedWeekdays"><span class="ios-toggle-slider"></span></label>
+                </div>
+                <div class="mf-toggle-row">
+                  <div>
+                    <div class="mf-toggle-label">Субота — вихідний</div>
+                  </div>
+                  <label class="ios-toggle"><input type="checkbox" id="sClosedSaturday"><span class="ios-toggle-slider"></span></label>
+                </div>
+                <div class="mf-toggle-row">
+                  <div>
+                    <div class="mf-toggle-label">Неділя — вихідний</div>
+                  </div>
+                  <label class="ios-toggle"><input type="checkbox" id="sClosedSunday"><span class="ios-toggle-slider"></span></label>
+                </div>
+                <div class="sett-save-bar">
+                  <button class="btn-pri" onclick="saveStoreStatus()">Зберегти вихідні</button>
+                </div>
+              </div>
+            </div>
+
             <div class="sett-block">
               <div class="sett-block-head">
                 <div class="sett-block-icon">⏰</div>
@@ -2987,6 +3061,24 @@ function renderSettings(){
   const freeVal=siteSettings.freeDelivery||500;
   const sMin=document.getElementById("sMin"); if(sMin) sMin.value=minVal;
   const sFree=document.getElementById("sFree"); if(sFree) sFree.value=freeVal;
+  // Store status (emergency close / recurring closed days)
+  const ss=siteSettings.storeStatus||{emergencyClosed:false,emergencyReason:"",closedDays:{weekdays:false,saturday:false,sunday:false}};
+  const secEl=document.getElementById("sEmergencyClosed"); if(secEl) secEl.checked=!!ss.emergencyClosed;
+  const serEl=document.getElementById("sEmergencyReason"); if(serEl) serEl.value=ss.emergencyReason||"";
+  const erWrap=document.getElementById("emergencyReasonWrap"); if(erWrap) erWrap.style.display=ss.emergencyClosed?"block":"none";
+  const cwd=document.getElementById("sClosedWeekdays"); if(cwd) cwd.checked=!!ss.closedDays?.weekdays;
+  const csat=document.getElementById("sClosedSaturday"); if(csat) csat.checked=!!ss.closedDays?.saturday;
+  const csun=document.getElementById("sClosedSunday"); if(csun) csun.checked=!!ss.closedDays?.sunday;
+  // Compute unified open/closed status (manual override takes priority over hours)
+  const nowD=new Date(); const dow=nowD.getDay();
+  const manuallyClosed = ss.emergencyClosed
+    || (dow===0 && ss.closedDays?.sunday)
+    || (dow===6 && ss.closedDays?.saturday)
+    || (dow!==0 && dow!==6 && ss.closedDays?.weekdays);
+  const statusBanner=document.getElementById("storeStatusBanner");
+  const statusIcon=document.getElementById("storeStatusIcon");
+  const statusText=document.getElementById("storeStatusText");
+  const statusSub=document.getElementById("storeStatusSub");
   // Preview cards
   const pm=document.getElementById("prev-min"); if(pm) pm.textContent=minVal+" грн";
   const pf=document.getElementById("prev-free"); if(pf) pf.textContent=freeVal+" грн";
@@ -3026,14 +3118,30 @@ function renderSettings(){
   const now=new Date(), d=now.getDay(), h2=now.getHours()+now.getMinutes()/60;
   const isWe=d===0||d===6;
   const hrs=isWe?wh.weekends:wh.weekdays;
-  const open=h2>=(hrs.open+(hrs.openMin||0)/60)&&h2<(hrs.close+(hrs.closeMin||0)/60);
+  const withinHours=h2>=(hrs.open+(hrs.openMin||0)/60)&&h2<(hrs.close+(hrs.closeMin||0)/60);
+  const open=!manuallyClosed&&withinHours;
   const spDot=document.getElementById("spDot");
   const spStatus=document.getElementById("spStatus");
   const spTime=document.getElementById("spTime");
   if(spDot){spDot.style.background=open?"var(--green)":"var(--red)";spDot.style.boxShadow=open?"0 0 0 3px rgba(34,197,94,.2)":"0 0 0 3px rgba(239,68,68,.15)";}
-  if(spStatus) spStatus.textContent=open?"Відкрито зараз":"Зачинено зараз";
+  if(spStatus) spStatus.textContent=open?"Відкрито зараз":(manuallyClosed?"Зачинено вручну":"Зачинено зараз");
   const fmt=(hh,mm)=>hh+":"+(mm<10?"0":"")+mm;
   if(spTime) spTime.textContent=`Пн–Пт ${fmt(wh.weekdays?.open??10,wh.weekdays?.openMin??0)}–${fmt(wh.weekdays?.close??22,wh.weekdays?.closeMin??0)} · Сб ${fmt(wh.saturday?.open??11,wh.saturday?.openMin??0)}–${fmt(wh.saturday?.close??23,wh.saturday?.closeMin??0)} · Нд ${fmt(wh.sunday?.open??11,wh.sunday?.openMin??0)}–${fmt(wh.sunday?.close??23,wh.sunday?.closeMin??0)}`;
+  // Live status banner in hours settings tab
+  if(statusBanner&&statusIcon&&statusText&&statusSub){
+    statusBanner.style.borderLeftColor=open?"var(--green)":"var(--red)";
+    statusIcon.textContent=open?"🟢":"🔴";
+    if(ss.emergencyClosed){
+      statusText.textContent="Заклад зачинено вручну (термінове закриття)";
+      statusSub.textContent=ss.emergencyReason?("Причина: "+ss.emergencyReason):"Клієнти не можуть оформити замовлення";
+    }else if(manuallyClosed){
+      statusText.textContent="Сьогодні вихідний день";
+      statusSub.textContent="Увімкнено як постійний вихідний у налаштуваннях";
+    }else{
+      statusText.textContent=open?"Заклад зараз відкрито":"Заклад зараз зачинено";
+      statusSub.textContent=open?"Працює за звичайним графіком":("Відкриється о "+fmt(hrs.open,hrs.openMin||0));
+    }
+  }
   // Legacy statsSection elements (used by stats panel)
   const spCities2=document.getElementById("spCities"); if(spCities2) spCities2.textContent=cities.length;
   const spCats2=document.getElementById("spCats"); if(spCats2) spCats2.textContent=cats.length;
@@ -3044,7 +3152,7 @@ function renderSettings(){
   const spStatus2=document.getElementById("spStatus2");
   const spTime2=document.getElementById("spTime2");
   if(spDot2) spDot2.style.background=open?"var(--green)":"var(--red)";
-  if(spStatus2) spStatus2.textContent=open?"Відкрито":"Зачинено";
+  if(spStatus2) spStatus2.textContent=open?"Відкрито":(manuallyClosed?"Зачинено вручну":"Зачинено");
   if(spTime2) spTime2.textContent=`Пн–Пт ${fmt(wh.weekdays?.open??10,wh.weekdays?.openMin??0)}–${fmt(wh.weekdays?.close??22,wh.weekdays?.closeMin??0)}`;
   applySettingsTabPerms();
 }
@@ -4214,6 +4322,45 @@ window.saveSettings=async()=>{
   }catch(e){showToast("Помилка",e.message,"⚠","error");}
 };
 
+// Toggle visibility of the emergency-close reason input
+window.toggleEmergencyReasonField=()=>{
+  const on=document.getElementById("sEmergencyClosed").checked;
+  const wrap=document.getElementById("emergencyReasonWrap");
+  if(wrap) wrap.style.display=on?"block":"none";
+};
+
+// Save manual store status: emergency close + recurring closed days
+window.saveStoreStatus=async()=>{
+  if(!checkPerm("settingsSchedule")) return;
+  const emergencyClosed=document.getElementById("sEmergencyClosed").checked;
+  const emergencyReason=document.getElementById("sEmergencyReason").value.trim().slice(0,140);
+  const closedWeekdays=document.getElementById("sClosedWeekdays").checked;
+  const closedSaturday=document.getElementById("sClosedSaturday").checked;
+  const closedSunday=document.getElementById("sClosedSunday").checked;
+  const wasEmergency=!!siteSettings.storeStatus?.emergencyClosed;
+  siteSettings.storeStatus={
+    emergencyClosed,
+    emergencyReason,
+    closedDays:{weekdays:closedWeekdays,saturday:closedSaturday,sunday:closedSunday}
+  };
+  try{
+    await dbSet(ref(db,"settings"),siteSettings);
+    if(emergencyClosed && !wasEmergency){
+      logHistory("settings","🚨 Термінове закриття закладу"+(emergencyReason?" — "+emergencyReason:""));
+      showToast("Заклад зачинено","Клієнти більше не можуть оформити замовлення","🚨","warn");
+    }else if(!emergencyClosed && wasEmergency){
+      logHistory("settings","✅ Термінове закриття скасовано — заклад знову відкрито");
+      showToast("Заклад відкрито","Прийом замовлень відновлено","✅","success");
+    }else{
+      const days=[closedWeekdays&&"будні",closedSaturday&&"субота",closedSunday&&"неділя"].filter(Boolean);
+      logHistory("settings","Вихідні дні: "+(days.length?days.join(", "):"немає"));
+      showToast("Збережено","Статус закладу оновлено","✓","success");
+    }
+    const m=document.getElementById("statusMsg");if(m){m.textContent="✓ Збережено";setTimeout(()=>m.textContent="",2500);}
+    renderSettings();
+  }catch(e){showToast("Помилка",e.message,"⚠","error");}
+};
+
 // Patch saveWorkHours
 window.saveWorkHours=async()=>{
   if(!checkPerm("settingsSchedule")) return;
@@ -4494,6 +4641,10 @@ window.openReportsModal = () => {
     return;
   }
   renderReportsDays();
+  const today = new Date().toISOString().slice(0,10);
+  const weekAgo = new Date(Date.now()-6*86400000).toISOString().slice(0,10);
+  const fEl=document.getElementById("reportFromDate"); if(fEl && !fEl.value) fEl.value=weekAgo;
+  const tEl=document.getElementById("reportToDate");   if(tEl && !tEl.value) tEl.value=today;
   document.getElementById("reportsModal").classList.add("on");
 };
 
@@ -4547,7 +4698,10 @@ function renderReportsDays(){
       </div>
       ${isEmpty
         ? `<span style="font-size:11px;color:var(--dim);padding:6px 12px;border:1px solid var(--brd);border-radius:var(--rs);white-space:nowrap">Немає даних</span>`
-        : `<button onclick="exportDayReportForDate(${day.d.getTime()},${day.dEnd.getTime()},'${day.dayLabel} ${day.dateStr}')" style="display:flex;align-items:center;gap:5px;padding:8px 14px;background:var(--p);color:#fff;border:none;border-radius:var(--rs);font-size:11px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:background var(--t);white-space:nowrap;flex-shrink:0" onmouseover="this.style.background='var(--pd)'" onmouseout="this.style.background='var(--p)'">⬇ Завантажити</button>`
+        : `<div style="display:flex;gap:6px;flex-shrink:0">
+            <button onclick="exportDayReportForDate(${day.d.getTime()},${day.dEnd.getTime()},'${day.dayLabel} ${day.dateStr}')" title="Друк / PDF" style="display:flex;align-items:center;gap:5px;padding:8px 14px;background:var(--p);color:#fff;border:none;border-radius:var(--rs);font-size:11px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:background var(--t);white-space:nowrap" onmouseover="this.style.background='var(--pd)'" onmouseout="this.style.background='var(--p)'">⬇ Завантажити</button>
+            <button onclick="exportRangeCSV(${day.d.getTime()},${day.dEnd.getTime()},'${day.dateStr.replace(/\s+/g,'_')}')" title="Завантажити CSV" style="display:flex;align-items:center;gap:5px;padding:8px 12px;background:var(--surf);color:var(--txt);border:1px solid var(--brd2);border-radius:var(--rs);font-size:11px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">CSV</button>
+          </div>`
       }
     </div>`;
   }).join("");
@@ -4796,6 +4950,110 @@ tbody tr:hover{background:#fffbf7}
 };
 
 /* ==============================
+   CSV / EXCEL EXPORT — ДОВІЛЬНИЙ ПЕРІОД
+   ============================== */
+
+// Returns orders within [tsFrom, tsTo), sorted by time
+function ordersInRange(tsFrom, tsTo){
+  return Object.values(allOrders).flat()
+    .filter(o => o && o.createdAt >= tsFrom && o.createdAt < tsTo)
+    .sort((a,b) => (a.createdAt||0) - (b.createdAt||0));
+}
+
+// Builds a semicolon-delimited CSV string (Excel-friendly for uk-UA locale) from a list of orders
+function buildOrdersCSV(orders){
+  const SLoc = {new:"Нове",accepted:"Прийнято",in_progress:"Готується",shipped:"В дорозі",completed:"Виконано"};
+  const esc = v => {
+    const s = String(v==null?"":v).replace(/"/g,'""');
+    return /[;"\n]/.test(s) ? `"${s}"` : s;
+  };
+  const header = ["#","Номер","Дата","Час","Клієнт","Телефон","Тип","Адреса","Страви","Сума","Доставка","Промокод","Знижка","Разом","Статус"];
+  const lines = [header.map(esc).join(";")];
+
+  orders.forEach((o,i) => {
+    const dt = new Date(o.createdAt);
+    const dateStr = dt.toLocaleDateString("uk-UA",{day:"2-digit",month:"2-digit",year:"numeric"});
+    const timeStr = dt.toLocaleTimeString("uk-UA",{hour:"2-digit",minute:"2-digit"});
+    const activeItems = (o.items||[]).filter(it => !it.deleted);
+    const itemsStr = activeItems.map(it => `${it.name}${it.isGift?" (подарунок)":""} ×${it.qty}`).join(", ");
+    const addr = o.deliveryType === "pickup"
+      ? "Самовивіз"
+      : [o.customer?.city, o.customer?.street].filter(Boolean).join(", ") || "—";
+    const dlvType = o.deliveryType === "pickup" ? "Самовивіз" : "Доставка";
+    const subVal = o.subtotal != null ? o.subtotal : (o.total||0);
+
+    lines.push([
+      i+1,
+      o.orderNum || o.id.slice(0,8),
+      dateStr,
+      timeStr,
+      o.customer?.name || "—",
+      o.customer?.phone || "—",
+      dlvType,
+      addr,
+      itemsStr,
+      subVal,
+      o.delivery || 0,
+      o.promoCode || "",
+      o.promoDiscount || 0,
+      o.total || 0,
+      SLoc[o.status] || o.status
+    ].map(esc).join(";"));
+  });
+
+  return lines.join("\r\n");
+}
+
+// Triggers a browser download of a CSV file (with BOM for correct Cyrillic in Excel)
+function downloadCSVFile(csvContent, filename){
+  const blob = new Blob(["\uFEFF" + csvContent], {type:"text/csv;charset=utf-8;"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+// CSV export for an arbitrary [tsFrom, tsTo) range — used by both the 7-day list and custom range
+window.exportRangeCSV = (tsFrom, tsTo, label) => {
+  const orders = ordersInRange(tsFrom, tsTo);
+  if(!orders.length){ showToast("Немає замовлень","За цей період даних немає","ℹ","info"); return; }
+  const csv = buildOrdersCSV(orders);
+  downloadCSVFile(csv, `zvit_${label}.csv`);
+  showToast("CSV завантажено", orders.length+" замовлень", "⬇", "success");
+};
+
+// Reads the custom date-range inputs and returns {tsFrom, tsTo, label} or null if invalid
+function readCustomRange(){
+  const fromVal = document.getElementById("reportFromDate").value;
+  const toVal   = document.getElementById("reportToDate").value;
+  if(!fromVal || !toVal){ showToast("Оберіть період","Вкажіть обидві дати","⚠","warn"); return null; }
+  const dFrom = new Date(fromVal+"T00:00:00");
+  const dTo   = new Date(toVal+"T00:00:00");
+  dTo.setDate(dTo.getDate()+1); // include the whole "to" day
+  if(dFrom.getTime() >= dTo.getTime()){ showToast("Невірний період","Дата «Від» має бути раніше «До»","⚠","warn"); return null; }
+  const label = `${fromVal}_${toVal}`;
+  return {tsFrom:dFrom.getTime(), tsTo:dTo.getTime(), label};
+}
+
+window.exportCustomRangeCSV = () => {
+  const r = readCustomRange();
+  if(!r) return;
+  window.exportRangeCSV(r.tsFrom, r.tsTo, r.label);
+};
+
+window.exportCustomRangePrint = () => {
+  const r = readCustomRange();
+  if(!r) return;
+  const fromLabel = new Date(r.tsFrom).toLocaleDateString("uk-UA",{day:"2-digit",month:"2-digit",year:"numeric"});
+  const toLabel = new Date(r.tsTo-86400000).toLocaleDateString("uk-UA",{day:"2-digit",month:"2-digit",year:"numeric"});
+  window.exportDayReportForDate(r.tsFrom, r.tsTo, `${fromLabel} — ${toLabel}`);
+};
+
+/* ==============================
    ДРУК ЧЕКА
    ============================== */
 window.printOrderReceipt=id=>{
@@ -4899,11 +5157,31 @@ ${o.eta?`<div class="row" style="margin-top:4px"><span>ETA:</span><span>~${o.eta
   <div class="modal-box" style="max-width:680px;border-radius:18px">
     <div class="modal-drag-bar"></div>
     <div class="modal-header">
-      <span class="modal-title">📊 Звіти по днях</span>
+      <span class="modal-title">📊 Звіти та вивантаження даних</span>
       <button class="modal-x" onclick="closeReportsModal()">✕</button>
     </div>
     <div class="modal-scroll" style="padding:20px">
-      <div style="font-size:12px;color:var(--sub);margin-bottom:16px">Завантажте звіт за будь-який із останніх 7 днів у вигляді суворої таблиці</div>
+
+      <!-- CUSTOM RANGE -->
+      <div style="background:var(--surf2);border:1px solid var(--brd);border-radius:var(--r);padding:14px 16px;margin-bottom:18px">
+        <div style="font-size:12px;font-weight:700;color:var(--txt);margin-bottom:10px">📆 Довільний період</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
+          <div style="flex:1;min-width:120px">
+            <label style="font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:5px">Від</label>
+            <input type="date" id="reportFromDate" class="sett-inp sett-inp-full">
+          </div>
+          <div style="flex:1;min-width:120px">
+            <label style="font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:5px">До</label>
+            <input type="date" id="reportToDate" class="sett-inp sett-inp-full">
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+          <button onclick="exportCustomRangePrint()" style="display:flex;align-items:center;gap:5px;padding:8px 14px;background:var(--p);color:#fff;border:none;border-radius:var(--rs);font-size:11px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">🖨 Друк / PDF</button>
+          <button onclick="exportCustomRangeCSV()" style="display:flex;align-items:center;gap:5px;padding:8px 14px;background:var(--surf);color:var(--txt);border:1px solid var(--brd2);border-radius:var(--rs);font-size:11px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">⬇ CSV (Excel)</button>
+        </div>
+      </div>
+
+      <div style="font-size:12px;color:var(--sub);margin-bottom:16px">Або завантажте звіт за будь-який із останніх 7 днів у вигляді таблиці — для друку/PDF або як CSV-файл для Excel</div>
       <div id="reportsDaysList" style="display:flex;flex-direction:column;gap:8px"></div>
     </div>
   </div>
