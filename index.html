@@ -1645,9 +1645,9 @@ function promoClientDesc(p) {
     return "Знижка " + p.value + "% на " + (dish ? dish.name : "страву");
   }
   if (p.type === "category") return "Знижка " + p.value + "% на категорію «" + (p.catId || "") + "»";
-  if (p.type === "buy_x_get_y") return "Купи " + (p.buyX||2) + " — отримай " + (p.getY||1) + " безкоштовно";
-  if (p.type === "min_order") return "Знижка " + p.value + "% від " + (p.minOrderVal||500) + " грн";
-  if (p.type === "nth_free") return "Кожен " + (p.nthN||3) + "-й товар — " + (p.nthDiscount||100) + "% знижка";
+  if (p.type === "buy_x_get_y") return "Купи " + ((p.raw && p.raw.buyX) || 2) + " — отримай " + ((p.raw && p.raw.getY) || 1) + " безкоштовно";
+  if (p.type === "min_order") return "Знижка " + p.value + "% від " + ((p.raw && p.raw.minOrderVal) || 500) + " грн";
+  if (p.type === "nth_free") return "Кожен " + ((p.raw && p.raw.nthN) || 3) + "-й товар — " + ((p.raw && p.raw.nthDiscount) || 100) + "% знижка";
   return "";
 }
 
@@ -1678,14 +1678,16 @@ function promoDiscount(sub) {
     return 0;
   }
   if (p.type === "min_order") {
-    if (sub < (p.minOrderVal || 500)) return 0;
+    var minOrderVal = (p.raw && p.raw.minOrderVal) || 500;
+    if (sub < minOrderVal) return 0;
     return Math.round(sub * p.value / 100);
   }
   if (p.type === "nth_free") {
-    var nthN = p.nthN || 3;
-    var nthDis = (p.nthDiscount || 100) / 100;
-    var eligible = p.nthDishId
-      ? cart.filter(function(i){ return i.id === p.nthDishId; })
+    var nthN = (p.raw && p.raw.nthN) || 3;
+    var nthDis = ((p.raw && p.raw.nthDiscount) || 100) / 100;
+    var nthDishId = p.raw && p.raw.nthDishId;
+    var eligible = nthDishId
+      ? cart.filter(function(i){ return i.id === nthDishId; })
       : cart.slice().sort(function(a,b){ return a.price-b.price; });
     var total = eligible.reduce(function(s,i){ return s+i.qty; },0);
     var freeCount = Math.floor(total / nthN);
@@ -1735,15 +1737,17 @@ function promoCartValidate(p) {
   }
   if (p.type === "min_order") {
     var sub2 = cart.reduce(function(s,i){ return s+i.price*i.qty; },0);
-    if (sub2 < (p.minOrderVal||500)) return "Промокод діє від " + (p.minOrderVal||500) + " грн. У вас: " + sub2 + " грн";
+    var minOrderVal2 = (p.raw && p.raw.minOrderVal) || 500;
+    if (sub2 < minOrderVal2) return "Промокод діє від " + minOrderVal2 + " грн. У вас: " + sub2 + " грн";
   }
   if (p.type === "nth_free") {
-    var nthN2 = p.nthN || 3;
-    var pool = p.nthDishId ? cart.filter(function(i){ return i.id===p.nthDishId; }) : cart;
+    var nthN2 = (p.raw && p.raw.nthN) || 3;
+    var nthDishId2 = p.raw && p.raw.nthDishId;
+    var pool = nthDishId2 ? cart.filter(function(i){ return i.id===nthDishId2; }) : cart;
     var tot2 = pool.reduce(function(s,i){ return s+i.qty; },0);
     if (tot2 < nthN2) {
-      if (p.nthDishId) {
-        var dish2 = MENU.find(function(d){ return d.id===p.nthDishId; });
+      if (nthDishId2) {
+        var dish2 = MENU.find(function(d){ return d.id===nthDishId2; });
         return "Промокод діє на кожен " + nthN2 + "-й «" + (dish2?dish2.name:"товар") + "». Потрібно " + nthN2 + "+";
       }
       return "Промокод діє на кожен " + nthN2 + "-й товар. Потрібно " + nthN2 + "+ позицій";
