@@ -988,7 +988,7 @@ let step       = 1;
 let trackUnsub = null;
 let TG_TOKEN   = null;   // завантажується з /api/config
 let TG_CHAT    = null;
-let TG_ENABLED = true;  // читається з Firebase settings.telegramEnabled
+
 
 /* ——— PAGES ——— */
 window.showPage = function(page) {
@@ -1120,7 +1120,6 @@ function listenFirebase() {
         if (s.workHours.weekdays) WORK_HOURS.weekdays = s.workHours.weekdays;
         if (s.workHours.weekends) WORK_HOURS.weekends = s.workHours.weekends;
       }
-      if (s.telegramEnabled !== undefined) TG_ENABLED = !!s.telegramEnabled;
     }
     updateBannerText();
     populateCitySelect();
@@ -2073,7 +2072,7 @@ window.placeOrder = async function() {
       createdAt:    Date.now(),
     });
     // Telegram notification — fire and don't block UI
-    if (TG_ENABLED) sendTelegramNotification({
+    sendTelegramNotification({
       orderNum:      orderNum,
       promoCode:     appliedPromo ? appliedPromo.code : null,
       promoDiscount: discount || 0,

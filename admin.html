@@ -1867,13 +1867,9 @@ input,select,textarea{font-family:'Inter',sans-serif;outline:none;font-size:16px
                   <div class="sett-block-title">Telegram-сповіщення</div>
                   <div class="sett-block-sub">Повідомлення при кожному новому замовленні</div>
                 </div>
-                <span id="tgStatusPill" class="tg-status-pill tg-pill-off">Вимкнено</span>
-                <label class="ios-toggle" style="margin-left:10px">
-                  <input type="checkbox" id="sTgEnabled" onchange="onTgToggle(this)">
-                  <span class="ios-toggle-slider"></span>
-                </label>
+                <span id="tgStatusPill" class="tg-status-pill tg-pill-on">Увімкнено</span>
               </div>
-              <div class="sett-block-body" id="tgInfoBody" style="display:none">
+              <div class="sett-block-body" id="tgInfoBody" style="display:block">
                 <div style="padding:10px 12px;background:var(--surf2);border-radius:var(--rs);font-size:12px;color:var(--sub);line-height:1.7">
                   📬 Сповіщення надсилаються до Telegram при кожному новому замовленні.<br>
                   <span style="color:var(--txt);font-weight:600">Chat ID та токен налаштовуються на сервері (/api/config).</span>
@@ -2310,34 +2306,6 @@ function applySettingsTabPerms(){
     }
   });
 }
-
-window.onTgToggle=async(checkbox)=>{
-  if(window.PERMS.telegramNotifications===false){
-    // Revert immediately
-    checkbox.checked=!checkbox.checked;
-    showToast("Функція недоступна","Telegram-сповіщення недоступні у вашому тарифі","🔒","warn");
-    return;
-  }
-  siteSettings.telegramEnabled=checkbox.checked;
-  try{
-    await dbSet(ref(db,"settings"),siteSettings);
-    const pill=document.getElementById("tgStatusPill");
-    const info=document.getElementById("tgInfoBody");
-    if(pill){
-      pill.textContent=checkbox.checked?"Увімкнено":"Вимкнено";
-      pill.className="tg-status-pill "+(checkbox.checked?"tg-pill-on":"tg-pill-off");
-    }
-    if(info) info.style.display=checkbox.checked?"block":"none";
-    showToast(
-      checkbox.checked?"Сповіщення увімкнено":"Сповіщення вимкнено",
-      "Зміни збережено в налаштуваннях","📱","success"
-    );
-    logHistory("settings","Telegram-сповіщення: "+(checkbox.checked?"увімкнено":"вимкнено"));
-  }catch(e){
-    checkbox.checked=!checkbox.checked;
-    showToast("Помилка збереження",e.message,"⚠","error");
-  }
-};
 
 /* ——— STATS PERMISSION OVERLAYS ——— */
 function applyStatsPermissions(){
@@ -3049,14 +3017,6 @@ function renderSettings(){
   if(spDot2) spDot2.style.background=open?"var(--green)":"var(--red)";
   if(spStatus2) spStatus2.textContent=open?"Відкрито":"Зачинено";
   if(spTime2) spTime2.textContent=`Пн–Пт ${fmt(wh.weekdays?.open??10,wh.weekdays?.openMin??0)}–${fmt(wh.weekdays?.close??22,wh.weekdays?.closeMin??0)}`;
-  // ── Telegram toggle state ──
-  const tgEnabled=!!siteSettings.telegramEnabled;
-  const tgEl=document.getElementById("sTgEnabled");
-  const tgPill=document.getElementById("tgStatusPill");
-  const tgInfo=document.getElementById("tgInfoBody");
-  if(tgEl) tgEl.checked=tgEnabled;
-  if(tgPill){tgPill.textContent=tgEnabled?"Увімкнено":"Вимкнено";tgPill.className="tg-status-pill "+(tgEnabled?"tg-pill-on":"tg-pill-off");}
-  if(tgInfo) tgInfo.style.display=tgEnabled?"block":"none";
   applySettingsTabPerms();
 }
 // saveWorkHours defined once below (patched version)
