@@ -704,6 +704,7 @@ input,select,textarea{font-size:16px!important} /* prevents iOS zoom on focus */
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           </div>
           <h3>Години роботи</h3>
+          <div id="contactEmergencyNotice" style="display:none;background:rgba(201,75,31,.08);border:1.5px solid var(--primary);border-radius:var(--radius-s);padding:8px 11px;margin-bottom:10px;font-size:12px;color:var(--primary);font-weight:600"></div>
           <div class="hours-table" id="contactHoursTable">
             <div class="hours-row"><span>Пн — Пт</span><span id="cHrsWeekday">10:00 – 22:00</span></div>
             <div class="hours-row"><span>Субота</span><span id="cHrsWeekend">11:00 – 23:00</span></div>
@@ -850,13 +851,14 @@ input,select,textarea{font-size:16px!important} /* prevents iOS zoom on focus */
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
             <div class="fg" style="margin:0">
               <label>Дата</label>
-              <input id="preorderDate" type="date" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-s);font-size:14px;font-family:'Exo 2',sans-serif;background:var(--bg);outline:none;color:var(--text)">
+              <input id="preorderDate" type="date" oninput="validatePreorderDate()" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-s);font-size:14px;font-family:'Exo 2',sans-serif;background:var(--bg);outline:none;color:var(--text)">
             </div>
             <div class="fg" style="margin:0">
               <label>Час</label>
               <input id="preorderTime" type="time" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-s);font-size:14px;font-family:'Exo 2',sans-serif;background:var(--bg);outline:none;color:var(--text)">
             </div>
           </div>
+          <div id="preorderDateWarn" style="display:none;margin-top:8px;padding:8px 11px;background:rgba(201,75,31,.08);border:1.5px solid var(--primary);border-radius:var(--radius-s);font-size:12px;color:var(--primary);font-weight:600"></div>
           <div style="font-size:11px;color:var(--muted);margin-top:7px">Замовлення буде готове до вказаного часу</div>
         </div>
       </div>
@@ -1265,11 +1267,31 @@ function checkHours() {
     }
   }
   document.getElementById("hoursDot").className = "hours-dot" + (open ? "" : " off");
-  var wd = fmtHour(WORK_HOURS.weekdays.open, WORK_HOURS.weekdays.openMin) + " – " + fmtHour(WORK_HOURS.weekdays.close, WORK_HOURS.weekdays.closeMin);
-  var we = fmtHour(WORK_HOURS.weekends.open, WORK_HOURS.weekends.openMin) + " – " + fmtHour(WORK_HOURS.weekends.close, WORK_HOURS.weekends.closeMin);
-  var e1 = document.getElementById("cHrsWeekday"); if(e1) e1.textContent = wd;
-  var e2 = document.getElementById("cHrsWeekend"); if(e2) e2.textContent = we;
-  var e3 = document.getElementById("cHrsSunday");  if(e3) e3.textContent = we;
+  var wd = STORE_STATUS.closedDays.weekdays
+    ? "Вихідний"
+    : fmtHour(WORK_HOURS.weekdays.open, WORK_HOURS.weekdays.openMin) + " – " + fmtHour(WORK_HOURS.weekdays.close, WORK_HOURS.weekdays.closeMin);
+  var sa = STORE_STATUS.closedDays.saturday
+    ? "Вихідний"
+    : fmtHour((WORK_HOURS.saturday||WORK_HOURS.weekends).open, (WORK_HOURS.saturday||WORK_HOURS.weekends).openMin) + " – " + fmtHour((WORK_HOURS.saturday||WORK_HOURS.weekends).close, (WORK_HOURS.saturday||WORK_HOURS.weekends).closeMin);
+  var su = STORE_STATUS.closedDays.sunday
+    ? "Вихідний"
+    : fmtHour((WORK_HOURS.sunday||WORK_HOURS.weekends).open, (WORK_HOURS.sunday||WORK_HOURS.weekends).openMin) + " – " + fmtHour((WORK_HOURS.sunday||WORK_HOURS.weekends).close, (WORK_HOURS.sunday||WORK_HOURS.weekends).closeMin);
+  var e1 = document.getElementById("cHrsWeekday");
+  if(e1){ e1.textContent = wd; e1.style.color = STORE_STATUS.closedDays.weekdays ? "var(--primary)" : ""; e1.style.fontWeight = STORE_STATUS.closedDays.weekdays ? "700" : ""; }
+  var e2 = document.getElementById("cHrsWeekend");
+  if(e2){ e2.textContent = sa; e2.style.color = STORE_STATUS.closedDays.saturday ? "var(--primary)" : ""; e2.style.fontWeight = STORE_STATUS.closedDays.saturday ? "700" : ""; }
+  var e3 = document.getElementById("cHrsSunday");
+  if(e3){ e3.textContent = su; e3.style.color = STORE_STATUS.closedDays.sunday ? "var(--primary)" : ""; e3.style.fontWeight = STORE_STATUS.closedDays.sunday ? "700" : ""; }
+  // Emergency-close notice on the Contacts page
+  var noticeEl = document.getElementById("contactEmergencyNotice");
+  if (noticeEl) {
+    if (STORE_STATUS.emergencyClosed) {
+      noticeEl.style.display = "block";
+      noticeEl.textContent = "🕐 " + (STORE_STATUS.emergencyReason ? "Тимчасово не працюємо: " + STORE_STATUS.emergencyReason : "Наразі тимчасово не працюємо. Перепрошуємо за незручності.");
+    } else {
+      noticeEl.style.display = "none";
+    }
+  }
 }
 
 /* ——— FILTERS ——— */
@@ -1996,6 +2018,7 @@ window.toStep = function(n) {
     var ph = document.getElementById("fPhone").value.replace(/\D/g, "");
     if (!nm || nm.length < 2) { flashField("fName"); return; }
     if (ph.length < 12) { flashField("fPhone"); return; }
+    if (preorderEnabled && !validatePreorderDate()) { return; }
   }
   if (n > 2 && dlvType === "delivery") {
     if (!document.getElementById("fCity").value) { flashField("fCity"); return; }
@@ -2091,6 +2114,10 @@ window.placeOrder = async function() {
     msg2El.style.display = "none";
     proceedBtn.style.display = "none";
     setTimeout(function() { openModal("closedModal"); }, 250);
+    return;
+  }
+  if (preorderEnabled && !validatePreorderDate()) {
+    toStep(1);
     return;
   }
   var btn = document.getElementById("placeBtn");
@@ -2410,6 +2437,32 @@ window.trackOrder = async function() {
 
 /* ——— PREORDER ——— */
 var preorderEnabled = false;
+
+// Returns true if the given "YYYY-MM-DD" date falls on a recurring closed day
+function isDateOnClosedDay(dateStr) {
+  if (!dateStr) return false;
+  var parts = dateStr.split("-");
+  var d = new Date(parseInt(parts[0],10), parseInt(parts[1],10)-1, parseInt(parts[2],10));
+  var dow = d.getDay(); // 0=Нд..6=Сб
+  if (dow === 0) return !!STORE_STATUS.closedDays.sunday;
+  if (dow === 6) return !!STORE_STATUS.closedDays.saturday;
+  return !!STORE_STATUS.closedDays.weekdays;
+}
+
+// Validates the chosen preorder date against recurring closed days, shows/hides a warning
+window.validatePreorderDate = function() {
+  var el = document.getElementById("preorderDate");
+  var warn = document.getElementById("preorderDateWarn");
+  if (!el || !warn) return true;
+  if (isDateOnClosedDay(el.value)) {
+    warn.style.display = "block";
+    warn.textContent = "⚠ У цей день заклад не працює. Оберіть іншу дату.";
+    return false;
+  }
+  warn.style.display = "none";
+  return true;
+};
+
 window.togglePreorder = function() {
   preorderEnabled = !preorderEnabled;
   var dot = document.getElementById("preorderToggleDot");
@@ -2429,6 +2482,7 @@ window.togglePreorder = function() {
       var h = String(d.getHours()).padStart(2,"0"), m = String(d.getMinutes()).padStart(2,"0");
       tel.value = h + ":" + m;
     }
+    validatePreorderDate();
   }
 };
 
