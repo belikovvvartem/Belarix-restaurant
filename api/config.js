@@ -21,7 +21,6 @@ export default function handler(req, res) {
       FIREBASE_MESSAGING_SENDER_ID: process.env.FIREBASE_MESSAGING_SENDER_ID,
       FIREBASE_APP_ID:              process.env.FIREBASE_APP_ID,
       R2_PUBLIC:                    process.env.R2_PUBLIC,
-      // Telegram — bot token + target chat id
       TG_BOT_TOKEN:                 process.env.TG_BOT_TOKEN,
       TG_CHAT_ID:                   process.env.TG_CHAT_ID,
     });

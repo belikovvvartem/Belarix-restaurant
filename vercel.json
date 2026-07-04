@@ -1,11 +1,7 @@
 {
-    "rewrites": [
-      { "source": "/api/config",    "destination": "/api/config.js"    },
-      { "source": "/api/r2-upload", "destination": "/api/r2-upload.js" },
-      { "source": "/api/r2-delete", "destination": "/api/r2-delete.js" }
-    ],
-    "routes": [
-      { "handle": "filesystem" },
-      { "src": "/(.*)", "dest": "/404.html", "status": 404 }
-    ]
-  }
+  "rewrites": [
+    { "source": "/api/config",    "destination": "/api/config.js"    },
+    { "source": "/api/r2-upload", "destination": "/api/r2-upload.js" },
+    { "source": "/api/r2-delete", "destination": "/api/r2-delete.js" }
+  ]
+}
